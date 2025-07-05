@@ -63,6 +63,8 @@ pub enum OptionApiError {
     NotFoundError,
     #[error("{0}")]
     AuthorizationError(String),
+    #[error("{0}")]
+    MethodNotAllowedError(String),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -84,6 +86,9 @@ impl ResponseError for OptionApiError {
             }
             OptionApiError::AuthorizationError(message) => {
                 (StatusCode::FORBIDDEN, message.clone())
+            }
+            OptionApiError::MethodNotAllowedError(message) => {
+                (StatusCode::METHOD_NOT_ALLOWED, message.clone())
             }
             OptionApiError::UnexpectedError(_) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -377,6 +382,48 @@ impl From<NotFoundOnlyError> for OptionApiError {
         match value {
             NotFoundOnlyError::NotFoundError => Self::NotFoundError,
         }
+    }
+}
+
+#[derive(thiserror::Error)]
+pub enum MethodNotAllowedOnlyError {
+    #[error("{0}")]
+    MethodNotAllowedError(String),
+}
+
+impl std::fmt::Debug for MethodNotAllowedOnlyError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        error_chain_fmt(self, f)
+    }
+}
+
+impl From<MethodNotAllowedOnlyError> for OptionApiError {
+    fn from(value: MethodNotAllowedOnlyError) -> Self {
+        match value {
+            MethodNotAllowedOnlyError::MethodNotAllowedError(message) => {
+                Self::MethodNotAllowedError(message)
+            }
+        }
+    }
+}
+
+impl ResponseError for MethodNotAllowedOnlyError {
+    fn error_response(&self) -> HttpResponse<BoxBody> {
+        let (status_code, message) = match self {
+            MethodNotAllowedOnlyError::MethodNotAllowedError(message) => {
+                (StatusCode::METHOD_NOT_ALLOWED, message.clone())
+            }
+        };
+        HttpResponse::build(status_code)
+            .insert_header((
+                CONTENT_TYPE,
+                HeaderValue::from_static("application/json"),
+            ))
+            // TODO: handle unwrap
+            .body(
+                serde_json::to_string(&ErrorResponse { detail: message })
+                    .unwrap(),
+            )
     }
 }
 
