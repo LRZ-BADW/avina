@@ -70,7 +70,7 @@ pub struct ProjectBudgetModifyData {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub amount: Option<u32>,
-    #[serde(skip_serializing_if = "is_false")]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub force: bool,
 }
 
