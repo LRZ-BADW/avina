@@ -16,6 +16,16 @@ version = "0.0.1"
 [dependencies]
 dioxus = { version = "0.6.3", features = ["fullstack"] }
 avina = { version = "1.8", path = "../lib" }
+typst = "0.13.1"
+typst-pdf = "0.13.1"
+typst-kit = { version = "0.13.1", default-features = false, features = ["fonts"] }
+# zune-inflate = { version = "0.2.54", default-features = false, features = [
+#   "gzip",
+#   "std",
+# ] }
+# tar = "0.4.44"
+# ureq = "3.0.12"
+time = "0.3.41"
 
 [features]
 default = []
