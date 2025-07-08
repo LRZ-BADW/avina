@@ -9,7 +9,7 @@ You need to have `django` installed. One way to do so would be:
 ```bash
 python3 -m venv wrapper/.env
 . wrapper/.env/bin/activate
-pip install django
+pip install django requests
 ```
 
 ### Run Locally
