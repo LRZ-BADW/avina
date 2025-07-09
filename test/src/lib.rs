@@ -400,21 +400,32 @@ impl TestApp {
         &self,
         project: &Project,
     ) -> Result<ProjectBudget, MinimalApiError> {
-        let mut transaction = self
-            .db_pool
-            .begin()
-            .await
-            .expect("Failed to begin transaction.");
         let new_project_budget = NewProjectBudget {
             project_id: project.id as u64,
             year: Utc::now().year() as u32,
             amount: 0,
         };
-        let project_budget_id = insert_project_budget_into_db(
-            &mut transaction,
+        self.setup_test_project_budget_with_new_project_budget(
+            project,
             &new_project_budget,
         )
-        .await? as u32;
+        .await
+    }
+
+    pub async fn setup_test_project_budget_with_new_project_budget(
+        &self,
+        project: &Project,
+        new_project_budget: &NewProjectBudget,
+    ) -> Result<ProjectBudget, MinimalApiError> {
+        let mut transaction = self
+            .db_pool
+            .begin()
+            .await
+            .expect("Failed to begin transaction.");
+
+        let project_budget_id =
+            insert_project_budget_into_db(&mut transaction, new_project_budget)
+                .await? as u32;
         transaction
             .commit()
             .await
