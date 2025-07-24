@@ -52,7 +52,7 @@ pub async fn project_budget_modify(
     require_master_user_or_return_not_found(&user, project_budget.project)?;
 
     let year = Utc::now().year();
-    if project_budget.year != year as u32 && !data.force {
+    if project_budget.year < year as u32 && !data.force {
         return Err(OptionApiError::AuthorizationError(String::from(
             "Changing past budgets not allowed",
         )));
