@@ -14,8 +14,8 @@ use crate::{
     error::{MinimalApiError, not_found},
     openstack::OpenStack,
     routes::{
-        accounting_scope, budgeting_scope, health_check, hello_scope,
-        pricing_scope, quota_scope, resources_scope,
+        accounting_scope, bill_scope, budgeting_scope, health_check,
+        hello_scope, pricing_scope, quota_scope, resources_scope,
         user::{
             project::create::{NewProject, insert_project_into_db},
             user::create::{NewUser, insert_user_into_db},
@@ -146,6 +146,7 @@ async fn run(
                     .wrap(from_fn(require_valid_token))
                     .route("/secured_health_check", web::get().to(health_check))
                     .service(hello_scope())
+                    .service(bill_scope())
                     .service(user_scope())
                     .service(accounting_scope())
                     .service(resources_scope())

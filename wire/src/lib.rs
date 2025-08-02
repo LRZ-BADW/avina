@@ -3,6 +3,8 @@ pub mod error;
 
 #[cfg(feature = "accounting")]
 pub mod accounting;
+#[cfg(feature = "bill")]
+pub mod bill;
 #[cfg(feature = "budgeting")]
 pub mod budgeting;
 #[cfg(feature = "hello")]

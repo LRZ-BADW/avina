@@ -1,4 +1,5 @@
 mod accounting;
+mod bill;
 mod budgeting;
 mod health_check;
 mod hello;
@@ -8,6 +9,7 @@ mod resources;
 pub mod user;
 
 pub use accounting::*;
+pub use bill::*;
 pub use budgeting::*;
 pub use health_check::*;
 pub use hello::*;

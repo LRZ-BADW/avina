@@ -20,8 +20,9 @@ path = "src/lib.rs"
 
 [features]
 default = ["all"]
-all = ["accounting", "budgeting", "hello", "pricing", "quota", "resources", "user"]
+all = ["accounting", "bill", "budgeting", "hello", "pricing", "quota", "resources", "user"]
 accounting = []
+bill = []
 budgeting = []
 hello = []
 pricing = []
