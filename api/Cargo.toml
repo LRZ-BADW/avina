@@ -24,8 +24,9 @@ path = "src/main.rs"
 
 [features]
 default = ["all"]
-all = ["accounting", "budgeting", "hello", "pricing", "quota", "resources", "user"]
+all = ["accounting", "bill", "budgeting", "hello", "pricing", "quota", "resources", "user"]
 accounting = ["avina-wire/accounting"]
+bill = ["avina-wire/bill"]
 budgeting = ["avina-wire/budgeting"]
 hello = ["avina-wire/hello"]
 pricing = ["avina-wire/pricing"]
@@ -54,6 +55,10 @@ thiserror = "2.0"
 chrono = { version = "0.4", features = ["serde"] }
 strum = { version = "0.27", features = ["derive"] }
 indexmap = "2.10"
+# TODO: make these feature dependent
+tera = { version = "1.20" }
+typst-as-lib = "0.14"
+typst-pdf = "0.13"
 
 [dependencies.sqlx]
 version = "0.8"

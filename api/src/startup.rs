@@ -13,6 +13,7 @@ use crate::{
     configuration::{DatabaseSettings, Settings},
     error::{MinimalApiError, not_found},
     openstack::OpenStack,
+    // TODO: this does not check for features and just includes all
     routes::{
         accounting_scope, bill_scope, budgeting_scope, health_check,
         hello_scope, pricing_scope, quota_scope, resources_scope,
@@ -133,6 +134,7 @@ async fn run(
             .allow_any_header()
             .allow_any_method()
             .expose_any_header();
+        // TODO: this does not check for features and just includes all
         App::new()
             .wrap(cors)
             .wrap(TracingLogger::default())

@@ -8,6 +8,8 @@ use tabled::Tabled;
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Bill {
     pub amount: f64,
+    #[tabled(skip)]
+    pub pdf: Vec<u8>,
 }
 
 impl Display for Bill {
