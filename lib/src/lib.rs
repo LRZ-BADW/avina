@@ -15,6 +15,8 @@ pub use token::Token;
 
 #[cfg(feature = "accounting")]
 mod accounting;
+#[cfg(feature = "bill")]
+mod bill;
 #[cfg(feature = "budgeting")]
 mod budgeting;
 #[cfg(feature = "hello")]
@@ -34,6 +36,8 @@ use accounting::ServerConsumptionApi;
 use accounting::ServerCostApi;
 #[cfg(feature = "accounting")]
 use accounting::ServerStateApi;
+#[cfg(feature = "bill")]
+use bill::BillApi;
 #[cfg(feature = "budgeting")]
 use budgeting::BudgetBulkCreateApi;
 #[cfg(feature = "budgeting")]
@@ -97,6 +101,8 @@ pub struct Api {
     pub budget_over_tree: BudgetOverTreeApi,
     #[cfg(feature = "budgeting")]
     pub budget_bulk_create: BudgetBulkCreateApi,
+    #[cfg(feature = "bill")]
+    pub bill: BillApi,
 }
 
 impl Api {
@@ -171,6 +177,8 @@ impl Api {
             budget_over_tree: BudgetOverTreeApi::new(&url, &client),
             #[cfg(feature = "budgeting")]
             budget_bulk_create: BudgetBulkCreateApi::new(&url, &client),
+            #[cfg(feature = "bill")]
+            bill: BillApi::new(&url, &client),
         })
     }
 }

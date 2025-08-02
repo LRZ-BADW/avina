@@ -19,8 +19,9 @@ path = "src/main.rs"
 
 [features]
 default = ["all"]
-all = ["accounting", "budgeting", "hello", "pricing", "quota", "resources", "user"]
+all = ["accounting", "bill", "budgeting", "hello", "pricing", "quota", "resources", "user"]
 accounting = ["avina/accounting"]
+bill = ["avina/bill"]
 budgeting = ["avina/budgeting"]
 hello = ["avina/hello"]
 pricing = ["avina/pricing"]
