@@ -1,0 +1,255 @@
+#let letter(
+  sender: none,
+  sender2: none,
+  recipient: none,
+  date: none,
+  subject: none,
+  body
+) = {
+  let preliminary = {{ preliminary }};
+  set page(
+    margin: (top: 20mm),
+    footer-descent: -10%,
+    footer: context {
+      if counter(page).get().first() == 1 [
+        #line(length: 100%, stroke: 0.7pt)
+        #set text(font: "Nimbus Sans", size: 6.5pt)
+        #table(
+          columns: 4,
+          stroke: none,
+          inset: (x: 2mm, y: 1mm),
+          [Direktorium], [Leibniz-Rechenzentrum], [Telefon: +49 (0)89 35831-8800], [Email: #link("service@lrz.de")],
+          [Prof. Dr. D. Kranzlmüller (Vorsitzender), Prof. Dr. M. Schulz], [Boltzmannstraße 1], [Ust-IdNr: DE 811 209 280], [Internet: #link("www.lrz.de")],
+          [Prof. Dr. H.-J. Bungartz, Prof. Dr. T. Seidl], [85748 Garching bei München]
+        )
+      ] else [
+        #set align(center)
+        #linebreak()
+        #linebreak()
+        #counter(page).get().first()
+      ]
+    },
+    background: context {
+      if preliminary {
+        rotate(-60deg,
+          text(100pt, fill: rgb("DDDDDD"))[
+            *VORLÄUFIG*
+          ]
+        )
+      }
+    }
+  )
+  set text(font: "Nimbus Sans", size: 10pt)
+
+  place(
+    dy: 85mm,
+    dx: -20mm,
+    line(
+      length: 5mm,
+      stroke: 0.5pt + rgb("#777777")
+    )
+  )
+
+  image(
+    "logo.svg",
+    width: 65mm,
+  )
+
+  v(15mm)
+
+  text(6.5pt, if sender == none {
+    hide("a")
+  } else {
+    sender
+  })
+
+  v(5mm)
+
+  grid(
+    columns: 2,
+    gutter: 10mm,
+    box(
+      width: 100mm,
+      text(9.5pt, if recipient == none {
+        hide("a")
+      } else {
+        recipient
+      })
+    ),
+    box(
+      text(9.5pt, if sender2 == none {
+        hide("a")
+      } else {
+        sender2
+      })
+    )
+  )
+
+  v(20mm)
+
+  align(right, if date != none {
+    date
+  } else {
+    hide("a")
+  })
+
+  v(1mm)
+
+  if subject != none {
+    pad(right: 10%, strong(subject))
+  }
+
+  v(1mm)
+
+  body
+  v(1.25cm)
+}
+
+#show: letter.with(
+  sender: [
+    Leibniz-Rechenzentrum, Boltzmannstr. 1, 85748 Garching b. München
+  ],
+  sender2: [
+    *Leibniz-Rechenzentrum* \
+    IT-Infrastruktur Server und Dienste \
+    https://servicedesk.lrz.de/ql/create/105 \
+
+    Verwaltungsnummer: {{ bookkeeping_number }} \
+    Projekt: {{ project }}
+  ],
+  recipient: [
+    *{{ organization }}* \
+    {{ institute }} \
+    {{ addr_recipient }} \
+    {{ street_and_number }} \
+    {{ postcode }} {{ city }}
+  ],
+  date: [Garching, {{ now_day }}. {{ now_month }} {{ now_year }}],
+  subject: [Beiblatt zur Rechnung für die Nutzung der Compute Cloud in {{ bill_year }}],
+)
+
+{{ recipient }},
+
+#par(justify: true)[
+nachfolgend erhalten Sie die Kostenaufstellung bzgl. der Nutzung der Compute
+Cloud durch Ihr Projekt *{{ project }} „{{ project_name }}“* der Nutzerklasse *1*
+für den Zeitraum vom *01.01.{{ bill_year }}* bis *{{ bill_day }}.{{ bill_month }}.{{ bill_year }}*. Die Abrechnung erfolgt gemäß dem für
+den Abrechnungszeitraum gültigen Dienstleistungskatalog. Insgesamt ergaben sich
+für Ihr Projekt Nettogesamtkosten in Höhe von {# *{{ cost.total | format_float }} €* #}.
+]
+
+#text(
+  size: 8pt,
+  table(
+    columns: 4,
+    stroke: 0.2pt,
+    inset: (
+      x: 4mm,
+      y: 2mm
+    ),
+    table.header(
+      [*Leistung (Flavor / Nutzerklasse)*], [*Preis pro Jahr*], [*Abgerechnete Nutzungsdauer*], [*Anteilige Kosten*]
+    ),
+    {#
+    {% for flavor, flavor_cost in cost.flavors.items() %}
+    {% if flavor_cost.cost %}
+    [{{ flavor }} / {{ user_class }}], table.cell(align: right, [{{ flavor_cost.price | format_float }} €]), table.cell(align: right, [{{ flavor_cost.runtime | format_time }}]), table.cell(align: right, [{{ flavor_cost.cost | format_float }} €]),
+    {% endif %}
+    {% endfor %}
+    #}
+    table.cell(
+      colspan: 3,
+      [*Nettogesamtkosten* #h(10cm)]
+    ), table.cell(align: right, [*{# {{ cost.total | format_float }} #} €*])
+  )
+)
+
+\
+Bitte beachten Sie weiterhin die für alle LRZ-Projekte gültigen Vertragsvereinbarungen:
+
+1. Die Laufzeit des Projektes endet mit dem Kalenderjahr. Vor Ablauf des
+   Projektes fordert das LRZ die Einrichtung zur Verlängerung bzw. Löschung auf.
+2. Für das Projekt gelten die Benutzungsrichtlinien des LRZ, siehe \
+   #text(blue, link("http://www.lrz.de/wir/regelwerk/benutzungsrichtlinien.pdf")).
+3. Bei Nutzung von kostenpflichtigen Dienstleistungen findet der
+   Dienstleistungskatalog des LRZ Anwendung, siehe
+   #text(blue, link("http://www.lrz.de/wir/regelwerk/dienstleistungskatalog.pdf")).
+4. Die Rechnungsstellung erfolgt jährlich im ersten Quartal des Folgejahres des
+   Leistungszeitraumes.
+
+#pagebreak()
+
+{#
+
+{% for username, user_cost in cost.users.items() %}
+{% set outer_loop = loop %}
+
+*Nutzer: {{ username }}*
+
+#text(
+  size: 8pt,
+  table(
+    columns: 4,
+    stroke: 0.2pt,
+    inset: (
+      x: 4mm,
+      y: 2mm
+    ),
+    table.header(
+      table.cell(
+        colspan: 3,
+        [*Nutzer: {{ username }}*]
+      ),
+      [*Posten: {{ loop.index }}*],
+      [*Leistung (Flavor / Nutzerklasse)*], [*Preis pro Jahr*], [*Abgerechnete Nutzungsdauer*], [*Anteilige Kosten*]
+    ),
+    {% for flavor, flavor_cost in user_cost.flavors.items() %}
+    {% if flavor_cost.cost %}
+    [{{ flavor }} / {{ user_class }}], table.cell(align: right, [{{ flavor_cost.price | format_float }} €]), table.cell(align: right, [{{ flavor_cost.runtime | format_time }}]), table.cell(align: right, [{{ flavor_cost.cost | format_float }} €]),
+    {% endif %}
+    {% endfor %}
+    table.cell(
+      colspan: 3,
+      [*Nettogesamtkosten* #h(10cm)]
+    ), table.cell(align: right, [*{{ user_cost.total | format_float }} €*])
+  )
+)
+
+{% if not compact %}
+{% for server, server_cost in user_cost.servers.items() %}
+
+#text(
+  rgb("#666666"),
+  size: 8pt,
+  table(
+    columns: 4,
+    stroke: 0.2pt + rgb("#666666"),
+    inset: (
+      x: 4mm,
+      y: 2mm
+    ),
+    table.header(
+      table.cell(
+        colspan: 3,
+        [*VM: {{ server }}*]
+      ),
+      [*Unterposten: {{ outer_loop.index }}.{{ loop.index }}*],
+      [*Leistung (Flavor / Nutzerklasse)*], [*Preis pro Jahr*], [*Abgerechnete Nutzungsdauer*], [*Anteilige Kosten*]
+    ),
+    {% for flavor, flavor_cost in server_cost.flavors.items() %}
+    {% if flavor_cost.cost %}
+    [{{ flavor }} / {{ user_class }}], table.cell(align: right, [{{ flavor_cost.price | format_float }} €]), table.cell(align: right, [{{ flavor_cost.runtime | format_time }}]), table.cell(align: right, [{{ flavor_cost.cost | format_float }} €]),
+    {% endif %}
+    {% endfor %}
+    table.cell(
+      colspan: 3,
+      [*Nettogesamtkosten* #h(10cm)]
+    ), table.cell(align: right, [*{{ server_cost.total | format_float }} €*])
+  )
+)
+
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+#}

@@ -10,6 +10,8 @@ mod common;
 
 #[cfg(feature = "accounting")]
 mod accounting;
+#[cfg(feature = "bill")]
+mod bill;
 #[cfg(feature = "budgeting")]
 mod budgeting;
 #[cfg(feature = "hello")]
@@ -323,6 +325,10 @@ enum Command {
         )]
         year: i32,
     },
+
+    #[cfg(feature = "bill")]
+    #[clap(about = "Bill creation command")]
+    Bill,
 }
 
 #[tokio::main]
@@ -506,6 +512,8 @@ async fn main() -> ExitCode {
         Command::BudgetBulkCreate { year } => {
             budgeting::budget_bulk_create(api, cli.format, year).await
         }
+        #[cfg(feature = "bill")]
+        Command::Bill => bill::bill_get(api, cli.format).await,
     } {
         Ok(_) => {}
         Err(error) => {
