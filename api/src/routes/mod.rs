@@ -18,10 +18,8 @@ pub use user::*;
 
 // TODO: missing endpoints
 // - resources::flavor::usage
-// - resources::flavor_group::initialize
 // - resources::flavor_group::usage
 // - resources::usage
-// - pricing::flavor_price::initialize
 // - quota::flavor_quota::check
 // - user::import
 // - budgeting::budget_over_tree
