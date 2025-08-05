@@ -17,6 +17,7 @@ pub use resources::*;
 pub use user::*;
 
 // TODO: missing endpoints
+// - resources::flavor::access
 // - resources::flavor::usage
 // - resources::flavor_group::usage
 // - resources::usage
