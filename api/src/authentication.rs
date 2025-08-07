@@ -15,6 +15,9 @@ use crate::{
 
 // TODO revise error handling here as well and test errors
 
+#[derive(Clone, Debug)]
+pub struct Token(pub String);
+
 pub async fn require_valid_token(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
@@ -33,6 +36,7 @@ pub async fn require_valid_token(
     let Ok(os_project) = openstack.validate_user_token(token).await else {
         return Err(unauthorized_error("Failed to validate user token"));
     };
+    req.extensions_mut().insert(Token(token.into()));
     req.extensions_mut().insert(os_project);
     next.call(req).await
 }
