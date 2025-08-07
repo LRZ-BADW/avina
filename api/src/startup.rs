@@ -50,6 +50,7 @@ impl Application {
             connection_pool,
             configuration.application.base_url,
             openstack,
+            configuration.application.cloud_usage_url,
         )
         .await?;
 
@@ -116,16 +117,20 @@ impl Application {
 }
 
 pub struct ApplicationBaseUrl(pub String);
+#[derive(Debug)]
+pub struct CloudUsageUrl(pub Option<String>);
 
 async fn run(
     listener: TcpListener,
     db_pool: MySqlPool,
     base_url: String,
     openstack: OpenStack,
+    cloud_usage_url: Option<String>,
 ) -> Result<Server, anyhow::Error> {
     let db_pool = Data::new(db_pool);
     let base_url = Data::new(ApplicationBaseUrl(base_url));
     let openstack = Data::new(openstack);
+    let cloud_usage_url = Data::new(CloudUsageUrl(cloud_usage_url));
     let server = HttpServer::new(move || {
         // TODO: this should be configurable
         let cors = Cors::default()
@@ -139,6 +144,7 @@ async fn run(
             .app_data(db_pool.clone())
             .app_data(base_url.clone())
             .app_data(openstack.clone())
+            .app_data(cloud_usage_url.clone())
             .route("/health_check", web::get().to(health_check))
             .service(
                 web::scope("/api")
