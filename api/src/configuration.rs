@@ -17,6 +17,7 @@ pub struct ApplicationSettings {
     pub host: String,
     pub base_url: String,
     pub insert_admin: bool,
+    pub cloud_usage_url: Option<String>,
 }
 
 fn deserialize_secret_string<'de, D>(

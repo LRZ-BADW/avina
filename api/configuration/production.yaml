@@ -2,5 +2,6 @@ application:
   base_url: "http://127.0.0.1"
   host: 0.0.0.0
   insert_admin: false
+  cloud_usage_url: http://127.0.0.1:8880/
 database:
   require_ssl: true
