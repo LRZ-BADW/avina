@@ -78,21 +78,21 @@ pub async fn calculate_server_consumption_for_server(
         return Ok(consumption);
     }
     let first = states.first_mut().unwrap();
-    if let Some(begin) = begin {
-        if begin.fixed_offset() > first.begin {
-            first.begin = begin.fixed_offset();
-        }
+    if let Some(begin) = begin
+        && begin.fixed_offset() > first.begin
+    {
+        first.begin = begin.fixed_offset();
     }
     let last = states.last_mut().unwrap();
-    if last.end.is_none() {
-        if let Some(end) = end {
-            last.end = Some(end.fixed_offset());
-        }
+    if last.end.is_none()
+        && let Some(end) = end
+    {
+        last.end = Some(end.fixed_offset());
     }
-    if let Some(end) = end {
-        if end.fixed_offset() < last.end.unwrap() {
-            last.end = Some(end.fixed_offset());
-        }
+    if let Some(end) = end
+        && end.fixed_offset() < last.end.unwrap()
+    {
+        last.end = Some(end.fixed_offset());
     }
     for state in states {
         let entry = consumption.entry(state.flavor_name).or_default();
