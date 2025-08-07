@@ -20,7 +20,6 @@ pub use user::*;
 // - resources::flavor::access
 // - resources::flavor::usage
 // - resources::flavor_group::usage
-// - resources::usage
 // - quota::flavor_quota::check
 // - user::import
 // - budgeting::budget_over_tree
