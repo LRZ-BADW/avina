@@ -20,8 +20,9 @@ path = "src/lib.rs"
 
 [features]
 default = ["all"]
-all = ["accounting", "budgeting", "hello", "pricing", "quota", "resources", "user"]
+all = ["accounting", "bill", "budgeting", "hello", "pricing", "quota", "resources", "user"]
 accounting = ["avina-wire/accounting"]
+bill = ["avina-wire/bill"]
 budgeting = ["avina-wire/budgeting"]
 hello = ["avina-wire/hello"]
 pricing = ["avina-wire/pricing"]
