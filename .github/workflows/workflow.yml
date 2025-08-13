@@ -25,7 +25,7 @@ jobs:
       - name: Rust Cache Action
         uses: Swatinem/rust-cache@v2
       - name: Install zizmor
-        run: cargo install zizmor
+        run: cargo install --locked zizmor
       - name: check workflows
         run: zizmor .github/workflows
         env:
