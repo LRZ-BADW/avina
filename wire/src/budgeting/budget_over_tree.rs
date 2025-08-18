@@ -20,8 +20,8 @@ pub struct BudgetOverTreeServer {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct BudgetOverTreeUser {
     pub cost: f64,
-    pub budget_id: u32,
-    pub budget: u64,
+    pub budget_id: Option<u32>,
+    pub budget: Option<u64>,
     pub over: bool,
     pub servers: HashMap<String, BudgetOverTreeServer>,
     pub flavors: HashMap<String, f64>,
@@ -30,8 +30,8 @@ pub struct BudgetOverTreeUser {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct BudgetOverTreeProject {
     pub cost: f64,
-    pub budget_id: u32,
-    pub budget: u64,
+    pub budget_id: Option<u32>,
+    pub budget: Option<u64>,
     pub over: bool,
     pub users: HashMap<String, BudgetOverTreeUser>,
     #[serde(skip_serializing_if = "Option::is_none")]
