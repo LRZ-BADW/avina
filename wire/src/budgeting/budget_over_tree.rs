@@ -34,6 +34,7 @@ pub struct BudgetOverTreeProject {
     pub budget: Option<u64>,
     pub over: bool,
     pub users: HashMap<String, BudgetOverTreeUser>,
+    // TODO: why is this an option?
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flavors: Option<HashMap<String, f64>>,
 }
@@ -43,6 +44,7 @@ pub struct BudgetOverTree {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cost: Option<f64>,
     pub projects: HashMap<String, BudgetOverTreeProject>,
+    // TODO: why is this an option?
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flavors: Option<HashMap<String, f64>>,
 }
