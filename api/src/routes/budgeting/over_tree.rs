@@ -22,10 +22,14 @@ use crate::{
     },
     database::{
         budgeting::{
-            project_budget::select_maybe_project_budget_by_project_and_year_from_db,
+            project_budget::{
+                select_maybe_project_budget_by_project_and_year_from_db,
+                select_project_budgets_by_year_from_db,
+            },
             user_budget::{
                 select_maybe_user_budget_by_user_and_year_from_db,
                 select_user_budgets_by_project_and_year_from_db,
+                select_user_budgets_by_year_from_db,
             },
         },
         user::{
@@ -35,7 +39,10 @@ use crate::{
     error::{
         NotFoundOrUnexpectedApiError, OptionApiError, UnexpectedOnlyError,
     },
-    routes::server_cost::get::calculate_server_cost_for_project_detail,
+    routes::server_cost::get::{
+        calculate_server_cost_for_all_detail,
+        calculate_server_cost_for_project_detail,
+    },
     utils::start_of_the_year,
 };
 
@@ -231,7 +238,84 @@ async fn budget_over_tree_for_all(
     transaction: &mut Transaction<'_, MySql>,
     end: DateTime<Utc>,
 ) -> Result<BudgetOverTree, UnexpectedOnlyError> {
-    todo!()
+    let year = end.year();
+    let begin = start_of_the_year(year as u32);
+    let project_budgets =
+        select_project_budgets_by_year_from_db(transaction, year as u32)
+            .await?
+            .iter()
+            .cloned()
+            .map(|b| (b.project_name.clone(), b))
+            .collect::<HashMap<_, _>>();
+    let user_budgets =
+        select_user_budgets_by_year_from_db(transaction, year as u32)
+            .await?
+            .iter()
+            .cloned()
+            .map(|b| (b.username.clone(), b))
+            .collect::<HashMap<_, _>>();
+    let all_cost =
+        calculate_server_cost_for_all_detail(transaction, begin, end).await?;
+    let mut tree = BudgetOverTree {
+        cost: Some(all_cost.total),
+        projects: HashMap::new(),
+        flavors: Some(all_cost.flavors),
+    };
+
+    for (project_name, project_cost) in all_cost.projects {
+        tree.projects.insert(
+            project_name.clone(),
+            BudgetOverTreeProject {
+                cost: project_cost.total,
+                budget_id: None,
+                budget: None,
+                over: false,
+                users: HashMap::new(),
+                flavors: Some(project_cost.flavors),
+            },
+        );
+        let tree_project = tree.projects.get_mut(&project_name).unwrap();
+
+        if let Some(project_budget) = project_budgets.get(&project_name) {
+            tree_project.budget_id = Some(project_budget.id);
+            tree_project.budget = Some(project_budget.amount as u64);
+            tree_project.over =
+                project_cost.total >= project_budget.amount as f64;
+        }
+
+        for (username, user_cost) in project_cost.users {
+            tree_project.users.insert(
+                username.clone(),
+                BudgetOverTreeUser {
+                    cost: user_cost.total,
+                    budget_id: None,
+                    budget: None,
+                    over: false,
+                    servers: HashMap::new(),
+                    flavors: user_cost.flavors,
+                },
+            );
+            let tree_user = tree_project.users.get_mut(&username).unwrap();
+
+            if let Some(user_budget) = user_budgets.get(&username) {
+                tree_user.budget_id = Some(user_budget.id);
+                tree_user.budget = Some(user_budget.amount as u64);
+                tree_user.over = user_cost.total >= user_budget.amount as f64;
+            }
+
+            for (server_uuid, server_cost) in user_cost.servers {
+                tree_user.servers.insert(
+                    server_uuid,
+                    BudgetOverTreeServer {
+                        total: server_cost.total,
+                        flavors: server_cost.flavors,
+                    },
+                );
+            }
+        }
+    }
+
+    Ok(tree)
 }
 
 #[tracing::instrument(name = "budget_over_tree")]
