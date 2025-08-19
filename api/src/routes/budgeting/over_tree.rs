@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use actix_web::{
     HttpResponse,
     web::{Data, Query, ReqData},
@@ -12,8 +14,6 @@ use avina_wire::{
 };
 use chrono::{DateTime, Datelike, Utc};
 use sqlx::{MySql, MySqlPool, Transaction};
-
-use std::collections::HashMap;
 
 use crate::{
     authorization::{
