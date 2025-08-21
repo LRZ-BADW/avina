@@ -203,6 +203,23 @@ pub struct ServerDetailedList {
     servers: Vec<ServerDetailed>,
 }
 
+// TODO: the are fields missing here
+#[derive(Clone, Debug, serde::Deserialize)]
+#[allow(unused)]
+pub struct Domain {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub enabled: bool,
+    // TODO: why does this not work?
+    // pub links: Vec<Link>,
+}
+
+#[derive(Clone, Debug, serde::Deserialize)]
+pub struct DomainList {
+    domains: Vec<Domain>,
+}
+
 impl OpenStack {
     pub async fn new(
         settings: OpenStackSettings,
@@ -324,6 +341,32 @@ impl OpenStack {
         )
         .context("Could not parse response")?;
         Ok(servers.servers)
+    }
+
+    // TODO: shouldn't we use on openstack-specific return type
+    pub async fn get_domains(&self) -> Result<Vec<Domain>, anyhow::Error> {
+        let client = self.client().await?;
+        let url = format!("{}/domains", self.settings.keystone_endpoint);
+        let response = client
+            .get(url.as_str())
+            .send()
+            .await
+            .context("Could not retrieve domain list")?;
+        if !response.status().is_success() {
+            return Err(anyhow::anyhow!(
+                "Failed to validate user token, returned code {}",
+                response.status().as_u16()
+            ));
+        }
+        let domains: DomainList = serde_json::from_str(
+            response
+                .text()
+                .await
+                .context("Could not read response text")?
+                .as_str(),
+        )
+        .context("Could not parse response")?;
+        Ok(domains.domains)
     }
 }
 
