@@ -203,7 +203,6 @@ pub struct ServerDetailedList {
     servers: Vec<ServerDetailed>,
 }
 
-// TODO: the are fields missing here
 #[derive(Clone, Debug, serde::Deserialize)]
 #[allow(unused)]
 pub struct Domain {
@@ -211,13 +210,30 @@ pub struct Domain {
     pub name: String,
     pub description: Option<String>,
     pub enabled: bool,
-    // TODO: why does this not work?
-    // pub links: Vec<Link>,
 }
 
 #[derive(Clone, Debug, serde::Deserialize)]
 pub struct DomainList {
     domains: Vec<Domain>,
+}
+
+// TODO: the are fields missing here
+#[derive(Clone, Debug, serde::Deserialize)]
+#[allow(unused)]
+pub struct Project {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub enabled: bool,
+    pub is_domain: bool,
+    pub domain_id: String,
+    pub parent_id: String,
+    pub tags: Vec<String>,
+}
+
+#[derive(Clone, Debug, serde::Deserialize)]
+pub struct ProjectList {
+    projects: Vec<Project>,
 }
 
 impl OpenStack {
@@ -343,7 +359,6 @@ impl OpenStack {
         Ok(servers.servers)
     }
 
-    // TODO: shouldn't we use on openstack-specific return type
     pub async fn get_domains(&self) -> Result<Vec<Domain>, anyhow::Error> {
         let client = self.client().await?;
         let url = format!("{}/domains", self.settings.keystone_endpoint);
@@ -367,6 +382,31 @@ impl OpenStack {
         )
         .context("Could not parse response")?;
         Ok(domains.domains)
+    }
+
+    pub async fn get_projects(&self) -> Result<Vec<Project>, anyhow::Error> {
+        let client = self.client().await?;
+        let url = format!("{}/projects", self.settings.keystone_endpoint);
+        let response = client
+            .get(url.as_str())
+            .send()
+            .await
+            .context("Could not retrieve project list")?;
+        if !response.status().is_success() {
+            return Err(anyhow::anyhow!(
+                "Failed to validate user token, returned code {}",
+                response.status().as_u16()
+            ));
+        }
+        let projects: ProjectList = serde_json::from_str(
+            response
+                .text()
+                .await
+                .context("Could not read response text")?
+                .as_str(),
+        )
+        .context("Could not parse response")?;
+        Ok(projects.projects)
     }
 }
 
