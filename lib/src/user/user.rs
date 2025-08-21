@@ -260,7 +260,7 @@ impl UserApi {
     pub async fn import(&self) -> Result<UserImport, ApiError> {
         // TODO use Url.join
         let url = format!(
-            "{}/import/",
+            "{}/import",
             self.url
                 .rfind('/')
                 .map(|i| &self.url[..i])
