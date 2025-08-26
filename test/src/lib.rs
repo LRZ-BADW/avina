@@ -328,14 +328,8 @@ impl TestApp {
         user: &User,
         server_id: &str,
     ) -> Result<ServerState, MinimalApiError> {
-        let mut transaction = self
-            .db_pool
-            .begin()
-            .await
-            .expect("Failed to begin transaction.");
-        let begin = DateTime::<FixedOffset>::from(Utc::now());
         let new_server_state = NewServerState {
-            begin: begin.to_utc(),
+            begin: DateTime::<FixedOffset>::from(Utc::now()).to_utc(),
             end: None,
             instance_id: server_id.to_string(),
             instance_name: random_alphanumeric_string(10),
@@ -343,6 +337,25 @@ impl TestApp {
             status: "ACTIVE".to_string(),
             user: user.id,
         };
+        self.setup_test_server_state_with_server_state(
+            flavor,
+            user,
+            new_server_state,
+        )
+        .await
+    }
+
+    pub async fn setup_test_server_state_with_server_state(
+        &self,
+        flavor: &Flavor,
+        user: &User,
+        new_server_state: NewServerState,
+    ) -> Result<ServerState, MinimalApiError> {
+        let mut transaction = self
+            .db_pool
+            .begin()
+            .await
+            .expect("Failed to begin transaction.");
         let server_state_id =
             insert_server_state_into_db(&mut transaction, &new_server_state)
                 .await? as u32;
