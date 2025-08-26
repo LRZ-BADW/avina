@@ -352,7 +352,7 @@ impl TestApp {
             .context("Failed to commit transaction")?;
         let server_state = ServerState {
             id: server_state_id,
-            begin,
+            begin: new_server_state.begin.fixed_offset(),
             end: None,
             instance_id: new_server_state.instance_id,
             instance_name: new_server_state.instance_name,
@@ -369,18 +369,30 @@ impl TestApp {
         &self,
         user: &User,
     ) -> Result<UserBudget, MinimalApiError> {
+        let new_project_budget = NewUserBudget {
+            user_id: user.id as u64,
+            year: Utc::now().year() as u32,
+            amount: 0,
+        };
+        self.setup_test_user_budget_with_new_user_budget(
+            user,
+            &new_project_budget,
+        )
+        .await
+    }
+
+    pub async fn setup_test_user_budget_with_new_user_budget(
+        &self,
+        user: &User,
+        new_user_budget: &NewUserBudget,
+    ) -> Result<UserBudget, MinimalApiError> {
         let mut transaction = self
             .db_pool
             .begin()
             .await
             .expect("Failed to begin transaction.");
-        let new_user_budget = NewUserBudget {
-            user_id: user.id as u64,
-            year: Utc::now().year() as u32,
-            amount: 0,
-        };
         let user_budget_id =
-            insert_user_budget_into_db(&mut transaction, &new_user_budget)
+            insert_user_budget_into_db(&mut transaction, new_user_budget)
                 .await? as u32;
         transaction
             .commit()
