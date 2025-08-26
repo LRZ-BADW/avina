@@ -156,18 +156,34 @@ impl TestApp {
         master_number: usize,
         normal_number: usize,
     ) -> Result<TestProject, sqlx::Error> {
+        let project = Project {
+            id: 1,
+            name: random_alphanumeric_string(10),
+            openstack_id: random_uuid(),
+            user_class: 1,
+        };
+        self.setup_test_project_with_project(
+            admin_number,
+            master_number,
+            normal_number,
+            project,
+        )
+        .await
+    }
+
+    pub async fn setup_test_project_with_project(
+        &self,
+        admin_number: usize,
+        master_number: usize,
+        normal_number: usize,
+        mut project: Project,
+    ) -> Result<TestProject, sqlx::Error> {
         let mut transaction = self
             .db_pool
             .begin()
             .await
             .expect("Failed to begin transaction.");
 
-        let mut project = Project {
-            id: 1,
-            name: random_alphanumeric_string(10),
-            openstack_id: random_uuid(),
-            user_class: random_number(1..6),
-        };
         project.id =
             insert_project_into_db(&mut transaction, &project).await? as u32;
 
