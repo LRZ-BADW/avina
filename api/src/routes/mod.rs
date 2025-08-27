@@ -21,7 +21,6 @@ pub use user::*;
 // - resources::flavor::usage
 // - resources::flavor_group::usage
 // - quota::flavor_quota::check
-// - user::import
 
 // TODO: improve the following endpoints
 // - budgeting::project_budget::modify
@@ -34,3 +33,4 @@ pub use user::*;
 // - quota::flavor_quota::get
 // - budgeting::budget_over_tree
 // - resources::server_cost
+// - user::import
