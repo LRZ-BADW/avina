@@ -14,5 +14,6 @@ openstack:
   project_id: "PROJECT_ID"
   domain: "DOMAIN"
   domain_id: "DOMAIN_ID"
+  # TODO: why do we use the version for keystone but not for nova
   keystone_endpoint: "https://cc.lrz.de:5000/v3"
   nova_endpoint: "https://cc.lrz.de:8774"
