@@ -90,3 +90,5 @@ datetime
 hashmap
 NormalApiError
 AuthOrUnexpectedError
+ldap
+userclass
