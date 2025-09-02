@@ -134,6 +134,18 @@ impl FlavorGroupModifyData {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FlavorGroupUsageParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub project: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub all: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub aggregate: Option<bool>,
+}
+
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FlavorGroupUsage {
