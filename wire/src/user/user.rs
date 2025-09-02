@@ -3,6 +3,7 @@ use std::{cmp::PartialEq, fmt::Display};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "sqlx")]
 use sqlx::FromRow;
+use strum::EnumIter;
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
 
@@ -182,6 +183,62 @@ impl UserModifyData {
             role: None,
             is_staff: None,
             is_active: None,
+        }
+    }
+}
+
+#[derive(
+    clap::ValueEnum,
+    Hash,
+    PartialEq,
+    Eq,
+    Clone,
+    EnumIter,
+    Debug,
+    Deserialize,
+    Serialize,
+    Copy,
+    sqlx::Type,
+)]
+pub enum UserClass {
+    UC1 = 1,
+    UC2 = 2,
+    UC3 = 3,
+    UC4 = 4,
+    UC5 = 5,
+    UC6 = 6,
+}
+
+impl Display for UserClass {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl From<u32> for UserClass {
+    fn from(u: u32) -> Self {
+        match u {
+            1 => UserClass::UC1,
+            2 => UserClass::UC2,
+            3 => UserClass::UC3,
+            4 => UserClass::UC4,
+            5 => UserClass::UC5,
+            6 => UserClass::UC6,
+            _ => panic!("Unknown user class value: {}", u),
+        }
+    }
+}
+
+impl From<u64> for UserClass {
+    fn from(u: u64) -> Self {
+        match u {
+            1 => UserClass::UC1,
+            2 => UserClass::UC2,
+            3 => UserClass::UC3,
+            4 => UserClass::UC4,
+            5 => UserClass::UC5,
+            6 => UserClass::UC6,
+            _ => panic!("Unknown user class value: {}", u),
         }
     }
 }

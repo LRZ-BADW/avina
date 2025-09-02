@@ -1,5 +1,8 @@
 use anyhow::Context;
-use avina_wire::pricing::{FlavorPrice, FlavorPriceCreateData};
+use avina_wire::{
+    pricing::{FlavorPrice, FlavorPriceCreateData},
+    user::UserClass,
+};
 use chrono::{DateTime, Utc};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
@@ -14,7 +17,7 @@ pub struct FlavorPriceRow {
     #[sqlx(try_from = "i32")]
     pub flavor: u32,
     pub flavor_name: String,
-    pub user_class: u32,
+    pub user_class: UserClass,
     pub unit_price: f64,
     pub start_time: DateTime<Utc>,
 }
@@ -170,7 +173,7 @@ pub async fn select_flavor_prices_for_period_from_db(
 
 pub struct NewFlavorPrice {
     pub flavor_id: u64,
-    pub user_class: u32,
+    pub user_class: UserClass,
     pub unit_price: f64,
     pub start_time: DateTime<Utc>,
 }

@@ -1,9 +1,12 @@
 use std::rc::Rc;
 
 use anyhow::Context;
-use avina_wire::pricing::{
-    FlavorPrice, FlavorPriceCreateData, FlavorPriceInitialize,
-    FlavorPriceModifyData,
+use avina_wire::{
+    pricing::{
+        FlavorPrice, FlavorPriceCreateData, FlavorPriceInitialize,
+        FlavorPriceModifyData,
+    },
+    user::UserClass,
 };
 use chrono::{DateTime, FixedOffset};
 use reqwest::{Client, Method, StatusCode, Url};
@@ -59,7 +62,7 @@ impl FlavorPriceCreateRequest {
         url: &str,
         client: &Rc<Client>,
         flavor: u32,
-        user_class: u32,
+        user_class: UserClass,
     ) -> Self {
         Self {
             url: url.to_string(),
@@ -114,7 +117,7 @@ impl FlavorPriceModifyRequest {
         self
     }
 
-    pub fn user_class(&mut self, user_class: u32) -> &mut Self {
+    pub fn user_class(&mut self, user_class: UserClass) -> &mut Self {
         self.data.user_class = Some(user_class);
         self
     }
@@ -172,7 +175,7 @@ impl FlavorPriceApi {
     pub fn create(
         &self,
         flavor: u32,
-        user_class: u32,
+        user_class: UserClass,
     ) -> FlavorPriceCreateRequest {
         // TODO use Url.join
         let url = format!("{}/", self.url);

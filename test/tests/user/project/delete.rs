@@ -1,10 +1,8 @@
 use std::str::FromStr;
 
 use avina::{Api, Token};
-use avina_test::{
-    random_alphanumeric_string, random_number, random_uuid, spawn_app,
-};
-use avina_wire::user::ProjectRetrieved;
+use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
+use avina_wire::user::{ProjectRetrieved, UserClass};
 
 #[tokio::test]
 async fn e2e_lib_project_delete_denies_access_to_normal_user() {
@@ -103,11 +101,11 @@ async fn e2e_lib_project_create_get_delete_get_works() {
     // act and assert 1 - create
     let name = random_alphanumeric_string(10);
     let openstack_id = random_uuid();
-    let user_class = random_number(1..6);
+    let user_class = UserClass::UC1;
     let created = client
         .project
         .create(name.clone(), openstack_id.clone())
-        .user_class(user_class)
+        .user_class(UserClass::UC1)
         .send()
         .await
         .unwrap();
