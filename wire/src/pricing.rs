@@ -5,13 +5,15 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
 
+use crate::user::UserClass;
+
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorPrice {
     pub id: u32,
     pub flavor: u32,
     pub flavor_name: String,
-    pub user_class: u32,
+    pub user_class: UserClass,
     pub unit_price: f64,
     pub start_time: DateTime<FixedOffset>,
 }
@@ -34,8 +36,7 @@ pub struct FlavorPriceInitialize {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FlavorPriceCreateData {
     pub flavor: u32,
-    // TODO use an enum for this
-    pub user_class: u32,
+    pub user_class: UserClass,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub price: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -43,7 +44,7 @@ pub struct FlavorPriceCreateData {
 }
 
 impl FlavorPriceCreateData {
-    pub fn new(flavor: u32, user_class: u32) -> Self {
+    pub fn new(flavor: u32, user_class: UserClass) -> Self {
         Self {
             flavor,
             user_class,
@@ -60,7 +61,7 @@ pub struct FlavorPriceModifyData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flavor: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_class: Option<u32>,
+    pub user_class: Option<UserClass>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unit_price: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]

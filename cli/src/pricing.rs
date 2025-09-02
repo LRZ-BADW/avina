@@ -1,5 +1,6 @@
 use std::error::Error;
 
+use avina_wire::user::UserClass;
 use chrono::{DateTime, FixedOffset};
 use clap::Subcommand;
 
@@ -28,7 +29,7 @@ pub(crate) enum FlavorPriceCommand {
         flavor: String,
 
         #[clap(help = "User class of the price (1-6)")]
-        user_class: u32,
+        user_class: UserClass,
 
         #[clap(long, short, help = "Unit price of the flavor, default: 0.0")]
         price: Option<f64>,
@@ -50,7 +51,7 @@ pub(crate) enum FlavorPriceCommand {
         flavor: Option<String>,
 
         #[clap(long, short, help = "User class of the price (1-6)")]
-        user_class: Option<u32>,
+        user_class: Option<UserClass>,
 
         #[clap(long, short, help = "Unit price of the flavor")]
         price: Option<f64>,
@@ -126,7 +127,7 @@ async fn create(
     api: avina::Api,
     format: Format,
     flavor: &str,
-    user_class: u32,
+    user_class: UserClass,
     price: Option<f64>,
     start_time: Option<DateTime<FixedOffset>>,
 ) -> Result<(), Box<dyn Error>> {
@@ -146,7 +147,7 @@ async fn modify(
     format: Format,
     id: u32,
     flavor: Option<String>,
-    user_class: Option<u32>,
+    user_class: Option<UserClass>,
     unit_price: Option<f64>,
     start_time: Option<DateTime<FixedOffset>>,
 ) -> Result<(), Box<dyn Error>> {

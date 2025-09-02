@@ -3,7 +3,7 @@ use std::rc::Rc;
 use anyhow::Context;
 use avina_wire::user::{
     Project, ProjectCreateData, ProjectListParams, ProjectModifyData,
-    ProjectRetrieved,
+    ProjectRetrieved, UserClass,
 };
 use reqwest::{Client, Method, StatusCode};
 
@@ -62,8 +62,7 @@ impl ProjectListRequest {
         self
     }
 
-    // TODO: use enum for this
-    pub fn user_class(&mut self, userclass: u32) -> &mut Self {
+    pub fn user_class(&mut self, userclass: UserClass) -> &mut Self {
         self.params.userclass = Some(userclass);
         self
     }
@@ -90,7 +89,7 @@ impl ProjectCreateRequest {
         }
     }
 
-    pub fn user_class(&mut self, user_class: u32) -> &mut Self {
+    pub fn user_class(&mut self, user_class: UserClass) -> &mut Self {
         self.data.user_class = Some(user_class);
         self
     }
@@ -133,7 +132,7 @@ impl ProjectModifyRequest {
         self
     }
 
-    pub fn user_class(&mut self, user_class: u32) -> &mut Self {
+    pub fn user_class(&mut self, user_class: UserClass) -> &mut Self {
         self.data.user_class = Some(user_class);
         self
     }

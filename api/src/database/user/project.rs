@@ -1,5 +1,5 @@
 use anyhow::Context;
-use avina_wire::user::{Project, ProjectMinimal};
+use avina_wire::user::{Project, ProjectMinimal, UserClass};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
@@ -166,7 +166,7 @@ pub async fn select_all_projects_from_db(
 )]
 pub async fn select_projects_by_userclass_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    user_class: u8,
+    user_class: UserClass,
 ) -> Result<Vec<Project>, UnexpectedOnlyError> {
     let query = sqlx::query!(
         r#"
@@ -178,7 +178,7 @@ pub async fn select_projects_by_userclass_from_db(
         FROM user_project
         where user_class = ?
         "#,
-        user_class
+        user_class as u32
     );
     let rows = transaction
         .fetch_all(query)
@@ -226,7 +226,7 @@ pub async fn select_projects_by_id_from_db(
 pub async fn select_user_class_by_project_from_db(
     transaction: &mut Transaction<'_, MySql>,
     project_id: u64,
-) -> Result<Option<u32>, UnexpectedOnlyError> {
+) -> Result<Option<UserClass>, UnexpectedOnlyError> {
     #[derive(FromRow)]
     struct Row {
         user_class: u32,
@@ -247,7 +247,9 @@ pub async fn select_user_class_by_project_from_db(
         Some(row) => Some(
             Row::from_row(&row)
                 .context("Failed to parse user class row")?
-                .user_class,
+                .user_class
+                .try_into()
+                .context("Failed to parse user class")?,
         ),
         None => None,
     })

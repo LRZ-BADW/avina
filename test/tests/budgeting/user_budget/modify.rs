@@ -6,7 +6,8 @@ use avina_api::database::{
     budgeting::{project_budget::NewProjectBudget, user_budget::NewUserBudget},
     pricing::flavor_price::NewFlavorPrice,
 };
-use avina_test::{random_alphanumeric_string, spawn_app};
+use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
+use avina_wire::user::{Project, UserClass};
 use chrono::{Datelike, TimeZone, Utc};
 
 #[tokio::test]
@@ -14,8 +15,14 @@ async fn e2e_lib_admin_cannot_modify_user_budget() {
     // arrange
     let server = spawn_app().await;
 
+    let project_new = Project {
+        id: 1,
+        name: random_alphanumeric_string(10),
+        openstack_id: random_uuid(),
+        user_class: UserClass::UC1,
+    };
     let test_project_1 = server
-        .setup_test_project(1, 2, 0)
+        .setup_test_project_with_project(1, 2, 0, project_new)
         .await
         .expect("Failed to setup test project");
     let admin = test_project_1.admins[0].user.clone();
@@ -115,7 +122,7 @@ async fn e2e_lib_admin_cannot_modify_user_budget() {
         .expect("Failed to setup test flavor");
     let new_flavor_price = NewFlavorPrice {
         flavor_id: flavor.id as u64,
-        user_class: 1,
+        user_class: project_1.user_class,
         unit_price: 200_f64, // cost: 133
         start_time,
     };

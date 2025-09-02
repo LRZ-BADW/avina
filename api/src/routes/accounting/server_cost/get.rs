@@ -11,13 +11,13 @@ use avina_wire::{
         ServerCostSimple, ServerCostUser,
     },
     pricing::FlavorPrice,
-    user::User,
+    user::{User, UserClass},
 };
 use chrono::{DateTime, Datelike, TimeZone, Utc};
 use indexmap::IndexMap;
 use serde::Serialize;
 use sqlx::{MySql, MySqlPool, Transaction};
-use strum::{EnumIter, IntoEnumIterator};
+use strum::IntoEnumIterator;
 
 use crate::{
     authorization::{
@@ -49,30 +49,6 @@ use crate::{
     },
 };
 
-#[derive(Hash, PartialEq, Eq, Clone, EnumIter, Debug)]
-enum UserClass {
-    UC1 = 1,
-    UC2 = 2,
-    UC3 = 3,
-    UC4 = 4,
-    UC5 = 5,
-    UC6 = 6,
-}
-
-impl UserClass {
-    fn from_u32(value: u32) -> Result<Self, UnexpectedOnlyError> {
-        match value {
-            1 => Ok(UserClass::UC1),
-            2 => Ok(UserClass::UC2),
-            3 => Ok(UserClass::UC3),
-            4 => Ok(UserClass::UC4),
-            5 => Ok(UserClass::UC5),
-            6 => Ok(UserClass::UC6),
-            _ => Err(anyhow!("Got non-existing user-class.").into()),
-        }
-    }
-}
-
 type PricesForPeriod = HashMap<UserClass, HashMap<String, Vec<FlavorPrice>>>;
 
 async fn get_flavor_price_map_for_period(
@@ -86,7 +62,7 @@ async fn get_flavor_price_map_for_period(
     let mut prices = HashMap::new();
     for price in price_list {
         prices
-            .entry(UserClass::from_u32(price.user_class)?)
+            .entry(price.user_class)
             // TODO: .default() should work here, too
             .or_insert_with(HashMap::new)
             .entry(price.flavor_name.clone())
@@ -135,7 +111,7 @@ async fn get_flavor_price_periods(
     for user_class in UserClass::iter() {
         for flavor in flavors.clone() {
             current_prices
-                .entry(user_class.clone())
+                .entry(user_class)
                 .or_default()
                 .entry(flavor.name.clone())
                 .or_insert(0.0);
@@ -151,7 +127,7 @@ async fn get_flavor_price_periods(
             break;
         }
         *current_prices
-            .get_mut(&UserClass::from_u32(price.user_class)?)
+            .get_mut(&price.user_class)
             .unwrap()
             .entry(price.flavor_name.clone())
             .or_insert(0.0) = price.unit_price;
@@ -172,7 +148,7 @@ async fn get_flavor_price_periods(
         let price = prices.get(i).unwrap();
         if price.start_time.to_utc() == current_time {
             *current_prices
-                .get_mut(&UserClass::from_u32(price.user_class)?)
+                .get_mut(&price.user_class)
                 .unwrap()
                 .entry(price.flavor_name.clone())
                 .or_insert(0.0) = price.unit_price;
@@ -219,8 +195,6 @@ pub async fn calculate_server_cost_for_server_normal(
         server_uuid.to_string(),
     )
     .await?
-    .map(|u| UserClass::from_u32(u as u32))
-    .map_or(Ok(None), |r| r.map(Some))?
     else {
         return Ok(cost);
     };
@@ -248,7 +222,7 @@ pub async fn calculate_server_cost_for_server_normal(
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
                 prices.clone(),
-                user_class.clone(),
+                user_class,
                 flavor_name,
             );
             if flavor_cost <= 0. {
@@ -277,8 +251,6 @@ pub async fn calculate_server_cost_for_server_detail(
         server_uuid.to_string(),
     )
     .await?
-    .map(|u| UserClass::from_u32(u as u32))
-    .map_or(Ok(None), |r| r.map(Some))?
     else {
         return Ok(cost);
     };
@@ -303,7 +275,7 @@ pub async fn calculate_server_cost_for_server_detail(
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
                 prices.clone(),
-                user_class.clone(),
+                user_class,
                 flavor_name.clone(),
             );
             *cost.flavors.entry(flavor_name).or_default() += flavor_cost;
@@ -362,10 +334,7 @@ pub async fn calculate_server_cost_for_user_normal(
 ) -> Result<ServerCostSimple, UnexpectedOnlyError> {
     let mut cost = ServerCostSimple { total: 0.0 };
     let Some(user_class) =
-        select_user_class_by_user_from_db(transaction, user_id)
-            .await?
-            .map(UserClass::from_u32)
-            .map_or(Ok(None), |r| r.map(Some))?
+        select_user_class_by_user_from_db(transaction, user_id).await?
     else {
         return Ok(cost);
     };
@@ -399,7 +368,7 @@ pub async fn calculate_server_cost_for_user_normal(
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
                 prices.clone(),
-                user_class.clone(),
+                user_class,
                 flavor_name,
             );
             cost.total += flavor_cost;
@@ -422,10 +391,7 @@ pub async fn calculate_server_cost_for_user_detail(
         servers: HashMap::new(),
     };
     let Some(user_class) =
-        select_user_class_by_user_from_db(transaction, user_id)
-            .await?
-            .map(UserClass::from_u32)
-            .map_or(Ok(None), |r| r.map(Some))?
+        select_user_class_by_user_from_db(transaction, user_id).await?
     else {
         return Ok(cost);
     };
@@ -465,7 +431,7 @@ pub async fn calculate_server_cost_for_user_detail(
                 let flavor_cost = calculate_flavor_consumption_cost(
                     flavor_consumption,
                     prices.clone(),
-                    user_class.clone(),
+                    user_class,
                     flavor_name.clone(),
                 );
                 *server_cost.flavors.entry(flavor_name.clone()).or_default() +=
@@ -527,10 +493,7 @@ pub async fn calculate_server_cost_for_project_normal(
 ) -> Result<ServerCostSimple, UnexpectedOnlyError> {
     let mut cost = ServerCostSimple { total: 0.0 };
     let Some(user_class) =
-        select_user_class_by_project_from_db(transaction, project_id)
-            .await?
-            .map(UserClass::from_u32)
-            .map_or(Ok(None), |r| r.map(Some))?
+        select_user_class_by_project_from_db(transaction, project_id).await?
     else {
         return Ok(cost);
     };
@@ -565,7 +528,7 @@ pub async fn calculate_server_cost_for_project_normal(
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
                 prices.clone(),
-                user_class.clone(),
+                user_class,
                 flavor_name,
             );
             if flavor_cost <= 0. {
@@ -591,10 +554,7 @@ pub async fn calculate_server_cost_for_project_detail(
         users: HashMap::new(),
     };
     let Some(user_class) =
-        select_user_class_by_project_from_db(transaction, project_id)
-            .await?
-            .map(UserClass::from_u32)
-            .map_or(Ok(None), |r| r.map(Some))?
+        select_user_class_by_project_from_db(transaction, project_id).await?
     else {
         return Ok(cost);
     };
@@ -643,7 +603,7 @@ pub async fn calculate_server_cost_for_project_detail(
                     let flavor_cost = calculate_flavor_consumption_cost(
                         flavor_consumption,
                         prices.clone(),
-                        user_class.clone(),
+                        user_class,
                         flavor_name.clone(),
                     );
                     *server_cost
@@ -745,9 +705,6 @@ pub async fn calculate_server_cost_for_all_normal(
             let Some(project) = projects.get(&project_name) else {
                 continue;
             };
-            let Ok(user_class) = UserClass::from_u32(project.user_class) else {
-                continue;
-            };
 
             for (flavor_name, flavor_consumption) in project_consumption.total {
                 if flavor_consumption == 0. {
@@ -756,7 +713,7 @@ pub async fn calculate_server_cost_for_all_normal(
                 let flavor_cost = calculate_flavor_consumption_cost(
                     flavor_consumption,
                     prices.clone(),
-                    user_class.clone(),
+                    project.user_class,
                     flavor_name,
                 );
                 if flavor_cost <= 0. {
@@ -813,9 +770,6 @@ pub async fn calculate_server_cost_for_all_detail(
             let Some(project) = projects.get(&project_name) else {
                 continue;
             };
-            let Ok(user_class) = UserClass::from_u32(project.user_class) else {
-                continue;
-            };
             let project_cost = cost
                 .projects
                 .entry(project_name.clone())
@@ -849,7 +803,7 @@ pub async fn calculate_server_cost_for_all_detail(
                         let flavor_cost = calculate_flavor_consumption_cost(
                             flavor_consumption,
                             prices.clone(),
-                            user_class.clone(),
+                            project.user_class,
                             flavor_name.clone(),
                         );
                         *server_cost

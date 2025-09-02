@@ -28,7 +28,7 @@ use avina_wire::{
     pricing::FlavorPrice,
     quota::{FlavorQuota, FlavorQuotaCreateData},
     resources::{Flavor, FlavorCreateData, FlavorGroup, FlavorGroupCreateData},
-    user::{Project, User},
+    user::{Project, User, UserClass},
 };
 use chrono::{DateTime, Datelike, FixedOffset, Utc};
 use once_cell::sync::Lazy;
@@ -160,7 +160,7 @@ impl TestApp {
             id: 1,
             name: random_alphanumeric_string(10),
             openstack_id: random_uuid(),
-            user_class: 1,
+            user_class: rand::random(),
         };
         self.setup_test_project_with_project(
             admin_number,
@@ -484,7 +484,7 @@ impl TestApp {
     pub async fn setup_test_flavor_price(
         &self,
         flavor: &Flavor,
-        user_class: u32,
+        user_class: UserClass,
     ) -> Result<FlavorPrice, MinimalApiError> {
         let start_time = DateTime::<FixedOffset>::from(Utc::now());
         let new_flavor_price = NewFlavorPrice {
@@ -655,7 +655,7 @@ pub async fn insert_project_into_db(
         "#,
         project.name,
         project.openstack_id,
-        project.user_class,
+        project.user_class as u32,
     );
     transaction
         .execute(query)

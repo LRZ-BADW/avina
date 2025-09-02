@@ -1,5 +1,5 @@
 use anyhow::Context;
-use avina_wire::user::{User, UserDetailed, UserMinimal};
+use avina_wire::user::{User, UserClass, UserDetailed, UserMinimal};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
@@ -282,7 +282,7 @@ pub async fn select_minimal_users_by_project_id_from_db(
 pub async fn select_user_class_by_user_from_db(
     transaction: &mut Transaction<'_, MySql>,
     user_id: u64,
-) -> Result<Option<u32>, UnexpectedOnlyError> {
+) -> Result<Option<UserClass>, UnexpectedOnlyError> {
     #[derive(FromRow)]
     struct Row {
         user_class: u32,
@@ -307,7 +307,9 @@ pub async fn select_user_class_by_user_from_db(
         Some(row) => Some(
             Row::from_row(&row)
                 .context("Failed to parse user class row")?
-                .user_class,
+                .user_class
+                .try_into()
+                .context("Failed to parse user class")?,
         ),
         None => None,
     })
