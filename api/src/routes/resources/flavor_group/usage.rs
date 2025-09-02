@@ -7,7 +7,7 @@ use sqlx::MySqlPool;
 
 use crate::{error::NormalApiError, openstack::OpenStack};
 
-#[tracing::instrument(name = "flavor_usage", skip(_openstack))]
+#[tracing::instrument(name = "flavor_group_usage", skip(_openstack))]
 pub async fn flavor_group_usage(
     user: ReqData<User>,
     db_pool: Data<MySqlPool>,
