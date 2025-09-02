@@ -112,11 +112,19 @@ pub async fn extract_user_and_project(
         is_staff: row.user_is_staff != 0,
         is_active: row.user_is_active != 0,
     };
+
+    let user_class = match row.project_user_class.try_into() {
+        Ok(u) => u,
+        Err(_) => {
+            return Err(internal_server_error("Failed to parse user class"));
+        }
+    };
+
     let project = Project {
         id: row.project_id as u32,
         name: row.project_name,
         openstack_id: row.project_openstack_id,
-        user_class: row.project_user_class,
+        user_class,
     };
 
     req.extensions_mut().insert(user);

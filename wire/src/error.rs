@@ -1,12 +1,17 @@
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
+use thiserror::Error;
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ErrorResponse {
     pub detail: String,
 }
+
+#[derive(Debug, Error)]
+#[error("{0}")]
+pub struct ConversionError(pub String);
 
 pub fn error_chain_fmt(
     e: &impl std::error::Error,

@@ -1,9 +1,8 @@
 use std::str::FromStr;
 
 use avina::{Api, Token};
-use avina_test::{
-    random_alphanumeric_string, random_number, random_uuid, spawn_app,
-};
+use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
+use avina_wire::user::UserClass;
 
 #[tokio::test]
 async fn e2e_lib_project_list_returns_own_project() {
@@ -91,7 +90,12 @@ async fn e2e_lib_project_list_by_user_class_denies_access_to_normal_user() {
     .unwrap();
 
     // act
-    let list = client.project.list().user_class(1).send().await;
+    let list = client
+        .project
+        .list()
+        .user_class(UserClass::UC1)
+        .send()
+        .await;
 
     // assert
     assert!(list.is_err());
@@ -129,7 +133,7 @@ async fn e2e_lib_project_list_all_works() {
     for _ in 0..5 {
         let name = random_alphanumeric_string(10);
         let openstack_id = random_uuid();
-        let user_class = random_number(0..6);
+        let user_class = rand::random();
         let created = client
             .project
             .create(name.clone(), openstack_id.clone())
@@ -169,7 +173,7 @@ async fn e2e_lib_project_list_by_user_class_works() {
     )
     .unwrap();
 
-    let user_class = 3;
+    let user_class = UserClass::UC3;
 
     // act part 1 - create projects
     let mut expected = Vec::new();

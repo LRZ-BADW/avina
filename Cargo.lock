@@ -479,9 +479,13 @@ version = "1.7.0"
 dependencies = [
  "cargo-husky",
  "chrono",
+ "clap",
+ "rand 0.9.2",
  "serde",
  "sqlx",
+ "strum",
  "tabled",
+ "thiserror 2.0.16",
 ]
 
 [[package]]

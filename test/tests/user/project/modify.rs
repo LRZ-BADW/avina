@@ -1,9 +1,7 @@
 use std::str::FromStr;
 
 use avina::{Api, Token};
-use avina_test::{
-    random_alphanumeric_string, random_number, random_uuid, spawn_app,
-};
+use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
 use avina_wire::user::ProjectRetrieved;
 
 #[tokio::test]
@@ -103,7 +101,7 @@ async fn e2e_lib_project_modify_and_get_works() {
     // act and assert 1 - modify
     let name = random_alphanumeric_string(10);
     let openstack_id = random_uuid();
-    let user_class = random_number(1..6);
+    let user_class = rand::random();
     let modified = client
         .project
         .modify(project.id)

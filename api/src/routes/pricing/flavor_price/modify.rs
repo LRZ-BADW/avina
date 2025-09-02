@@ -64,7 +64,7 @@ pub async fn update_flavor_price_in_db(
         SET user_class = ?, unit_price = ?, start_time = ?, flavor_id = ?
         WHERE id = ?
         "#,
-        user_class,
+        user_class as u32,
         unit_price,
         start_time.to_utc(),
         flavor,

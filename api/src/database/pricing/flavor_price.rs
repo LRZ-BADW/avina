@@ -1,5 +1,8 @@
 use anyhow::Context;
-use avina_wire::pricing::{FlavorPrice, FlavorPriceCreateData};
+use avina_wire::{
+    pricing::{FlavorPrice, FlavorPriceCreateData},
+    user::UserClass,
+};
 use chrono::{DateTime, Utc};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
@@ -57,7 +60,10 @@ pub async fn select_maybe_flavor_price_from_db(
                 id: row.id,
                 flavor: row.flavor,
                 flavor_name: row.flavor_name,
-                user_class: row.user_class,
+                user_class: row
+                    .user_class
+                    .try_into()
+                    .context("Failed to parse user class")?,
                 unit_price: row.unit_price,
                 start_time: row.start_time.fixed_offset(),
             })
@@ -106,17 +112,23 @@ pub async fn select_all_flavor_prices_from_db(
         .into_iter()
         .map(|r| FlavorPriceRow::from_row(&r))
         .collect::<Result<Vec<_>, _>>()
-        .context("Failed to convert row to flavor price")?
+        .context("Failed to convert row to flavor price row")?
         .into_iter()
-        .map(|row| FlavorPrice {
-            id: row.id,
-            flavor: row.flavor,
-            flavor_name: row.flavor_name,
-            user_class: row.user_class,
-            unit_price: row.unit_price,
-            start_time: row.start_time.fixed_offset(),
+        .map(|row| {
+            Ok::<FlavorPrice, UnexpectedOnlyError>(FlavorPrice {
+                id: row.id,
+                flavor: row.flavor,
+                flavor_name: row.flavor_name,
+                user_class: row
+                    .user_class
+                    .try_into()
+                    .context("Failed to parse user class")?,
+                unit_price: row.unit_price,
+                start_time: row.start_time.fixed_offset(),
+            })
         })
-        .collect();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert flavor price row to flavor price")?;
     Ok(rows)
 }
 
@@ -154,23 +166,29 @@ pub async fn select_flavor_prices_for_period_from_db(
         .into_iter()
         .map(|r| FlavorPriceRow::from_row(&r))
         .collect::<Result<Vec<_>, _>>()
-        .context("Failed to convert row to flavor price")?
+        .context("Failed to convert row to flavor price row")?
         .into_iter()
-        .map(|row| FlavorPrice {
-            id: row.id,
-            flavor: row.flavor,
-            flavor_name: row.flavor_name,
-            user_class: row.user_class,
-            unit_price: row.unit_price,
-            start_time: row.start_time.fixed_offset(),
+        .map(|row| {
+            Ok::<FlavorPrice, UnexpectedOnlyError>(FlavorPrice {
+                id: row.id,
+                flavor: row.flavor,
+                flavor_name: row.flavor_name,
+                user_class: row
+                    .user_class
+                    .try_into()
+                    .context("Failed to parse user class")?,
+                unit_price: row.unit_price,
+                start_time: row.start_time.fixed_offset(),
+            })
         })
-        .collect();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert row to flavor price")?;
     Ok(rows)
 }
 
 pub struct NewFlavorPrice {
     pub flavor_id: u64,
-    pub user_class: u32,
+    pub user_class: UserClass,
     pub unit_price: f64,
     pub start_time: DateTime<Utc>,
 }
@@ -205,7 +223,7 @@ pub async fn insert_flavor_price_into_db(
         INSERT IGNORE INTO pricing_flavorprice (user_class, unit_price, start_time, flavor_id)
         VALUES (?, ?, ?, ?)
         "#,
-        new_flavor_price.user_class,
+        new_flavor_price.user_class as u32,
         new_flavor_price.unit_price,
         new_flavor_price.start_time,
         new_flavor_price.flavor_id,

@@ -5,7 +5,7 @@ use actix_web::{
     web::{Data, ReqData},
 };
 use anyhow::Context;
-use avina_wire::user::{User, UserImport};
+use avina_wire::user::{User, UserClass, UserImport};
 use sqlx::MySqlPool;
 
 use crate::{
@@ -55,8 +55,7 @@ pub async fn user_import(
                 name: project_name,
                 openstack_id: os_domain.id,
                 // TODO: get userclass from ldap
-                // TODO: we need an enum here
-                user_class: 0,
+                user_class: UserClass::NA,
             };
             insert_project_into_db(&mut transaction, &new_project).await?;
             // TODO: create project budget

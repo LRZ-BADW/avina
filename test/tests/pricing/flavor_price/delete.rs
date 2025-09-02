@@ -22,7 +22,7 @@ async fn e2e_lib_flavor_price_delete_denies_access_to_normal_user() {
         .await
         .expect("Failed to setup test flavor");
     let flavor_price = server
-        .setup_test_flavor_price(&flavor, 1)
+        .setup_test_flavor_price(&flavor, rand::random())
         .await
         .expect("Failed to setup test flavor group");
 
@@ -65,7 +65,7 @@ async fn e2e_lib_flavor_price_delete_denies_access_to_master_user() {
         .await
         .expect("Failed to setup test flavor");
     let flavor_price = server
-        .setup_test_flavor_price(&flavor, 1)
+        .setup_test_flavor_price(&flavor, rand::random())
         .await
         .expect("Failed to setup test flavor group");
 
@@ -108,7 +108,7 @@ async fn e2e_lib_flavor_price_delete_works() {
         .await
         .expect("Failed to setup test flavor");
     let flavor_price = server
-        .setup_test_flavor_price(&flavor, 1)
+        .setup_test_flavor_price(&flavor, rand::random())
         .await
         .expect("Failed to setup test flavor group");
 
