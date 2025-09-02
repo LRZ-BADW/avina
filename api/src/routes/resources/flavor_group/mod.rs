@@ -14,6 +14,8 @@ mod modify;
 use modify::flavor_group_modify;
 mod delete;
 use delete::flavor_group_delete;
+mod usage;
+use usage::flavor_group_usage;
 
 pub fn flavor_groups_scope() -> Scope {
     scope("/flavorgroups")
@@ -23,6 +25,7 @@ pub fn flavor_groups_scope() -> Scope {
         // TODO: what about PUT?
         .route("/{flavor_group_id}/", patch().to(flavor_group_modify))
         .route("/{flavor_group_id}/", delete().to(flavor_group_delete))
+        .route("/usage/", get().to(flavor_group_usage))
 }
 
 // TODO: wouldn't a general IdParam be better?
