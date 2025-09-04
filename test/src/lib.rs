@@ -156,18 +156,34 @@ impl TestApp {
         master_number: usize,
         normal_number: usize,
     ) -> Result<TestProject, sqlx::Error> {
+        let project = Project {
+            id: 1,
+            name: random_alphanumeric_string(10),
+            openstack_id: random_uuid(),
+            user_class: 1,
+        };
+        self.setup_test_project_with_project(
+            admin_number,
+            master_number,
+            normal_number,
+            project,
+        )
+        .await
+    }
+
+    pub async fn setup_test_project_with_project(
+        &self,
+        admin_number: usize,
+        master_number: usize,
+        normal_number: usize,
+        mut project: Project,
+    ) -> Result<TestProject, sqlx::Error> {
         let mut transaction = self
             .db_pool
             .begin()
             .await
             .expect("Failed to begin transaction.");
 
-        let mut project = Project {
-            id: 1,
-            name: random_alphanumeric_string(10),
-            openstack_id: random_uuid(),
-            user_class: random_number(1..6),
-        };
         project.id =
             insert_project_into_db(&mut transaction, &project).await? as u32;
 
@@ -328,14 +344,8 @@ impl TestApp {
         user: &User,
         server_id: &str,
     ) -> Result<ServerState, MinimalApiError> {
-        let mut transaction = self
-            .db_pool
-            .begin()
-            .await
-            .expect("Failed to begin transaction.");
-        let begin = DateTime::<FixedOffset>::from(Utc::now());
         let new_server_state = NewServerState {
-            begin: begin.to_utc(),
+            begin: DateTime::<FixedOffset>::from(Utc::now()).to_utc(),
             end: None,
             instance_id: server_id.to_string(),
             instance_name: random_alphanumeric_string(10),
@@ -343,6 +353,25 @@ impl TestApp {
             status: "ACTIVE".to_string(),
             user: user.id,
         };
+        self.setup_test_server_state_with_server_state(
+            flavor,
+            user,
+            new_server_state,
+        )
+        .await
+    }
+
+    pub async fn setup_test_server_state_with_server_state(
+        &self,
+        flavor: &Flavor,
+        user: &User,
+        new_server_state: NewServerState,
+    ) -> Result<ServerState, MinimalApiError> {
+        let mut transaction = self
+            .db_pool
+            .begin()
+            .await
+            .expect("Failed to begin transaction.");
         let server_state_id =
             insert_server_state_into_db(&mut transaction, &new_server_state)
                 .await? as u32;
@@ -352,7 +381,7 @@ impl TestApp {
             .context("Failed to commit transaction")?;
         let server_state = ServerState {
             id: server_state_id,
-            begin,
+            begin: new_server_state.begin.fixed_offset(),
             end: None,
             instance_id: new_server_state.instance_id,
             instance_name: new_server_state.instance_name,
@@ -369,18 +398,30 @@ impl TestApp {
         &self,
         user: &User,
     ) -> Result<UserBudget, MinimalApiError> {
+        let new_project_budget = NewUserBudget {
+            user_id: user.id as u64,
+            year: Utc::now().year() as u32,
+            amount: 0,
+        };
+        self.setup_test_user_budget_with_new_user_budget(
+            user,
+            &new_project_budget,
+        )
+        .await
+    }
+
+    pub async fn setup_test_user_budget_with_new_user_budget(
+        &self,
+        user: &User,
+        new_user_budget: &NewUserBudget,
+    ) -> Result<UserBudget, MinimalApiError> {
         let mut transaction = self
             .db_pool
             .begin()
             .await
             .expect("Failed to begin transaction.");
-        let new_user_budget = NewUserBudget {
-            user_id: user.id as u64,
-            year: Utc::now().year() as u32,
-            amount: 0,
-        };
         let user_budget_id =
-            insert_user_budget_into_db(&mut transaction, &new_user_budget)
+            insert_user_budget_into_db(&mut transaction, new_user_budget)
                 .await? as u32;
         transaction
             .commit()
@@ -444,18 +485,31 @@ impl TestApp {
         &self,
         flavor: &Flavor,
     ) -> Result<FlavorPrice, MinimalApiError> {
+        let start_time = DateTime::<FixedOffset>::from(Utc::now());
+        let new_flavor_price = NewFlavorPrice {
+            flavor_id: flavor.id as u64,
+            user_class: 1,
+            unit_price: random_number(1..1000) as f64,
+            start_time: start_time.to_utc(),
+        };
+        self.setup_test_flavor_price_with_new_flavor_price(
+            flavor,
+            new_flavor_price,
+        )
+        .await
+    }
+
+    pub async fn setup_test_flavor_price_with_new_flavor_price(
+        &self,
+        flavor: &Flavor,
+        new_flavor_price: NewFlavorPrice,
+    ) -> Result<FlavorPrice, MinimalApiError> {
         let mut transaction = self
             .db_pool
             .begin()
             .await
             .expect("Failed to begin transaction.");
-        let start_time = DateTime::<FixedOffset>::from(Utc::now());
-        let new_flavor_price = NewFlavorPrice {
-            flavor_id: flavor.id as u64,
-            user_class: random_number(1..6),
-            unit_price: random_number(1..1000) as f64,
-            start_time: start_time.to_utc(),
-        };
+
         let flavor_price_id =
             insert_flavor_price_into_db(&mut transaction, &new_flavor_price)
                 .await? as u32;
@@ -469,7 +523,7 @@ impl TestApp {
             flavor_name: flavor.name.clone(),
             user_class: new_flavor_price.user_class,
             unit_price: new_flavor_price.unit_price,
-            start_time,
+            start_time: new_flavor_price.start_time.into(),
         };
         Ok(flavor_price)
     }
