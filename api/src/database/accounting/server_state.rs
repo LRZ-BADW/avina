@@ -1,5 +1,8 @@
 use anyhow::Context;
-use avina_wire::accounting::{ServerState, ServerStateCreateData};
+use avina_wire::{
+    accounting::{ServerState, ServerStateCreateData},
+    user::UserClass,
+};
 use chrono::{DateTime, Utc};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
@@ -344,7 +347,7 @@ pub async fn select_server_states_by_server_from_db(
 pub async fn select_user_class_by_server_from_db(
     transaction: &mut Transaction<'_, MySql>,
     server_id: String,
-) -> Result<Option<u64>, UnexpectedOnlyError> {
+) -> Result<Option<UserClass>, UnexpectedOnlyError> {
     #[derive(FromRow)]
     struct Row {
         user_class: u64,
@@ -373,7 +376,7 @@ pub async fn select_user_class_by_server_from_db(
             Row::from_row(&r).context("Failed to convert row to user class")
         })
         .map_or(Ok(None), |r| r.map(Some))?
-        .map(|r| r.user_class);
+        .map(|r| UserClass::from(r.user_class));
     Ok(user_class)
 }
 

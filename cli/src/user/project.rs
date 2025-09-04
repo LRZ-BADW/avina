@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use anyhow::{Context, anyhow};
-use avina_wire::user::ProjectRetrieved;
+use avina_wire::user::{ProjectRetrieved, UserClass};
 use clap::{Args, Subcommand};
 
 use crate::common::{
@@ -16,8 +16,7 @@ pub(crate) struct ProjectListFilter {
     all: bool,
 
     #[clap(short, long, help = "Display projects of given user class")]
-    // TODO: use enum for this
-    user_class: Option<u32>,
+    user_class: Option<UserClass>,
 }
 
 #[derive(Subcommand, Debug)]
@@ -42,13 +41,12 @@ pub(crate) enum ProjectCommand {
         #[clap(help = "Openstack UUIDv4 of the project")]
         openstack_id: String,
 
-        // TODO we need some enum here
         #[clap(
             long,
             short,
             help = "User class of the project (0,1,2,3,4,5,6)"
         )]
-        user_class: Option<u32>,
+        user_class: Option<UserClass>,
     },
 
     #[clap(about = "Modify a project")]
@@ -63,13 +61,12 @@ pub(crate) enum ProjectCommand {
         #[clap(long, short, help = "Openstack UUIDv4 of the project")]
         openstack_id: Option<String>,
 
-        // TODO we need some enum here
         #[clap(
             long,
             short,
             help = "User class of the project (0,1,2,3,4,5,6)"
         )]
-        user_class: Option<u32>,
+        user_class: Option<UserClass>,
     },
 
     #[clap(about = "Delete project with given name, ID or OpenStack ID")]
@@ -158,7 +155,7 @@ async fn create(
     format: Format,
     name: String,
     openstack_id: String,
-    user_class: Option<u32>,
+    user_class: Option<UserClass>,
 ) -> Result<(), Box<dyn Error>> {
     let mut request = api.project.create(name, openstack_id);
     if let Some(user_class) = user_class {
@@ -174,7 +171,7 @@ async fn modify(
     name_or_id: &str,
     name: Option<String>,
     openstack_id: Option<String>,
-    user_class: Option<u32>,
+    user_class: Option<UserClass>,
 ) -> Result<(), Box<dyn Error>> {
     let id = find_id(&api, name_or_id).await?;
     let mut request = api.project.modify(id);

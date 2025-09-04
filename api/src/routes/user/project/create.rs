@@ -3,7 +3,7 @@ use actix_web::{
     web::{Data, Json, ReqData},
 };
 use anyhow::Context;
-use avina_wire::user::{Project, ProjectCreateData, User};
+use avina_wire::user::{Project, ProjectCreateData, User, UserClass};
 use sqlx::{Executor, MySql, MySqlPool, Transaction};
 
 use crate::{
@@ -14,7 +14,7 @@ use crate::{
 pub struct NewProject {
     pub name: String,
     pub openstack_id: String,
-    pub user_class: u32,
+    pub user_class: UserClass,
 }
 
 // TODO: validate that user class is in valid range (0-6)
@@ -26,7 +26,7 @@ impl TryFrom<ProjectCreateData> for NewProject {
         Ok(Self {
             name: data.name,
             openstack_id: data.openstack_id,
-            user_class: data.user_class.unwrap_or(1),
+            user_class: data.user_class.unwrap_or(UserClass::UC1),
         })
     }
 }
@@ -76,7 +76,7 @@ pub async fn insert_project_into_db(
         "#,
         new_project.name,
         new_project.openstack_id,
-        new_project.user_class
+        new_project.user_class as u32
     );
     let result = transaction
         .execute(query)

@@ -31,7 +31,7 @@ pub async fn project_list(
         select_all_projects_from_db(&mut transaction).await?
     } else if let Some(userclass) = params.userclass {
         require_admin_user(&user)?;
-        select_projects_by_userclass_from_db(&mut transaction, userclass as u8)
+        select_projects_by_userclass_from_db(&mut transaction, userclass)
             .await?
     } else {
         select_projects_by_id_from_db(&mut transaction, project.id as u64)
