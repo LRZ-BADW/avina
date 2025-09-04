@@ -3,9 +3,9 @@ use std::rc::Rc;
 use anyhow::Context;
 use avina_wire::resources::{
     Flavor, FlavorCreateData, FlavorDetailed, FlavorImport, FlavorListParams,
-    FlavorModifyData, FlavorUsage, FlavorUsageAggregate,
+    FlavorModifyData, FlavorUsage, FlavorUsageAggregate, FlavorUsageParams,
 };
-use reqwest::{Client, Method, StatusCode, Url};
+use reqwest::{Client, Method, StatusCode};
 
 use crate::{
     common::{SerializableNone, request, request_bare},
@@ -168,10 +168,7 @@ pub struct FlavorUsageRequest {
     url: String,
     client: Rc<Client>,
 
-    user: Option<u32>,
-    project: Option<u32>,
-    all: bool,
-    aggregate: bool,
+    params: FlavorUsageParams,
 }
 
 impl FlavorUsageRequest {
@@ -180,36 +177,27 @@ impl FlavorUsageRequest {
             url: url.to_string(),
             client: Rc::clone(client),
 
-            user: None,
-            project: None,
-            all: false,
-            aggregate: false,
+            params: FlavorUsageParams {
+                user: None,
+                project: None,
+                all: None,
+                aggregate: None,
+            },
         }
-    }
-
-    pub fn params(&self) -> Vec<(&str, String)> {
-        let mut params = Vec::new();
-        if let Some(user) = self.user {
-            params.push(("user", user.to_string()));
-        } else if let Some(project) = self.project {
-            params.push(("project", project.to_string()));
-        } else if self.all {
-            params.push(("all", "1".to_string()));
-        }
-        if self.aggregate {
-            params.push(("aggregate", "1".to_string()));
-        }
-        params
     }
 
     pub async fn user(
         &mut self,
         user: u32,
     ) -> Result<Vec<FlavorUsage>, ApiError> {
-        self.user = Some(user);
-        self.aggregate = false;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.user = Some(user);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -224,10 +212,15 @@ impl FlavorUsageRequest {
         &mut self,
         user: u32,
     ) -> Result<Vec<FlavorUsageAggregate>, ApiError> {
-        self.user = Some(user);
-        self.aggregate = true;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.user = Some(user);
+        self.params.aggregate = Some(true);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -242,10 +235,14 @@ impl FlavorUsageRequest {
         &mut self,
         project: u32,
     ) -> Result<Vec<FlavorUsage>, ApiError> {
-        self.project = Some(project);
-        self.aggregate = false;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.project = Some(project);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -260,10 +257,15 @@ impl FlavorUsageRequest {
         &mut self,
         project: u32,
     ) -> Result<Vec<FlavorUsageAggregate>, ApiError> {
-        self.project = Some(project);
-        self.aggregate = true;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.project = Some(project);
+        self.params.aggregate = Some(true);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -275,10 +277,14 @@ impl FlavorUsageRequest {
     }
 
     pub async fn all(&mut self) -> Result<Vec<FlavorUsage>, ApiError> {
-        self.all = true;
-        self.aggregate = false;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.all = Some(true);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -292,10 +298,15 @@ impl FlavorUsageRequest {
     pub async fn all_aggregate(
         &mut self,
     ) -> Result<Vec<FlavorUsageAggregate>, ApiError> {
-        self.all = true;
-        self.aggregate = true;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.all = Some(true);
+        self.params.aggregate = Some(true);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -307,9 +318,13 @@ impl FlavorUsageRequest {
     }
 
     pub async fn mine(&mut self) -> Result<Vec<FlavorUsage>, ApiError> {
-        self.aggregate = false;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
@@ -324,10 +339,14 @@ impl FlavorUsageRequest {
     pub async fn mine_aggregate(
         &mut self,
     ) -> Result<Vec<FlavorUsageAggregate>, ApiError> {
-        // TODO use Url.join
-        self.aggregate = true;
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        self.params.aggregate = Some(true);
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
