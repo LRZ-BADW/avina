@@ -58,7 +58,7 @@ pub async fn update_project_in_db(
         "#,
         name,
         openstack_id,
-        user_class,
+        user_class as u32,
         data.id,
     );
     transaction

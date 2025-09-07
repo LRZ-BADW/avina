@@ -1,5 +1,6 @@
 use std::error::Error;
 
+use avina_wire::user::UserClass;
 use chrono::{DateTime, FixedOffset};
 use clap::Subcommand;
 
@@ -15,7 +16,12 @@ use crate::resources::flavor::find_id as flavor_find_id;
 #[derive(Subcommand, Debug)]
 pub(crate) enum FlavorPriceCommand {
     #[clap(about = "List flavor prices")]
-    List,
+    List {
+        #[clap(short, long, help = "List flavor prices for user class")]
+        user_class: Option<UserClass>,
+        #[clap(short, long, help = "List active flavor prices", action)]
+        current: bool,
+    },
 
     #[clap(visible_alias = "show", about = "Show flavor price with given ID")]
     Get { id: u32 },
@@ -28,7 +34,7 @@ pub(crate) enum FlavorPriceCommand {
         flavor: String,
 
         #[clap(help = "User class of the price (1-6)")]
-        user_class: u32,
+        user_class: UserClass,
 
         #[clap(long, short, help = "Unit price of the flavor, default: 0.0")]
         price: Option<f64>,
@@ -50,7 +56,7 @@ pub(crate) enum FlavorPriceCommand {
         flavor: Option<String>,
 
         #[clap(long, short, help = "User class of the price (1-6)")]
-        user_class: Option<u32>,
+        user_class: Option<UserClass>,
 
         #[clap(long, short, help = "Unit price of the flavor")]
         price: Option<f64>,
@@ -74,7 +80,10 @@ impl Execute for FlavorPriceCommand {
         format: Format,
     ) -> Result<(), Box<dyn Error>> {
         match self {
-            List => list(api, format).await,
+            List {
+                user_class,
+                current,
+            } => list(api, format, *user_class, *current).await,
             Get { id } => get(api, format, id).await,
             Create {
                 flavor,
@@ -109,8 +118,19 @@ impl Execute for FlavorPriceCommand {
     }
 }
 
-async fn list(api: avina::Api, format: Format) -> Result<(), Box<dyn Error>> {
-    let request = api.flavor_price.list();
+async fn list(
+    api: avina::Api,
+    format: Format,
+    user_class: Option<UserClass>,
+    current: bool,
+) -> Result<(), Box<dyn Error>> {
+    let mut request = api.flavor_price.list();
+    if let Some(user_class) = user_class {
+        request.user_class(user_class);
+    }
+    if current {
+        request.current();
+    }
     print_object_list(request.send().await?, format)
 }
 
@@ -126,7 +146,7 @@ async fn create(
     api: avina::Api,
     format: Format,
     flavor: &str,
-    user_class: u32,
+    user_class: UserClass,
     price: Option<f64>,
     start_time: Option<DateTime<FixedOffset>>,
 ) -> Result<(), Box<dyn Error>> {
@@ -146,7 +166,7 @@ async fn modify(
     format: Format,
     id: u32,
     flavor: Option<String>,
-    user_class: Option<u32>,
+    user_class: Option<UserClass>,
     unit_price: Option<f64>,
     start_time: Option<DateTime<FixedOffset>>,
 ) -> Result<(), Box<dyn Error>> {

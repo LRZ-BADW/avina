@@ -485,8 +485,10 @@ version = "1.7.0"
 dependencies = [
  "cargo-husky",
  "chrono",
+ "clap",
  "serde",
  "sqlx",
+ "strum",
  "tabled",
 ]
 

@@ -5,7 +5,7 @@ use actix_web::{
     middleware::Next,
     web::Data,
 };
-use avina_wire::user::{Project, User};
+use avina_wire::user::{Project, User, UserClass};
 use sqlx::MySqlPool;
 
 use crate::{
@@ -116,7 +116,7 @@ pub async fn extract_user_and_project(
         id: row.project_id as u32,
         name: row.project_name,
         openstack_id: row.project_openstack_id,
-        user_class: row.project_user_class,
+        user_class: UserClass::from(row.project_user_class),
     };
 
     req.extensions_mut().insert(user);

@@ -5,6 +5,7 @@ use actix_web::{
     App, HttpServer, dev::Server, middleware::from_fn, web, web::Data,
 };
 use anyhow::Context;
+use avina_wire::user::UserClass;
 use sqlx::{MySqlPool, mysql::MySqlPoolOptions};
 use tracing_actix_web::TracingLogger;
 
@@ -68,7 +69,7 @@ impl Application {
         let project = NewProject {
             name: configuration.openstack.domain.clone(),
             openstack_id: configuration.openstack.domain_id.clone(),
-            user_class: 1,
+            user_class: UserClass::UC1,
         };
         let project_id =
             match insert_project_into_db(&mut transaction, &project).await {
