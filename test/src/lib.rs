@@ -345,7 +345,7 @@ impl TestApp {
         server_id: &str,
     ) -> Result<ServerState, MinimalApiError> {
         let new_server_state = NewServerState {
-            begin: DateTime::<FixedOffset>::from(Utc::now()).to_utc(),
+            begin: Utc::now(),
             end: None,
             instance_id: server_id.to_string(),
             instance_name: random_alphanumeric_string(10),
@@ -484,11 +484,12 @@ impl TestApp {
     pub async fn setup_test_flavor_price(
         &self,
         flavor: &Flavor,
+        user_class: u32,
     ) -> Result<FlavorPrice, MinimalApiError> {
         let start_time = DateTime::<FixedOffset>::from(Utc::now());
         let new_flavor_price = NewFlavorPrice {
             flavor_id: flavor.id as u64,
-            user_class: 1,
+            user_class,
             unit_price: random_number(1..1000) as f64,
             start_time: start_time.to_utc(),
         };
