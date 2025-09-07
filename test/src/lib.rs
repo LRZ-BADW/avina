@@ -447,7 +447,7 @@ impl TestApp {
         let start_time = DateTime::<FixedOffset>::from(Utc::now());
         let new_flavor_price = NewFlavorPrice {
             flavor_id: flavor.id as u64,
-            user_class: 1,
+            user_class: UserClass::UC1,
             unit_price: random_number(1..1000) as f64,
             start_time: start_time.to_utc(),
         };
