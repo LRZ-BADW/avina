@@ -16,7 +16,12 @@ use crate::resources::flavor::find_id as flavor_find_id;
 #[derive(Subcommand, Debug)]
 pub(crate) enum FlavorPriceCommand {
     #[clap(about = "List flavor prices")]
-    List,
+    List {
+        #[clap(short, long, help = "List flavor prices for user class")]
+        user_class: Option<UserClass>,
+        #[clap(short, long, help = "List active flavor prices", action)]
+        current: Option<bool>,
+    },
 
     #[clap(visible_alias = "show", about = "Show flavor price with given ID")]
     Get { id: u32 },
@@ -75,7 +80,10 @@ impl Execute for FlavorPriceCommand {
         format: Format,
     ) -> Result<(), Box<dyn Error>> {
         match self {
-            List => list(api, format).await,
+            List {
+                user_class,
+                current,
+            } => list(api, format, *user_class, *current).await,
             Get { id } => get(api, format, id).await,
             Create {
                 flavor,
@@ -110,8 +118,19 @@ impl Execute for FlavorPriceCommand {
     }
 }
 
-async fn list(api: avina::Api, format: Format) -> Result<(), Box<dyn Error>> {
-    let request = api.flavor_price.list();
+async fn list(
+    api: avina::Api,
+    format: Format,
+    user_class: Option<UserClass>,
+    current: Option<bool>,
+) -> Result<(), Box<dyn Error>> {
+    let mut request = api.flavor_price.list();
+    if let Some(user_class) = user_class {
+        request.user_class(user_class);
+    }
+    if let Some(true) = current {
+        request.current();
+    }
     print_object_list(request.send().await?, format)
 }
 
