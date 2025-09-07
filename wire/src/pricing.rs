@@ -79,3 +79,9 @@ impl FlavorPriceModifyData {
         }
     }
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FlavorPriceListParams {
+    pub user_class: Option<UserClass>,
+    pub current: Option<bool>,
+}
