@@ -4,12 +4,12 @@ use anyhow::Context;
 use avina_wire::{
     pricing::{
         FlavorPrice, FlavorPriceCreateData, FlavorPriceInitialize,
-        FlavorPriceModifyData,
+        FlavorPriceListParams, FlavorPriceModifyData,
     },
     user::UserClass,
 };
 use chrono::{DateTime, FixedOffset};
-use reqwest::{Client, Method, StatusCode, Url};
+use reqwest::{Client, Method, StatusCode};
 
 use crate::{
     common::{SerializableNone, request, request_bare},
@@ -26,6 +26,8 @@ pub struct FlavorPriceApi {
 pub struct FlavorPriceListRequest {
     url: String,
     client: Rc<Client>,
+
+    params: FlavorPriceListParams,
 }
 
 impl FlavorPriceListRequest {
@@ -33,12 +35,32 @@ impl FlavorPriceListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
+
+            params: FlavorPriceListParams {
+                user_class: None,
+                current: None,
+            },
         }
     }
 
+    pub fn user_class(&mut self, user_class: UserClass) -> &mut Self {
+        self.params.user_class = Some(user_class);
+        self
+    }
+
+    pub fn current(&mut self) -> &mut Self {
+        self.params.current = Some(true);
+        self
+    }
+
     pub async fn send(&self) -> Result<Vec<FlavorPrice>, ApiError> {
-        let url = Url::parse(self.url.as_str())
-            .context("Could not parse URL GET parameters.")?;
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters.")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
