@@ -143,7 +143,8 @@ struct Cli {
         short = 'R',
         action = SetFalse,
         default_value = "true",
-        help = "Do not use the Rust API for supported commands"
+        help = "Do not use the Rust API for supported commands",
+        global = true,
     )]
     rust: bool,
 
@@ -151,13 +152,14 @@ struct Cli {
     credentials: CredentialArgs,
 
     // TODO allow specifying user by name as well
-    #[clap(short, long, help = "ID of the user to impersonate")]
+    #[clap(short, long, help = "ID of the user to impersonate", global = true)]
     impersonate: Option<u32>,
 
     #[clap(
         short = 'T',
         long,
         help = format!("Timeout for requests in seconds [default: {}]", avina::DEFAULT_TIMEOUT),
+        global = true,
     )]
     timeout: Option<u64>,
 
@@ -166,7 +168,8 @@ struct Cli {
         short,
         long,
         help = "Format of the output",
-        default_value_t = Format::Table(TableFormat::Rounded)
+        default_value_t = Format::Table(TableFormat::Rounded),
+        global = true,
     )]
     format: Format,
 
