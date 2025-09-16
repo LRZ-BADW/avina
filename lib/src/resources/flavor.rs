@@ -3,7 +3,8 @@ use std::rc::Rc;
 use anyhow::Context;
 use avina_wire::resources::{
     Flavor, FlavorCreateData, FlavorDetailed, FlavorImport, FlavorListParams,
-    FlavorModifyData, FlavorUsage, FlavorUsageAggregate, FlavorUsageParams,
+    FlavorModifyData, FlavorUsageAggregate, FlavorUsageParams,
+    FlavorUsageSimple,
 };
 use reqwest::{Client, Method, StatusCode};
 
@@ -189,7 +190,7 @@ impl FlavorUsageRequest {
     pub async fn user(
         &mut self,
         user: u32,
-    ) -> Result<Vec<FlavorUsage>, ApiError> {
+    ) -> Result<Vec<FlavorUsageSimple>, ApiError> {
         self.params.user = Some(user);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
@@ -234,7 +235,7 @@ impl FlavorUsageRequest {
     pub async fn project(
         &mut self,
         project: u32,
-    ) -> Result<Vec<FlavorUsage>, ApiError> {
+    ) -> Result<Vec<FlavorUsageSimple>, ApiError> {
         self.params.project = Some(project);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
@@ -276,7 +277,7 @@ impl FlavorUsageRequest {
         .await
     }
 
-    pub async fn all(&mut self) -> Result<Vec<FlavorUsage>, ApiError> {
+    pub async fn all(&mut self) -> Result<Vec<FlavorUsageSimple>, ApiError> {
         self.params.all = Some(true);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
@@ -317,7 +318,7 @@ impl FlavorUsageRequest {
         .await
     }
 
-    pub async fn mine(&mut self) -> Result<Vec<FlavorUsage>, ApiError> {
+    pub async fn mine(&mut self) -> Result<Vec<FlavorUsageSimple>, ApiError> {
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
         let url = if params.is_empty() {
