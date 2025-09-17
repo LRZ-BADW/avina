@@ -70,7 +70,6 @@ pub async fn calculate_flavor_usage_for_user_simple(
             )
         })
         .collect();
-    dbg!(&flavor_usage_by_id);
     for os_server in os_servers {
         let Some(flavor) = flavor_by_uuid.get(&os_server.flavor.id) else {
             continue;
