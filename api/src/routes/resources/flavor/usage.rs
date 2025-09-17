@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use actix_web::{
     HttpResponse,
     web::{Data, Query, ReqData},
 };
-use anyhow::Context;
+use anyhow::{Context, anyhow};
 use avina_wire::{
     resources::{FlavorUsageAggregate, FlavorUsageParams, FlavorUsageSimple},
     user::User,
@@ -12,6 +14,10 @@ use sqlx::{MySql, MySqlPool, Transaction};
 
 use crate::{
     authorization::require_admin_user,
+    database::{
+        resources::flavor::select_lrz_flavors_from_db,
+        user::user::select_maybe_user_detail_from_db,
+    },
     error::{NormalApiError, UnexpectedOnlyError},
     openstack::OpenStack,
 };
@@ -24,11 +30,66 @@ pub enum FlavorUsage {
 }
 
 pub async fn calculate_flavor_usage_for_user_simple(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: &OpenStack,
-    _user_id: u64,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: &OpenStack,
+    user_id: u64,
 ) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
-    todo!()
+    let Some(user) =
+        select_maybe_user_detail_from_db(transaction, user_id).await?
+    else {
+        return Err(anyhow!(format!(
+            "Could not select user with id {} from database.",
+            user_id
+        ))
+        .into());
+    };
+    let os_servers =
+        openstack.get_servers_of_project(user.openstack_id).await?;
+    let flavors = select_lrz_flavors_from_db(transaction).await?;
+    let flavor_by_uuid: HashMap<_, _> = flavors
+        .iter()
+        .map(|f| (f.openstack_id.clone(), f.clone()))
+        .collect();
+    let mut flavor_usage_by_id: HashMap<_, _> = flavors
+        .iter()
+        .map(|flavor| {
+            (
+                flavor.id,
+                FlavorUsageSimple {
+                    user_id: user.id,
+                    user_name: user.name.clone(),
+                    flavor_id: flavor.id,
+                    flavor_name: flavor.name.clone(),
+                    flavorgroup_id: flavor.group,
+                    flavorgroup_name: flavor.group_name.clone(),
+                    count: 0,
+                    usage: 0,
+                },
+            )
+        })
+        .collect();
+    dbg!(&flavor_usage_by_id);
+    for os_server in os_servers {
+        let Some(flavor) = flavor_by_uuid.get(&os_server.flavor.id) else {
+            continue;
+        };
+        let flavor_usage =
+            flavor_usage_by_id
+                .entry(flavor.id)
+                .or_insert(FlavorUsageSimple {
+                    user_id: user.id,
+                    user_name: user.name.clone(),
+                    flavor_id: flavor.id,
+                    flavor_name: flavor.name.clone(),
+                    flavorgroup_id: flavor.group,
+                    flavorgroup_name: flavor.group_name.clone(),
+                    count: 0,
+                    usage: 0,
+                });
+        flavor_usage.count += 1;
+        flavor_usage.usage += flavor.weight;
+    }
+    Ok(flavor_usage_by_id.values().cloned().collect())
 }
 
 pub async fn calculate_flavor_usage_for_user_aggregate(
