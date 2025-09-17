@@ -19,15 +19,15 @@ use crate::{
 #[derive(Serialize)]
 #[serde(untagged)]
 pub enum FlavorUsage {
-    Simple(FlavorUsageSimple),
-    Aggregate(FlavorUsageAggregate),
+    Simple(Vec<FlavorUsageSimple>),
+    Aggregate(Vec<FlavorUsageAggregate>),
 }
 
 pub async fn calculate_flavor_usage_for_user_simple(
     _transaction: &mut Transaction<'_, MySql>,
     _openstack: &OpenStack,
     _user_id: u64,
-) -> Result<FlavorUsageSimple, UnexpectedOnlyError> {
+) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     todo!()
 }
 
@@ -35,7 +35,7 @@ pub async fn calculate_flavor_usage_for_user_aggregate(
     _transaction: &mut Transaction<'_, MySql>,
     _openstack: &OpenStack,
     _user_id: u64,
-) -> Result<FlavorUsageAggregate, UnexpectedOnlyError> {
+) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
     todo!()
 }
 
@@ -70,7 +70,7 @@ pub async fn calculate_flavor_usage_for_project_simple(
     _transaction: &mut Transaction<'_, MySql>,
     _openstack: &OpenStack,
     _project_id: u64,
-) -> Result<FlavorUsageSimple, UnexpectedOnlyError> {
+) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     todo!()
 }
 
@@ -78,7 +78,7 @@ pub async fn calculate_flavor_usage_for_project_aggregate(
     _transaction: &mut Transaction<'_, MySql>,
     _openstack: &OpenStack,
     _project_id: u64,
-) -> Result<FlavorUsageAggregate, UnexpectedOnlyError> {
+) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
     todo!()
 }
 
@@ -112,14 +112,14 @@ pub async fn calculate_flavor_usage_for_project(
 pub async fn calculate_flavor_usage_for_all_simple(
     _transaction: &mut Transaction<'_, MySql>,
     _openstack: &OpenStack,
-) -> Result<FlavorUsageSimple, UnexpectedOnlyError> {
+) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     todo!()
 }
 
 pub async fn calculate_flavor_usage_for_all_aggregate(
     _transaction: &mut Transaction<'_, MySql>,
     _openstack: &OpenStack,
-) -> Result<FlavorUsageAggregate, UnexpectedOnlyError> {
+) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
     todo!()
 }
 
