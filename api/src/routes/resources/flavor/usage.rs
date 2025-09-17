@@ -32,6 +32,28 @@ pub enum FlavorUsage {
     Aggregate(Vec<FlavorUsageAggregate>),
 }
 
+fn aggregate_flavor_usage(
+    usages: Vec<FlavorUsageSimple>,
+) -> Vec<FlavorUsageAggregate> {
+    let mut aggregates = HashMap::new();
+    for usage in usages {
+        let aggregate =
+            aggregates
+                .entry(usage.flavor_id)
+                .or_insert(FlavorUsageAggregate {
+                    flavor_id: usage.flavor_id,
+                    flavor_name: usage.flavor_name,
+                    flavorgroup_id: usage.flavorgroup_id,
+                    flavorgroup_name: usage.flavorgroup_name,
+                    count: 0,
+                    usage: 0,
+                });
+        aggregate.count += usage.count;
+        aggregate.usage += usage.usage;
+    }
+    aggregates.values().cloned().collect()
+}
+
 pub async fn calculate_flavor_usage_for_user_simple(
     transaction: &mut Transaction<'_, MySql>,
     openstack: &OpenStack,
@@ -95,11 +117,14 @@ pub async fn calculate_flavor_usage_for_user_simple(
 }
 
 pub async fn calculate_flavor_usage_for_user_aggregate(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: &OpenStack,
-    _user_id: u64,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: &OpenStack,
+    user_id: u64,
 ) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
-    todo!()
+    Ok(aggregate_flavor_usage(
+        calculate_flavor_usage_for_user_simple(transaction, openstack, user_id)
+            .await?,
+    ))
 }
 
 pub async fn calculate_flavor_usage_for_user(
@@ -151,11 +176,18 @@ pub async fn calculate_flavor_usage_for_project_simple(
 }
 
 pub async fn calculate_flavor_usage_for_project_aggregate(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: &OpenStack,
-    _project_id: u64,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: &OpenStack,
+    project_id: u64,
 ) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
-    todo!()
+    Ok(aggregate_flavor_usage(
+        calculate_flavor_usage_for_project_simple(
+            transaction,
+            openstack,
+            project_id,
+        )
+        .await?,
+    ))
 }
 
 pub async fn calculate_flavor_usage_for_project(
@@ -205,10 +237,12 @@ pub async fn calculate_flavor_usage_for_all_simple(
 }
 
 pub async fn calculate_flavor_usage_for_all_aggregate(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: &OpenStack,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: &OpenStack,
 ) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
-    todo!()
+    Ok(aggregate_flavor_usage(
+        calculate_flavor_usage_for_all_simple(transaction, openstack).await?,
+    ))
 }
 
 pub async fn calculate_flavor_usage_for_all(
