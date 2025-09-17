@@ -16,7 +16,9 @@ use crate::{
     authorization::require_admin_user,
     database::{
         resources::flavor::select_lrz_flavors_from_db,
-        user::user::select_maybe_user_detail_from_db,
+        user::user::{
+            select_maybe_user_detail_from_db, select_users_by_project_from_db,
+        },
     },
     error::{NormalApiError, UnexpectedOnlyError},
     openstack::OpenStack,
@@ -128,11 +130,24 @@ pub async fn calculate_flavor_usage_for_user(
 }
 
 pub async fn calculate_flavor_usage_for_project_simple(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: &OpenStack,
-    _project_id: u64,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: &OpenStack,
+    project_id: u64,
 ) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
-    todo!()
+    let users =
+        select_users_by_project_from_db(transaction, project_id).await?;
+    let mut usage = Vec::new();
+    for user in users {
+        usage.extend(
+            calculate_flavor_usage_for_user_simple(
+                transaction,
+                openstack,
+                user.id.into(),
+            )
+            .await?,
+        );
+    }
+    Ok(usage)
 }
 
 pub async fn calculate_flavor_usage_for_project_aggregate(
