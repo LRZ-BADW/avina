@@ -359,6 +359,37 @@ impl OpenStack {
         Ok(servers.servers)
     }
 
+    pub async fn get_servers_of_project(
+        &self,
+        project_id: String,
+    ) -> Result<Vec<ServerDetailed>, anyhow::Error> {
+        let client = self.client().await?;
+        let url = format!(
+            "{}/v2.1/servers/detail?all_tenants=True&tenant_id={}",
+            self.settings.nova_endpoint, project_id,
+        );
+        let response = client
+            .get(url.as_str())
+            .send()
+            .await
+            .context("Could not retrieve server list")?;
+        if !response.status().is_success() {
+            return Err(anyhow::anyhow!(
+                "Failed to validate user token, returned code {}",
+                response.status().as_u16()
+            ));
+        }
+        let servers: ServerDetailedList = serde_json::from_str(
+            response
+                .text()
+                .await
+                .context("Could not read response text")?
+                .as_str(),
+        )
+        .context("Could not parse response")?;
+        Ok(servers.servers)
+    }
+
     pub async fn get_domains(&self) -> Result<Vec<Domain>, anyhow::Error> {
         let client = self.client().await?;
         let url = format!("{}/domains", self.settings.keystone_endpoint);
