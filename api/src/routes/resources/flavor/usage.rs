@@ -15,15 +15,18 @@ use serde::Serialize;
 use sqlx::{MySql, MySqlPool, Transaction};
 
 use crate::{
-    authorization::require_admin_user,
+    authorization::{
+        require_admin_user, require_master_user_or_return_not_found,
+        require_user_or_project_master_or_not_found,
+    },
     database::{
         resources::flavor::select_lrz_flavors_from_db,
         user::user::{
             select_all_users_from_db, select_maybe_user_detail_from_db,
-            select_users_by_project_from_db,
+            select_user_from_db, select_users_by_project_from_db,
         },
     },
-    error::{NormalApiError, UnexpectedOnlyError},
+    error::{OptionApiError, UnexpectedOnlyError},
     openstack::OpenStack,
 };
 
@@ -293,17 +296,18 @@ pub async fn flavor_usage(
     openstack: Data<OpenStack>,
     params: Query<FlavorUsageParams>,
     // TODO: is the ValidationError variant ever used?
-) -> Result<HttpResponse, NormalApiError> {
-    require_admin_user(&user)?;
+) -> Result<HttpResponse, OptionApiError> {
     let aggregate = params.aggregate.unwrap_or(false);
     let mut transaction = db_pool
         .begin()
         .await
         .context("Failed to begin transaction")?;
     let usage = if params.all.unwrap_or(false) {
+        require_admin_user(&user)?;
         calculate_flavor_usage_for_all(&mut transaction, openstack, aggregate)
             .await?
     } else if let Some(project_id) = params.project {
+        require_master_user_or_return_not_found(&user, project_id)?;
         calculate_flavor_usage_for_project(
             &mut transaction,
             openstack,
@@ -312,6 +316,13 @@ pub async fn flavor_usage(
         )
         .await?
     } else if let Some(user_id) = params.user {
+        let user_queried =
+            select_user_from_db(&mut transaction, user_id as u64).await?;
+        require_user_or_project_master_or_not_found(
+            &user,
+            user_id,
+            user_queried.project,
+        )?;
         calculate_flavor_usage_for_user(
             &mut transaction,
             openstack,
