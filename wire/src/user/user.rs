@@ -50,6 +50,21 @@ impl PartialEq<UserDetailed> for User {
     }
 }
 
+impl From<UserDetailed> for User {
+    fn from(value: UserDetailed) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            openstack_id: value.openstack_id,
+            project: value.project.id,
+            project_name: value.project_name,
+            role: value.role,
+            is_staff: value.is_staff,
+            is_active: value.is_active,
+        }
+    }
+}
+
 #[cfg_attr(feature = "sqlx", derive(FromRow))]
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
