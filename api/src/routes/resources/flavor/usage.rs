@@ -6,7 +6,9 @@ use actix_web::{
 };
 use anyhow::{Context, anyhow};
 use avina_wire::{
-    resources::{FlavorUsageAggregate, FlavorUsageParams, FlavorUsageSimple},
+    resources::{
+        Flavor, FlavorUsageAggregate, FlavorUsageParams, FlavorUsageSimple,
+    },
     user::User,
 };
 use serde::Serialize;
@@ -56,7 +58,7 @@ fn aggregate_flavor_usage(
 
 pub async fn calculate_flavor_usage_for_user_simple(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     user_id: u64,
 ) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     let Some(user) =
@@ -68,9 +70,22 @@ pub async fn calculate_flavor_usage_for_user_simple(
         ))
         .into());
     };
+    let flavors = select_lrz_flavors_from_db(transaction).await?;
+    calculate_flavor_usage_for_user_simple_inner(
+        openstack,
+        user.into(),
+        flavors,
+    )
+    .await
+}
+
+pub async fn calculate_flavor_usage_for_user_simple_inner(
+    openstack: Data<OpenStack>,
+    user: User,
+    flavors: Vec<Flavor>,
+) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     let os_servers =
         openstack.get_servers_of_project(user.openstack_id).await?;
-    let flavors = select_lrz_flavors_from_db(transaction).await?;
     let flavor_by_uuid: HashMap<_, _> = flavors
         .iter()
         .map(|f| (f.openstack_id.clone(), f.clone()))
@@ -118,7 +133,7 @@ pub async fn calculate_flavor_usage_for_user_simple(
 
 pub async fn calculate_flavor_usage_for_user_aggregate(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     user_id: u64,
 ) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
     Ok(aggregate_flavor_usage(
@@ -129,7 +144,7 @@ pub async fn calculate_flavor_usage_for_user_aggregate(
 
 pub async fn calculate_flavor_usage_for_user(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     user_id: u64,
     aggregate: bool,
 ) -> Result<FlavorUsage, UnexpectedOnlyError> {
@@ -156,28 +171,32 @@ pub async fn calculate_flavor_usage_for_user(
 
 pub async fn calculate_flavor_usage_for_project_simple(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     project_id: u64,
 ) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     let users =
         select_users_by_project_from_db(transaction, project_id).await?;
-    let mut usage = Vec::new();
+    let flavors = select_lrz_flavors_from_db(transaction).await?;
+    let mut handles = Vec::with_capacity(users.len());
     for user in users {
-        usage.extend(
-            calculate_flavor_usage_for_user_simple(
-                transaction,
-                openstack,
-                user.id.into(),
-            )
-            .await?,
-        );
+        handles.push(tokio::spawn(
+            calculate_flavor_usage_for_user_simple_inner(
+                openstack.clone(),
+                user,
+                flavors.clone(),
+            ),
+        ));
+    }
+    let mut usage = Vec::new();
+    for handle in handles {
+        usage.extend(handle.await.context("Failed to join tasks.")??)
     }
     Ok(usage)
 }
 
 pub async fn calculate_flavor_usage_for_project_aggregate(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     project_id: u64,
 ) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
     Ok(aggregate_flavor_usage(
@@ -192,7 +211,7 @@ pub async fn calculate_flavor_usage_for_project_aggregate(
 
 pub async fn calculate_flavor_usage_for_project(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     project_id: u64,
     aggregate: bool,
 ) -> Result<FlavorUsage, UnexpectedOnlyError> {
@@ -219,26 +238,30 @@ pub async fn calculate_flavor_usage_for_project(
 
 pub async fn calculate_flavor_usage_for_all_simple(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
 ) -> Result<Vec<FlavorUsageSimple>, UnexpectedOnlyError> {
     let users = select_all_users_from_db(transaction).await?;
-    let mut usage = Vec::new();
+    let flavors = select_lrz_flavors_from_db(transaction).await?;
+    let mut handles = Vec::with_capacity(users.len());
     for user in users {
-        usage.extend(
-            calculate_flavor_usage_for_user_simple(
-                transaction,
-                openstack,
-                user.id.into(),
-            )
-            .await?,
-        );
+        handles.push(tokio::spawn(
+            calculate_flavor_usage_for_user_simple_inner(
+                openstack.clone(),
+                user,
+                flavors.clone(),
+            ),
+        ));
+    }
+    let mut usage = Vec::new();
+    for handle in handles {
+        usage.extend(handle.await.context("Failed to join tasks.")??)
     }
     Ok(usage)
 }
 
 pub async fn calculate_flavor_usage_for_all_aggregate(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
 ) -> Result<Vec<FlavorUsageAggregate>, UnexpectedOnlyError> {
     Ok(aggregate_flavor_usage(
         calculate_flavor_usage_for_all_simple(transaction, openstack).await?,
@@ -247,7 +270,7 @@ pub async fn calculate_flavor_usage_for_all_aggregate(
 
 pub async fn calculate_flavor_usage_for_all(
     transaction: &mut Transaction<'_, MySql>,
-    openstack: &OpenStack,
+    openstack: Data<OpenStack>,
     aggregate: bool,
 ) -> Result<FlavorUsage, UnexpectedOnlyError> {
     Ok(if aggregate {
@@ -278,12 +301,12 @@ pub async fn flavor_usage(
         .await
         .context("Failed to begin transaction")?;
     let usage = if params.all.unwrap_or(false) {
-        calculate_flavor_usage_for_all(&mut transaction, &openstack, aggregate)
+        calculate_flavor_usage_for_all(&mut transaction, openstack, aggregate)
             .await?
     } else if let Some(project_id) = params.project {
         calculate_flavor_usage_for_project(
             &mut transaction,
-            &openstack,
+            openstack,
             project_id.into(),
             aggregate,
         )
@@ -291,7 +314,7 @@ pub async fn flavor_usage(
     } else if let Some(user_id) = params.user {
         calculate_flavor_usage_for_user(
             &mut transaction,
-            &openstack,
+            openstack,
             user_id.into(),
             aggregate,
         )
@@ -299,7 +322,7 @@ pub async fn flavor_usage(
     } else {
         calculate_flavor_usage_for_user(
             &mut transaction,
-            &openstack,
+            openstack,
             user.id.into(),
             aggregate,
         )
