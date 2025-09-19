@@ -1,14 +1,18 @@
 use std::fmt::Display;
 
+use rand::{
+    Rng,
+    distr::{Distribution, StandardUniform},
+};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "sqlx")]
 use sqlx::FromRow;
+use strum::EnumIter;
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
 
 use crate::{
-    resources::FlavorGroupMinimal,
-    user::{UserClass, UserMinimal},
+    error::ConversionError, resources::FlavorGroupMinimal, user::UserMinimal,
 };
 
 #[cfg_attr(feature = "sqlx", derive(FromRow))]
@@ -177,6 +181,69 @@ impl ProjectModifyData {
             name: None,
             openstack_id: None,
             user_class: None,
+        }
+    }
+}
+
+#[derive(
+    clap::ValueEnum,
+    Hash,
+    PartialEq,
+    Eq,
+    Clone,
+    EnumIter,
+    Debug,
+    Deserialize,
+    Serialize,
+    Copy,
+    sqlx::Type,
+)]
+pub enum UserClass {
+    NA = 0,
+    UC1 = 1,
+    UC2 = 2,
+    UC3 = 3,
+    UC4 = 4,
+    UC5 = 5,
+    UC6 = 6,
+}
+
+impl Display for UserClass {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl TryFrom<u32> for UserClass {
+    type Error = ConversionError;
+
+    fn try_from(u: u32) -> Result<Self, Self::Error> {
+        match u {
+            0 => Ok(UserClass::NA),
+            1 => Ok(UserClass::UC1),
+            2 => Ok(UserClass::UC2),
+            3 => Ok(UserClass::UC3),
+            4 => Ok(UserClass::UC4),
+            5 => Ok(UserClass::UC5),
+            6 => Ok(UserClass::UC6),
+            _ => Err(ConversionError(
+                format!("Unknown user class value: {u}").to_string(),
+            )),
+        }
+    }
+}
+
+impl Distribution<UserClass> for StandardUniform {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> UserClass {
+        match rng.random_range(0..6) {
+            0 => UserClass::NA,
+            1 => UserClass::UC1,
+            2 => UserClass::UC2,
+            3 => UserClass::UC3,
+            4 => UserClass::UC4,
+            5 => UserClass::UC5,
+            6 => UserClass::UC6,
+            _ => UserClass::NA,
         }
     }
 }
