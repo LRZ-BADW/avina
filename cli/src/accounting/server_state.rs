@@ -2,6 +2,7 @@ use std::error::Error;
 
 use chrono::{DateTime, FixedOffset};
 use clap::{Args, Subcommand};
+use uuid::Uuid;
 
 #[cfg(not(feature = "resources"))]
 use crate::common::find_id as flavor_find_id;
@@ -27,7 +28,7 @@ pub(crate) struct ServerStateListFilter {
         help = "Display server states of server with given UUID"
     )]
     // TODO validate that this is a valid server UUIDv4
-    server: Option<String>,
+    server: Option<Uuid>,
 
     #[clap(
         short,
@@ -64,7 +65,7 @@ pub(crate) enum ServerStateCommand {
         begin: DateTime<FixedOffset>,
 
         #[clap(help = "UUIDv4 of the instance")]
-        instance_id: String, // UUIDv4
+        instance_id: Uuid,
 
         #[clap(help = "Name of the instance")]
         instance_name: String,
@@ -100,7 +101,7 @@ pub(crate) enum ServerStateCommand {
             help = "OpenStack UUIDv4 of the instance the server state belongs to"
         )]
         // validate that this is a valid UUIDv4
-        instance_id: Option<String>,
+        instance_id: Option<Uuid>,
 
         #[clap(
             long,
@@ -171,7 +172,7 @@ impl Execute for ServerStateCommand {
                     format,
                     *begin,
                     *end,
-                    instance_id.clone(),
+                    *instance_id,
                     instance_name.clone(),
                     flavor,
                     status.clone(),
@@ -195,7 +196,7 @@ impl Execute for ServerStateCommand {
                     *id,
                     *begin,
                     *end,
-                    instance_id.clone(),
+                    *instance_id,
                     instance_name.clone(),
                     flavor.to_owned(),
                     status.clone(),
@@ -216,7 +217,7 @@ async fn list(
 ) -> Result<(), Box<dyn Error>> {
     let mut request = api.server_state.list();
     if let Some(server) = &filter.server {
-        request.server(server);
+        request.server(*server);
     } else if let Some(user) = &filter.user {
         let user_id = user_find_id(&api, user).await?;
         request.user(user_id);
@@ -243,7 +244,7 @@ async fn create(
     format: Format,
     begin: DateTime<FixedOffset>,
     end: Option<DateTime<FixedOffset>>,
-    instance_id: String, // UUIDv4
+    instance_id: Uuid,
     instance_name: String,
     flavor: &str,
     status: String,
@@ -273,7 +274,7 @@ async fn modify(
     id: u32,
     begin: Option<DateTime<FixedOffset>>,
     end: Option<DateTime<FixedOffset>>,
-    instance_id: Option<String>,
+    instance_id: Option<Uuid>,
     instance_name: Option<String>,
     flavor: Option<String>,
     status: Option<String>,

@@ -16,6 +16,7 @@ use avina_wire::{
 use chrono::{DateTime, Datelike, TimeZone, Utc};
 use serde::Serialize;
 use sqlx::{MySql, MySqlPool, Transaction};
+use uuid::Uuid;
 
 use crate::{
     authorization::{
@@ -56,7 +57,7 @@ const CONSUMING_STATES: [&str; 15] = [
 
 pub async fn calculate_server_consumption_for_server(
     transaction: &mut Transaction<'_, MySql>,
-    server_uuid: &str,
+    server_uuid: Uuid,
     begin: Option<DateTime<Utc>>,
     end: Option<DateTime<Utc>>,
     states: Option<Vec<ServerState>>,
@@ -66,7 +67,7 @@ pub async fn calculate_server_consumption_for_server(
         None => {
             select_ordered_server_states_by_server_begin_and_end_from_db(
                 transaction,
-                server_uuid.to_string(),
+                server_uuid,
                 begin,
                 end,
             )
@@ -127,11 +128,10 @@ pub async fn calculate_server_consumption_for_user(
     )
     .await?;
 
-    let mut server_state_map: HashMap<String, Vec<ServerState>> =
-        HashMap::new();
+    let mut server_state_map: HashMap<Uuid, Vec<ServerState>> = HashMap::new();
     for state in states {
         server_state_map
-            .entry(state.instance_id.clone())
+            .entry(state.instance_id)
             .or_default()
             .push(state);
     }
@@ -139,10 +139,10 @@ pub async fn calculate_server_consumption_for_user(
     let mut consumption = ServerConsumptionUser::default();
     for (server_uuid, server_states) in server_state_map {
         consumption.servers.insert(
-            server_uuid.clone(),
+            server_uuid,
             calculate_server_consumption_for_server(
                 transaction,
-                server_uuid.as_str(),
+                server_uuid,
                 begin,
                 end,
                 Some(server_states),
@@ -326,10 +326,10 @@ pub async fn server_consumption(
             )
             .await?,
         )
-    } else if let Some(server_id) = params.server.clone() {
+    } else if let Some(server_id) = params.server {
         let server_state = select_server_states_by_server_from_db(
             &mut transaction,
-            server_id.clone(),
+            server_id,
             true,
         )
         .await?;
@@ -344,7 +344,7 @@ pub async fn server_consumption(
         ServerConsumption::Server(
             calculate_server_consumption_for_server(
                 &mut transaction,
-                server_id.as_str(),
+                server_id,
                 Some(begin.into()),
                 Some(end.into()),
                 None,

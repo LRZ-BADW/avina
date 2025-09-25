@@ -7,6 +7,7 @@ use avina_wire::accounting::{
 };
 use chrono::{DateTime, FixedOffset};
 use reqwest::{Client, Method, StatusCode};
+use uuid::Uuid;
 
 use crate::{
     common::{SerializableNone, request},
@@ -52,9 +53,9 @@ impl ServerCostRequest {
 
     pub async fn server(
         &mut self,
-        server: &str,
+        server: Uuid,
     ) -> Result<ServerCostSimple, ApiError> {
-        self.params.server = Some(server.to_string());
+        self.params.server = Some(server);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
         let url = if params.is_empty() {
@@ -74,9 +75,9 @@ impl ServerCostRequest {
 
     pub async fn server_detail(
         &mut self,
-        server: &str,
+        server: Uuid,
     ) -> Result<ServerCostServer, ApiError> {
-        self.params.server = Some(server.to_string());
+        self.params.server = Some(server);
         self.params.detail = Some(true);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
