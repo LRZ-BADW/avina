@@ -59,7 +59,7 @@ pub async fn update_server_state_in_db(
     if end.is_none() {
         end = row.end;
     }
-    let instance_id = data.instance_id.clone().unwrap_or(row.instance_id);
+    let instance_id = data.instance_id.unwrap_or(row.instance_id);
     let instance_name = data.instance_name.clone().unwrap_or(row.instance_name);
     let status = data.status.clone().unwrap_or(row.status);
     let user = data.user.unwrap_or(row.user);
@@ -91,7 +91,7 @@ pub async fn update_server_state_in_db(
             user_id = ?
         WHERE state_ptr_id = ?
         "#,
-        instance_id,
+        instance_id.to_string(),
         instance_name,
         flavor,
         status,

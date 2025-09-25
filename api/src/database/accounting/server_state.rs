@@ -1,10 +1,13 @@
+use std::str::FromStr;
+
 use anyhow::Context;
 use avina_wire::{
     accounting::{ServerState, ServerStateCreateData},
     user::UserClass,
 };
 use chrono::{DateTime, Utc};
-use sqlx::{Executor, FromRow, MySql, Transaction};
+use sqlx::{Executor, FromRow, MySql, Transaction, types::uuid};
+use uuid::Uuid;
 
 use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
@@ -68,12 +71,13 @@ pub async fn select_maybe_server_state_from_db(
     Ok(match row {
         Some(row) => {
             let row = ServerStateRow::from_row(&row)
-                .context("Failed to parse flavor price row")?;
+                .context("Failed to parse server state row")?;
             Some(ServerState {
                 id: row.id,
                 begin: row.begin.fixed_offset(),
                 end: row.end.map(|end| end.fixed_offset()),
-                instance_id: row.instance_id,
+                instance_id: Uuid::from_str(row.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
                 instance_name: row.instance_name,
                 flavor: row.flavor,
                 flavor_name: row.flavor_name,
@@ -136,19 +140,23 @@ pub async fn select_all_server_states_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -195,19 +203,23 @@ pub async fn select_server_states_by_project_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -254,19 +266,23 @@ pub async fn select_server_states_by_user_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -276,7 +292,7 @@ pub async fn select_server_states_by_user_from_db(
 )]
 pub async fn select_server_states_by_server_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    server_id: String,
+    server_id: Uuid,
     fetch_one: bool,
 ) -> Result<Vec<ServerState>, UnexpectedOnlyError> {
     let query = sqlx::query!(
@@ -303,7 +319,7 @@ pub async fn select_server_states_by_server_from_db(
             ss.state_ptr_id = s.id AND
             ss.instance_id = ?
         "#,
-        server_id
+        server_id.to_string()
     );
     let queried_rows = if fetch_one {
         let row = transaction
@@ -324,19 +340,23 @@ pub async fn select_server_states_by_server_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -346,7 +366,7 @@ pub async fn select_server_states_by_server_from_db(
 )]
 pub async fn select_user_class_by_server_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    server_id: String,
+    server_id: Uuid,
 ) -> Result<Option<UserClass>, UnexpectedOnlyError> {
     #[derive(FromRow)]
     struct Row {
@@ -366,7 +386,7 @@ pub async fn select_user_class_by_server_from_db(
             ss.instance_id = ?
         LIMIT 1
         "#,
-        server_id
+        server_id.to_string(),
     );
     let row = transaction
         .fetch_optional(query)
@@ -391,7 +411,7 @@ pub async fn select_user_class_by_server_from_db(
 )]
 pub async fn select_server_states_by_server_and_project_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    server_id: String,
+    server_id: Uuid,
     project_id: u64,
 ) -> Result<Vec<ServerState>, UnexpectedOnlyError> {
     let query = sqlx::query!(
@@ -419,7 +439,7 @@ pub async fn select_server_states_by_server_and_project_from_db(
             ss.instance_id = ? AND
             u.project_id = ?
         "#,
-        server_id,
+        server_id.to_string(),
         project_id
     );
     let rows = transaction
@@ -431,19 +451,23 @@ pub async fn select_server_states_by_server_and_project_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -453,7 +477,7 @@ pub async fn select_server_states_by_server_and_project_from_db(
 )]
 pub async fn select_server_states_by_server_and_user_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    server_id: String,
+    server_id: Uuid,
     user_id: u64,
 ) -> Result<Vec<ServerState>, UnexpectedOnlyError> {
     let query = sqlx::query!(
@@ -481,7 +505,7 @@ pub async fn select_server_states_by_server_and_user_from_db(
             ss.instance_id = ? AND
             u.id = ?
         "#,
-        server_id,
+        server_id.to_string(),
         user_id
     );
     let rows = transaction
@@ -493,26 +517,30 @@ pub async fn select_server_states_by_server_and_user_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
 pub struct NewServerState {
     pub begin: DateTime<Utc>,
     pub end: Option<DateTime<Utc>>,
-    pub instance_id: String, // UUIDv4
+    pub instance_id: Uuid,
     pub instance_name: String,
     pub flavor: u32,
     // TODO we need an enum here
@@ -574,7 +602,7 @@ pub async fn insert_server_state_into_db(
         VALUES (?, ?, ?, ?, ?, ?)
         "#,
         id,
-        new_server_state.instance_id,
+        new_server_state.instance_id.to_string(),
         new_server_state.instance_name,
         new_server_state.status,
         new_server_state.flavor,
@@ -599,7 +627,7 @@ pub async fn insert_server_state_into_db(
 )]
 pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    server_id: String,
+    server_id: Uuid,
     begin: Option<DateTime<Utc>>,
     end: Option<DateTime<Utc>>,
 ) -> Result<Vec<ServerState>, UnexpectedOnlyError> {
@@ -630,7 +658,7 @@ pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
                     ss.instance_id = ?
                 ORDER BY s.id
                 "#,
-                server_id
+                server_id.to_string(),
             );
             transaction.fetch_all(query).await
         }
@@ -661,7 +689,7 @@ pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
                     (s.end > ? OR s.end IS NULL)
                 ORDER BY s.id
                 "#,
-                server_id,
+                server_id.to_string(),
                 begin
             );
             transaction.fetch_all(query).await
@@ -693,7 +721,7 @@ pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
                     s.begin < ?
                 ORDER BY s.id
                 "#,
-                server_id,
+                server_id.to_string(),
                 end
             );
             transaction.fetch_all(query).await
@@ -726,7 +754,7 @@ pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
                     s.begin < ?
                 ORDER BY s.id
                 "#,
-                server_id,
+                server_id.to_string(),
                 begin,
                 end
             );
@@ -740,19 +768,23 @@ pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -903,19 +935,23 @@ pub async fn select_ordered_server_states_by_user_begin_and_end_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }
 
@@ -960,18 +996,22 @@ pub async fn select_unfinished_server_states_from_db(
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to server state")?
         .into_iter()
-        .map(|r| ServerState {
-            id: r.id,
-            begin: r.begin.fixed_offset(),
-            end: r.end.map(|end| end.fixed_offset()),
-            instance_id: r.instance_id,
-            instance_name: r.instance_name,
-            flavor: r.flavor,
-            flavor_name: r.flavor_name,
-            status: r.status,
-            user: r.user,
-            username: r.username,
+        .map(|r| {
+            Ok::<ServerState, UnexpectedOnlyError>(ServerState {
+                id: r.id,
+                begin: r.begin.fixed_offset(),
+                end: r.end.map(|end| end.fixed_offset()),
+                instance_id: Uuid::from_str(r.instance_id.as_str())
+                    .context("Could not parse instance id String")?,
+                instance_name: r.instance_name,
+                flavor: r.flavor,
+                flavor_name: r.flavor_name,
+                status: r.status,
+                user: r.user,
+                username: r.username,
+            })
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert server state row to server state")?;
     Ok(rows)
 }

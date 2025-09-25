@@ -4,6 +4,7 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
+use uuid::Uuid;
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -21,7 +22,7 @@ pub struct ServerCostServer {
 pub struct ServerCostUser {
     pub total: f64,
     pub flavors: HashMap<String, f64>,
-    pub servers: HashMap<String, ServerCostServer>,
+    pub servers: HashMap<Uuid, ServerCostServer>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -42,7 +43,7 @@ pub struct ServerCostAll {
 pub struct ServerCostParams {
     pub begin: Option<DateTime<FixedOffset>>,
     pub end: Option<DateTime<FixedOffset>>,
-    pub server: Option<String>,
+    pub server: Option<Uuid>,
     pub user: Option<u32>,
     pub project: Option<u32>,
     pub all: Option<bool>,

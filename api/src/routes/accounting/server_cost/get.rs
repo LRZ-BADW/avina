@@ -18,6 +18,7 @@ use indexmap::IndexMap;
 use serde::Serialize;
 use sqlx::{MySql, MySqlPool, Transaction};
 use strum::IntoEnumIterator;
+use uuid::Uuid;
 
 use crate::{
     authorization::{
@@ -185,16 +186,13 @@ pub enum ServerCostForServer {
 
 pub async fn calculate_server_cost_for_server_normal(
     transaction: &mut Transaction<'_, MySql>,
-    server_uuid: &str,
+    server_uuid: Uuid,
     begin: DateTime<Utc>,
     end: DateTime<Utc>,
 ) -> Result<ServerCostSimple, UnexpectedOnlyError> {
     let mut cost = ServerCostSimple { total: 0.0 };
-    let Some(user_class) = select_user_class_by_server_from_db(
-        transaction,
-        server_uuid.to_string(),
-    )
-    .await?
+    let Some(user_class) =
+        select_user_class_by_server_from_db(transaction, server_uuid).await?
     else {
         return Ok(cost);
     };
@@ -238,7 +236,7 @@ pub async fn calculate_server_cost_for_server_normal(
 // TODO: can we use macros to get rid of the code duplication here
 pub async fn calculate_server_cost_for_server_detail(
     transaction: &mut Transaction<'_, MySql>,
-    server_uuid: &str,
+    server_uuid: Uuid,
     begin: DateTime<Utc>,
     end: DateTime<Utc>,
 ) -> Result<ServerCostServer, UnexpectedOnlyError> {
@@ -246,11 +244,8 @@ pub async fn calculate_server_cost_for_server_detail(
         total: 0.0,
         flavors: HashMap::new(),
     };
-    let Some(user_class) = select_user_class_by_server_from_db(
-        transaction,
-        server_uuid.to_string(),
-    )
-    .await?
+    let Some(user_class) =
+        select_user_class_by_server_from_db(transaction, server_uuid).await?
     else {
         return Ok(cost);
     };
@@ -291,7 +286,7 @@ pub async fn calculate_server_cost_for_server_detail(
 
 pub async fn calculate_server_cost_for_server(
     transaction: &mut Transaction<'_, MySql>,
-    server_uuid: &str,
+    server_uuid: Uuid,
     begin: DateTime<Utc>,
     end: DateTime<Utc>,
     detail: Option<bool>,
@@ -420,10 +415,8 @@ pub async fn calculate_server_cost_for_user_detail(
             .into());
         };
         for (server_uuid, server_consumption) in consumption.servers {
-            let server_cost = cost
-                .servers
-                .entry(server_uuid.clone())
-                .or_insert(ServerCostServer {
+            let server_cost =
+                cost.servers.entry(server_uuid).or_insert(ServerCostServer {
                     total: 0.0,
                     flavors: HashMap::new(),
                 });
@@ -594,7 +587,7 @@ pub async fn calculate_server_cost_for_project_detail(
             for (server_uuid, server_consumption) in user_consumption.servers {
                 let server_cost = user_cost
                     .servers
-                    .entry(server_uuid.clone())
+                    .entry(server_uuid)
                     .or_insert(ServerCostServer {
                         total: 0.0,
                         flavors: HashMap::new(),
@@ -793,7 +786,7 @@ pub async fn calculate_server_cost_for_all_detail(
                 {
                     let server_cost = user_cost
                         .servers
-                        .entry(server_uuid.clone())
+                        .entry(server_uuid)
                         .or_insert(ServerCostServer {
                             total: 0.0,
                             flavors: HashMap::new(),
@@ -921,10 +914,10 @@ pub async fn server_cost(
             )
             .await?,
         )
-    } else if let Some(server_id) = params.server.clone() {
+    } else if let Some(server_id) = params.server {
         let server_state = select_server_states_by_server_from_db(
             &mut transaction,
-            server_id.clone(),
+            server_id,
             true,
         )
         .await?;
@@ -939,7 +932,7 @@ pub async fn server_cost(
         ServerCost::Server(
             calculate_server_cost_for_server(
                 &mut transaction,
-                server_id.as_str(),
+                server_id,
                 begin.into(),
                 end.into(),
                 params.detail,

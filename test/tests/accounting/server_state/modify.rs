@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use avina::{Api, Token};
 use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
+use uuid::Uuid;
 
 use super::assert_equal_server_states;
 
@@ -122,12 +123,12 @@ async fn e2e_lib_server_state_modify_and_get_works() {
     .unwrap();
 
     // act and assert 1 - modify
-    let instance_id = random_uuid();
+    let instance_id = Uuid::new_v4();
     let instance_name = random_alphanumeric_string(10);
     let modified = client
         .server_state
         .modify(server_state.id)
-        .instance_id(instance_id.clone())
+        .instance_id(instance_id)
         .instance_name(instance_name.clone())
         .send()
         .await

@@ -391,6 +391,7 @@ dependencies = [
  "serde_json",
  "serde_urlencoded",
  "thiserror 2.0.17",
+ "uuid",
 ]
 
 [[package]]
@@ -423,6 +424,7 @@ dependencies = [
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "uuid",
  "wiremock",
 ]
 
@@ -441,6 +443,7 @@ dependencies = [
  "serde_json",
  "tabled",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
@@ -486,6 +489,7 @@ dependencies = [
  "strum",
  "tabled",
  "thiserror 2.0.17",
+ "uuid",
 ]
 
 [[package]]
