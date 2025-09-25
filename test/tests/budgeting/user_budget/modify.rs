@@ -9,6 +9,7 @@ use avina_api::database::{
 use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
 use avina_wire::user::{Project, UserClass};
 use chrono::{Datelike, TimeZone, Utc};
+use uuid::Uuid;
 
 #[tokio::test]
 async fn e2e_lib_admin_cannot_modify_user_budget() {
@@ -145,7 +146,7 @@ async fn e2e_lib_admin_cannot_modify_user_budget() {
                 .fixed_offset()
                 .into(),
         ),
-        instance_id: random_alphanumeric_string(10),
+        instance_id: Uuid::new_v4(),
         instance_name: random_alphanumeric_string(10),
         flavor: flavor.id,
         status: "ACTIVE".to_string(),

@@ -4,6 +4,7 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
+use uuid::Uuid;
 
 #[cfg(feature = "tabled")]
 use crate::common::display_option;
@@ -15,7 +16,7 @@ pub struct ServerState {
     pub begin: DateTime<FixedOffset>,
     #[cfg_attr(feature = "tabled", tabled(display = "display_option"))]
     pub end: Option<DateTime<FixedOffset>>,
-    pub instance_id: String, // UUIDv4
+    pub instance_id: Uuid,
     pub instance_name: String,
     pub flavor: u32,
     pub flavor_name: String,
@@ -39,7 +40,7 @@ pub struct ServerStateImport {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerStateListParams {
-    pub server: Option<String>,
+    pub server: Option<Uuid>,
     pub user: Option<u32>,
     pub project: Option<u32>,
     pub all: Option<bool>,
@@ -50,7 +51,7 @@ pub struct ServerStateCreateData {
     pub begin: DateTime<FixedOffset>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub end: Option<DateTime<FixedOffset>>,
-    pub instance_id: String, // UUIDv4
+    pub instance_id: Uuid,
     pub instance_name: String,
     pub flavor: u32,
     // TODO we need an enum here
@@ -61,7 +62,7 @@ pub struct ServerStateCreateData {
 impl ServerStateCreateData {
     pub fn new(
         begin: DateTime<FixedOffset>,
-        instance_id: String, // UUIDv4
+        instance_id: Uuid,
         instance_name: String,
         flavor: u32,
         status: String,
@@ -88,7 +89,7 @@ pub struct ServerStateModifyData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub end: Option<DateTime<FixedOffset>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub instance_id: Option<String>, // UUIDv4
+    pub instance_id: Option<Uuid>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub instance_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

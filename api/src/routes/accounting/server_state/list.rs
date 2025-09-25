@@ -44,7 +44,7 @@ pub async fn server_state_list(
         select_all_server_states_from_db(&mut transaction).await?
     } else if let Some(project_id) = params.project {
         require_master_user_or_return_not_found(&user, project_id)?;
-        if let Some(server_id) = params.server.clone() {
+        if let Some(server_id) = params.server {
             select_server_states_by_server_and_project_from_db(
                 &mut transaction,
                 server_id,
@@ -67,7 +67,7 @@ pub async fn server_state_list(
             user1.id,
             user1.project,
         )?;
-        if let Some(server_id) = params.server.clone() {
+        if let Some(server_id) = params.server {
             select_server_states_by_server_and_user_from_db(
                 &mut transaction,
                 server_id,
@@ -81,7 +81,7 @@ pub async fn server_state_list(
             )
             .await?
         }
-    } else if let Some(server_id) = params.server.clone() {
+    } else if let Some(server_id) = params.server {
         let server_states = select_server_states_by_server_from_db(
             &mut transaction,
             server_id,

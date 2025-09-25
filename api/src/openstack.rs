@@ -7,6 +7,7 @@ use reqwest::{
     header::{CONTENT_TYPE, HeaderMap, HeaderValue},
 };
 use tokio::sync::RwLock;
+use uuid::Uuid;
 
 use crate::configuration::OpenStackSettings;
 
@@ -148,7 +149,7 @@ pub enum ServerDetailedImage {
 #[derive(Clone, Debug, serde::Deserialize)]
 #[allow(unused)]
 pub struct ServerDetailed {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub status: String,

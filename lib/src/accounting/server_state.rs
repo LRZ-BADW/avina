@@ -7,6 +7,7 @@ use avina_wire::accounting::{
 };
 use chrono::{DateTime, FixedOffset};
 use reqwest::{Client, Method, StatusCode};
+use uuid::Uuid;
 
 use crate::{
     common::{SerializableNone, request, request_bare},
@@ -60,8 +61,8 @@ impl ServerStateListRequest {
         .await
     }
 
-    pub fn server(&mut self, server: &str) -> &mut Self {
-        self.params.server = Some(server.to_string());
+    pub fn server(&mut self, server: Uuid) -> &mut Self {
+        self.params.server = Some(server);
         self
     }
 
@@ -94,7 +95,7 @@ impl ServerStateCreateRequest {
         url: &str,
         client: &Rc<Client>,
         begin: DateTime<FixedOffset>,
-        instance_id: String, // UUIDv4
+        instance_id: Uuid,
         instance_name: String,
         flavor: u32,
         status: String,
@@ -157,7 +158,7 @@ impl ServerStateModifyRequest {
         self
     }
 
-    pub fn instance_id(&mut self, instance_id: String) -> &mut Self {
+    pub fn instance_id(&mut self, instance_id: Uuid) -> &mut Self {
         self.data.instance_id = Some(instance_id);
         self
     }
@@ -222,7 +223,7 @@ impl ServerStateApi {
     pub fn create(
         &self,
         begin: DateTime<FixedOffset>,
-        instance_id: String, // UUIDv4
+        instance_id: Uuid,
         instance_name: String,
         flavor: u32,
         status: String,

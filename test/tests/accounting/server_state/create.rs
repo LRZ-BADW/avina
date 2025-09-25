@@ -3,6 +3,7 @@ use std::str::FromStr;
 use avina::{Api, Token};
 use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
 use chrono::{DateTime, FixedOffset, Utc};
+use uuid::Uuid;
 
 use super::assert_equal_server_states;
 
@@ -36,7 +37,7 @@ async fn e2e_lib_server_state_create_denies_access_to_normal_user() {
 
     // act
     let begin = DateTime::<FixedOffset>::from(Utc::now());
-    let instance_id = random_uuid();
+    let instance_id = Uuid::new_v4();
     let instance_name = random_alphanumeric_string(10);
     let status = "ACTIVE".to_string();
     let create = client
@@ -90,7 +91,7 @@ async fn e2e_lib_server_state_create_denies_access_to_master_user() {
 
     // act
     let begin = DateTime::<FixedOffset>::from(Utc::now());
-    let instance_id = random_uuid();
+    let instance_id = Uuid::new_v4();
     let instance_name = random_alphanumeric_string(10);
     let status = "ACTIVE".to_string();
     let create = client
@@ -144,7 +145,7 @@ async fn e2e_lib_server_state_create_works() {
 
     // act
     let begin = DateTime::<FixedOffset>::from(Utc::now());
-    let instance_id = random_uuid();
+    let instance_id = Uuid::new_v4();
     let instance_name = random_alphanumeric_string(10);
     let status = "ACTIVE".to_string();
     let created = client
@@ -202,14 +203,14 @@ async fn e2e_lib_server_state_create_and_get_works() {
 
     // act and assert 1 - create
     let begin = DateTime::<FixedOffset>::from(Utc::now());
-    let instance_id = random_uuid();
+    let instance_id = Uuid::new_v4();
     let instance_name = random_alphanumeric_string(10);
     let status = "ACTIVE".to_string();
     let created = client
         .server_state
         .create(
             begin,
-            instance_id.clone(),
+            instance_id,
             instance_name.clone(),
             flavor.id,
             status.clone(),
@@ -262,7 +263,7 @@ async fn e2e_lib_server_state_create_and_list_works() {
 
     // act and assert 1 - create
     let begin = DateTime::<FixedOffset>::from(Utc::now());
-    let instance_id = random_uuid();
+    let instance_id = Uuid::new_v4();
     let instance_name = random_alphanumeric_string(10);
     let status = "ACTIVE".to_string();
     let created = client

@@ -56,7 +56,7 @@ pub async fn server_state_create(
         id: id as u32,
         begin: data.begin,
         end: data.end,
-        instance_id: new_server_state.instance_id.clone(),
+        instance_id: new_server_state.instance_id,
         instance_name: new_server_state.instance_name.clone(),
         flavor: new_server_state.flavor,
         flavor_name,

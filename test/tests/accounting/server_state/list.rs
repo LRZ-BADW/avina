@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use avina::{Api, Token};
 use avina_test::{random_uuid, spawn_app};
+use uuid::Uuid;
 
 use super::assert_contains_server_state;
 
@@ -28,12 +29,12 @@ async fn e2e_lib_normal_user_can_list_own_server_states() {
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let server_state_1 = server
         .setup_test_server_state_with_server_id(
             &flavor,
             &normal_user_1,
-            &server_id,
+            server_id,
         )
         .await
         .expect("Failed to setup test server state 1");
@@ -41,7 +42,7 @@ async fn e2e_lib_normal_user_can_list_own_server_states() {
         .setup_test_server_state_with_server_id(
             &flavor,
             &normal_user_1,
-            &server_id,
+            server_id,
         )
         .await
         .expect("Failed to setup test server state 2");
@@ -75,7 +76,7 @@ async fn e2e_lib_normal_user_can_list_own_server_states() {
     let server_states_3 = client
         .server_state
         .list()
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();
@@ -118,12 +119,12 @@ async fn e2e_lib_normal_user_cannot_use_other_server_state_list_filters() {
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let _server_state = server
         .setup_test_server_state_with_server_id(
             &flavor,
             &normal_user_2,
-            &server_id,
+            server_id,
         )
         .await
         .expect("Failed to setup test server state 2");
@@ -147,12 +148,8 @@ async fn e2e_lib_normal_user_cannot_use_other_server_state_list_filters() {
         .user(normal_user_2.id)
         .send()
         .await;
-    let server_states_4 = client
-        .server_state
-        .list()
-        .server(server_id.as_str())
-        .send()
-        .await;
+    let server_states_4 =
+        client.server_state.list().server(server_id).send().await;
 
     // assert
     assert!(server_states_1.is_err());
@@ -241,12 +238,12 @@ async fn e2e_lib_master_user_can_list_own_projects_and_users_server_states() {
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let server_state_1 = server
         .setup_test_server_state_with_server_id(
             &flavor,
             &normal_user_1,
-            &server_id,
+            server_id,
         )
         .await
         .expect("Failed to setup test server state 1");
@@ -254,7 +251,7 @@ async fn e2e_lib_master_user_can_list_own_projects_and_users_server_states() {
         .setup_test_server_state_with_server_id(
             &flavor,
             &normal_user_1,
-            &server_id,
+            server_id,
         )
         .await
         .expect("Failed to setup test server state 2");
@@ -300,7 +297,7 @@ async fn e2e_lib_master_user_can_list_own_projects_and_users_server_states() {
     let server_states_4 = client
         .server_state
         .list()
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();
@@ -349,12 +346,12 @@ async fn e2e_lib_master_user_cannot_list_other_projects_and_users_server_states(
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let _server_state = server
         .setup_test_server_state_with_server_id(
             &flavor,
             &normal_user,
-            &server_id,
+            server_id,
         )
         .await
         .expect("Failed to setup test server state 1");
@@ -378,7 +375,7 @@ async fn e2e_lib_master_user_cannot_list_other_projects_and_users_server_states(
         .send()
         .await;
     let server_states_3 =
-        client.server_state.list().server(&server_id).send().await;
+        client.server_state.list().server(server_id).send().await;
 
     // assert
     assert!(server_states_1.is_err());
@@ -423,17 +420,17 @@ async fn e2e_lib_server_state_list_server_filter_works_across_projects_for_admin
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let server_state1 = server
-        .setup_test_server_state_with_server_id(&flavor, &user, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user, server_id)
         .await
         .expect("Failed to setup test server state 1");
     let server_state2 = server
-        .setup_test_server_state_with_server_id(&flavor, &user2, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user2, server_id)
         .await
         .expect("Failed to setup test server state 2");
     let server_state3 = server
-        .setup_test_server_state_with_server_id(&flavor, &user3, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user3, server_id)
         .await
         .expect("Failed to setup test server state 3");
     let _server_state4 = server
@@ -462,7 +459,7 @@ async fn e2e_lib_server_state_list_server_filter_works_across_projects_for_admin
     let server_states = client
         .server_state
         .list()
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();
@@ -535,7 +532,7 @@ async fn e2e_lib_admin_user_can_use_any_user_list_filters() {
     let server_states2 = client
         .server_state
         .list()
-        .server(&server_state5.instance_id)
+        .server(server_state5.instance_id)
         .send()
         .await
         .unwrap();
@@ -598,17 +595,17 @@ async fn e2e_lib_master_user_can_combine_server_state_list_filters() {
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let server_state1 = server
-        .setup_test_server_state_with_server_id(&flavor, &user, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user, server_id)
         .await
         .expect("Failed to setup test server state 1");
     let server_state2 = server
-        .setup_test_server_state_with_server_id(&flavor, &user2, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user2, server_id)
         .await
         .expect("Failed to setup test server state 2");
     let _server_state3 = server
-        .setup_test_server_state_with_server_id(&flavor, &user3, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user3, server_id)
         .await
         .expect("Failed to setup test server state 3");
     let _server_state4 = server
@@ -638,7 +635,7 @@ async fn e2e_lib_master_user_can_combine_server_state_list_filters() {
         .server_state
         .list()
         .project(project.id)
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();
@@ -646,7 +643,7 @@ async fn e2e_lib_master_user_can_combine_server_state_list_filters() {
         .server_state
         .list()
         .user(user.id)
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();
@@ -684,17 +681,17 @@ async fn e2e_lib_admin_user_can_combine_server_state_list_filters() {
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
-    let server_id = random_uuid();
+    let server_id = Uuid::new_v4();
     let server_state1 = server
-        .setup_test_server_state_with_server_id(&flavor, &user, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user, server_id)
         .await
         .expect("Failed to setup test server state 1");
     let server_state2 = server
-        .setup_test_server_state_with_server_id(&flavor, &user2, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user2, server_id)
         .await
         .expect("Failed to setup test server state 2");
     let _server_state3 = server
-        .setup_test_server_state_with_server_id(&flavor, &user3, &server_id)
+        .setup_test_server_state_with_server_id(&flavor, &user3, server_id)
         .await
         .expect("Failed to setup test server state 3");
     let _server_state4 = server
@@ -724,7 +721,7 @@ async fn e2e_lib_admin_user_can_combine_server_state_list_filters() {
         .server_state
         .list()
         .project(project.id)
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();
@@ -732,7 +729,7 @@ async fn e2e_lib_admin_user_can_combine_server_state_list_filters() {
         .server_state
         .list()
         .user(user.id)
-        .server(&server_id)
+        .server(server_id)
         .send()
         .await
         .unwrap();

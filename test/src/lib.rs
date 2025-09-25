@@ -310,7 +310,7 @@ impl TestApp {
         let new_server_state = NewServerState {
             begin: begin.to_utc(),
             end: None,
-            instance_id: random_uuid(),
+            instance_id: Uuid::new_v4(),
             instance_name: random_alphanumeric_string(10),
             flavor: flavor.id,
             status: "ACTIVE".to_string(),
@@ -342,12 +342,12 @@ impl TestApp {
         &self,
         flavor: &Flavor,
         user: &User,
-        server_id: &str,
+        server_id: Uuid,
     ) -> Result<ServerState, MinimalApiError> {
         let new_server_state = NewServerState {
             begin: Utc::now(),
             end: None,
-            instance_id: server_id.to_string(),
+            instance_id: server_id,
             instance_name: random_alphanumeric_string(10),
             flavor: flavor.id,
             status: "ACTIVE".to_string(),

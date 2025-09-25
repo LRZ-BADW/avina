@@ -2,6 +2,7 @@ use std::error::Error;
 
 use chrono::{DateTime, FixedOffset};
 use clap::Args;
+use uuid::Uuid;
 
 use crate::common::{Format, print_json, print_single_object};
 #[cfg(not(feature = "user"))]
@@ -19,8 +20,7 @@ pub(crate) struct ServerCostFilter {
         long,
         help = "Calculate server cost for server with given UUID"
     )]
-    // TODO validate that this is a valid server UUIDv4
-    server: Option<String>,
+    server: Option<Uuid>,
 
     #[clap(
         short,
@@ -62,7 +62,7 @@ pub(crate) async fn server_cost(
     }
     if detail {
         if let Some(server) = filter.server {
-            print_json(request.server_detail(&server).await?)
+            print_json(request.server_detail(server).await?)
         } else if let Some(user) = filter.user {
             let user_id = user_find_id(&api, &user).await?;
             print_json(request.user_detail(user_id).await?)
@@ -77,7 +77,7 @@ pub(crate) async fn server_cost(
     } else {
         #[allow(clippy::collapsible_else_if)]
         if let Some(server) = filter.server {
-            print_single_object(request.server(&server).await?, format)
+            print_single_object(request.server(server).await?, format)
         } else if let Some(user) = filter.user {
             let user_id = user_find_id(&api, &user).await?;
             print_single_object(request.user(user_id).await?, format)

@@ -63,13 +63,13 @@ pub async fn server_state_import(
         .await?
         .iter()
         .cloned()
-        .map(|s| (s.id.clone(), s))
+        .map(|s| (s.id, s))
         .collect::<HashMap<_, _>>();
     let states = select_unfinished_server_states_from_db(&mut transaction)
         .await?
         .iter()
         .cloned()
-        .map(|s| (s.instance_id.clone(), s))
+        .map(|s| (s.instance_id, s))
         .collect::<HashMap<_, _>>();
 
     let servers_and_states = union_hash_zip(servers, states);
@@ -173,7 +173,7 @@ pub async fn create_server_state_in_db(
     let server_state = NewServerState {
         begin: Utc::now(),
         end: None,
-        instance_id: server.id.clone(),
+        instance_id: server.id,
         instance_name: server.name.clone(),
         flavor: flavor_id as u32,
         status: server.status.clone(),
