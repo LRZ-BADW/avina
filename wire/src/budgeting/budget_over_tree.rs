@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BudgetOverTreeParams {
@@ -23,7 +24,7 @@ pub struct BudgetOverTreeUser {
     pub budget_id: Option<u32>,
     pub budget: Option<u64>,
     pub over: bool,
-    pub servers: HashMap<String, BudgetOverTreeServer>,
+    pub servers: HashMap<Uuid, BudgetOverTreeServer>,
     pub flavors: HashMap<String, f64>,
 }
 
