@@ -154,7 +154,7 @@ pub struct FlavorGroupUsageParams {
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct FlavorGroupUsage {
+pub struct FlavorGroupUsageSimple {
     pub user_id: u32,
     pub user_name: String,
     pub flavorgroup_id: u32,

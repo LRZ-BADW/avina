@@ -4,8 +4,8 @@ use anyhow::Context;
 use avina_wire::resources::{
     FlavorGroup, FlavorGroupCreateData, FlavorGroupCreated,
     FlavorGroupDetailed, FlavorGroupInitialize, FlavorGroupListParams,
-    FlavorGroupModifyData, FlavorGroupUsage, FlavorGroupUsageAggregate,
-    FlavorGroupUsageParams,
+    FlavorGroupModifyData, FlavorGroupUsageAggregate, FlavorGroupUsageParams,
+    FlavorGroupUsageSimple,
 };
 use reqwest::{Client, Method, StatusCode};
 
@@ -155,7 +155,7 @@ impl FlavorGroupUsageRequest {
     pub async fn user(
         &mut self,
         user: u32,
-    ) -> Result<Vec<FlavorGroupUsage>, ApiError> {
+    ) -> Result<Vec<FlavorGroupUsageSimple>, ApiError> {
         self.params.user = Some(user);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
@@ -200,7 +200,7 @@ impl FlavorGroupUsageRequest {
     pub async fn project(
         &mut self,
         project: u32,
-    ) -> Result<Vec<FlavorGroupUsage>, ApiError> {
+    ) -> Result<Vec<FlavorGroupUsageSimple>, ApiError> {
         self.params.project = Some(project);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
@@ -242,7 +242,9 @@ impl FlavorGroupUsageRequest {
         .await
     }
 
-    pub async fn all(&mut self) -> Result<Vec<FlavorGroupUsage>, ApiError> {
+    pub async fn all(
+        &mut self,
+    ) -> Result<Vec<FlavorGroupUsageSimple>, ApiError> {
         self.params.all = Some(true);
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
@@ -283,7 +285,9 @@ impl FlavorGroupUsageRequest {
         .await
     }
 
-    pub async fn mine(&mut self) -> Result<Vec<FlavorGroupUsage>, ApiError> {
+    pub async fn mine(
+        &mut self,
+    ) -> Result<Vec<FlavorGroupUsageSimple>, ApiError> {
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters")?;
         let url = if params.is_empty() {
