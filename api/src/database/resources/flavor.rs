@@ -125,7 +125,7 @@ pub async fn select_minimal_flavors_by_group_from_db(
 }
 
 #[tracing::instrument(
-    name = "select_maybe_user_detail_from_db",
+    name = "select_maybe_flavor_detail_from_db",
     skip(transaction)
 )]
 pub async fn select_maybe_flavor_detail_from_db(
