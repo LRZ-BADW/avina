@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use actix_web::{
     HttpResponse,
     web::{Data, Query, ReqData},
@@ -6,7 +8,7 @@ use anyhow::Context;
 use avina_wire::{
     resources::{
         FlavorGroupUsageAggregate, FlavorGroupUsageParams,
-        FlavorGroupUsageSimple,
+        FlavorGroupUsageSimple, FlavorUsageSimple,
     },
     user::User,
 };
@@ -21,6 +23,10 @@ use crate::{
     database::user::user::select_user_from_db,
     error::{OptionApiError, UnexpectedOnlyError},
     openstack::OpenStack,
+    routes::resources::flavor::usage::{
+        calculate_flavor_usage_for_project_simple,
+        calculate_flavor_usage_for_user_simple,
+    },
 };
 
 #[derive(Serialize)]
@@ -30,12 +36,45 @@ pub enum FlavorGroupUsage {
     Aggregate(Vec<FlavorGroupUsageAggregate>),
 }
 
+fn flavor_usage_to_flavor_group_usage(
+    usages: Vec<FlavorUsageSimple>,
+) -> Vec<FlavorGroupUsageSimple> {
+    let mut group_usages = HashMap::new();
+    for usage in usages {
+        let (Some(group_id), Some(group_name)) =
+            (usage.flavorgroup_id, usage.flavorgroup_name)
+        else {
+            continue;
+        };
+        let group_usages_for_user =
+            group_usages.entry(usage.user_id).or_insert(HashMap::new());
+        let group_usage = group_usages_for_user.entry(group_id).or_insert(
+            FlavorGroupUsageSimple {
+                user_id: usage.user_id,
+                user_name: usage.user_name,
+                flavorgroup_id: group_id,
+                flavorgroup_name: group_name,
+                usage: 0,
+            },
+        );
+        group_usage.usage += usage.usage;
+    }
+    group_usages
+        .values()
+        .cloned()
+        .flat_map(|h| h.values().cloned().collect::<Vec<_>>())
+        .collect()
+}
+
 pub async fn calculate_flavor_group_usage_for_user_simple(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: Data<OpenStack>,
-    _user_id: u64,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: Data<OpenStack>,
+    user_id: u64,
 ) -> Result<Vec<FlavorGroupUsageSimple>, UnexpectedOnlyError> {
-    todo!()
+    let flavor_usage =
+        calculate_flavor_usage_for_user_simple(transaction, openstack, user_id)
+            .await?;
+    Ok(flavor_usage_to_flavor_group_usage(flavor_usage))
 }
 
 pub async fn calculate_flavor_group_usage_for_user_aggregate(
