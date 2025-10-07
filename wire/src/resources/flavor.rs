@@ -55,6 +55,7 @@ impl Display for Flavor {
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorMinimal {
+    #[cfg_attr(feature = "sqlx", sqlx(try_from = "i32"))]
     pub id: u32,
     pub name: String,
 }
