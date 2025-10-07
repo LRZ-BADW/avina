@@ -20,7 +20,7 @@ pub(crate) enum FlavorPriceCommand {
         #[clap(short, long, help = "List flavor prices for user class")]
         user_class: Option<UserClass>,
         #[clap(short, long, help = "List active flavor prices", action)]
-        current: Option<bool>,
+        current: bool,
     },
 
     #[clap(visible_alias = "show", about = "Show flavor price with given ID")]
@@ -122,13 +122,13 @@ async fn list(
     api: avina::Api,
     format: Format,
     user_class: Option<UserClass>,
-    current: Option<bool>,
+    current: bool,
 ) -> Result<(), Box<dyn Error>> {
     let mut request = api.flavor_price.list();
     if let Some(user_class) = user_class {
         request.user_class(user_class);
     }
-    if let Some(true) = current {
+    if current {
         request.current();
     }
     print_object_list(request.send().await?, format)
