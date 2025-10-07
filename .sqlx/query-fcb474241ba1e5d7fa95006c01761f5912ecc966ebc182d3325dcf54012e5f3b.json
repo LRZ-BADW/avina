@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n        SELECT id, name, project_id\n        FROM resources_flavorgroup\n        WHERE id = ?\n        ",
+  "query": "\n        SELECT\n            g.id as id,\n            g.name as name,\n            g.project_id as project,\n            GROUP_CONCAT(f.id) as flavors\n        FROM resources_flavorgroup as g\n        LEFT JOIN resources_flavor as f\n        ON g.id = f.group_id\n        WHERE g.id = ?\n        GROUP BY g.id\n        ",
   "describe": {
     "columns": [
       {
@@ -23,11 +23,20 @@
       },
       {
         "ordinal": 2,
-        "name": "project_id",
+        "name": "project",
         "type_info": {
           "type": "Long",
           "flags": "NOT_NULL | MULTIPLE_KEY | NO_DEFAULT_VALUE",
           "max_size": 11
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "flavors",
+        "type_info": {
+          "type": "Blob",
+          "flags": "",
+          "max_size": 16777216
         }
       }
     ],
@@ -37,8 +46,9 @@
     "nullable": [
       false,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "e47d52e89a59f1616ea18056d574c123e0c9947910697bc8c2701d3f3dbc61d1"
+  "hash": "fcb474241ba1e5d7fa95006c01761f5912ecc966ebc182d3325dcf54012e5f3b"
 }
