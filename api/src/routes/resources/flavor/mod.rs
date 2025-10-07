@@ -16,7 +16,7 @@ mod delete;
 use delete::flavor_delete;
 mod import;
 use import::flavor_import;
-mod usage;
+pub mod usage;
 use usage::flavor_usage;
 
 pub fn flavors_scope() -> Scope {
