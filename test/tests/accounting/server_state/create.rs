@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use avina::{Api, Token};
-use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
+use avina_test::{random_alphanumeric_string, spawn_app};
 use chrono::{DateTime, FixedOffset, Utc};
 use uuid::Uuid;
 
@@ -152,7 +152,7 @@ async fn e2e_lib_server_state_create_works() {
         .server_state
         .create(
             begin,
-            instance_id.clone(),
+            instance_id,
             instance_name.clone(),
             flavor.id,
             status.clone(),
@@ -270,7 +270,7 @@ async fn e2e_lib_server_state_create_and_list_works() {
         .server_state
         .create(
             begin,
-            instance_id.clone(),
+            instance_id,
             instance_name.clone(),
             flavor.id,
             status.clone(),
