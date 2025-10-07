@@ -113,11 +113,17 @@ pub async fn calculate_flavor_group_usage_for_user(
 }
 
 pub async fn calculate_flavor_group_usage_for_project_simple(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: Data<OpenStack>,
-    _project_id: u64,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: Data<OpenStack>,
+    project_id: u64,
 ) -> Result<Vec<FlavorGroupUsageSimple>, UnexpectedOnlyError> {
-    todo!()
+    let flavor_usage = calculate_flavor_usage_for_project_simple(
+        transaction,
+        openstack,
+        project_id,
+    )
+    .await?;
+    Ok(flavor_usage_to_flavor_group_usage(flavor_usage))
 }
 
 pub async fn calculate_flavor_group_usage_for_project_aggregate(
