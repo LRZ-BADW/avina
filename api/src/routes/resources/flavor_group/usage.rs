@@ -72,10 +72,10 @@ pub async fn calculate_flavor_group_usage_for_user_simple(
     openstack: Data<OpenStack>,
     user_id: u64,
 ) -> Result<Vec<FlavorGroupUsageSimple>, UnexpectedOnlyError> {
-    let flavor_usage =
+    Ok(flavor_usage_to_flavor_group_usage(
         calculate_flavor_usage_for_user_simple(transaction, openstack, user_id)
-            .await?;
-    Ok(flavor_usage_to_flavor_group_usage(flavor_usage))
+            .await?,
+    ))
 }
 
 pub async fn calculate_flavor_group_usage_for_user_aggregate(
@@ -118,13 +118,14 @@ pub async fn calculate_flavor_group_usage_for_project_simple(
     openstack: Data<OpenStack>,
     project_id: u64,
 ) -> Result<Vec<FlavorGroupUsageSimple>, UnexpectedOnlyError> {
-    let flavor_usage = calculate_flavor_usage_for_project_simple(
-        transaction,
-        openstack,
-        project_id,
-    )
-    .await?;
-    Ok(flavor_usage_to_flavor_group_usage(flavor_usage))
+    Ok(flavor_usage_to_flavor_group_usage(
+        calculate_flavor_usage_for_project_simple(
+            transaction,
+            openstack,
+            project_id,
+        )
+        .await?,
+    ))
 }
 
 pub async fn calculate_flavor_group_usage_for_project_aggregate(
@@ -166,9 +167,9 @@ pub async fn calculate_flavor_group_usage_for_all_simple(
     transaction: &mut Transaction<'_, MySql>,
     openstack: Data<OpenStack>,
 ) -> Result<Vec<FlavorGroupUsageSimple>, UnexpectedOnlyError> {
-    let flavor_usage =
-        calculate_flavor_usage_for_all_simple(transaction, openstack).await?;
-    Ok(flavor_usage_to_flavor_group_usage(flavor_usage))
+    Ok(flavor_usage_to_flavor_group_usage(
+        calculate_flavor_usage_for_all_simple(transaction, openstack).await?,
+    ))
 }
 
 pub async fn calculate_flavor_group_usage_for_all_aggregate(
