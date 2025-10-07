@@ -25,9 +25,15 @@ impl<'r> FromRow<'r, MySqlRow> for FlavorGroup {
             id: row.try_get::<i32, _>("id")?.try_into().unwrap(),
             name: row.try_get("name")?,
             flavors: {
-                let flavors: String = row.try_get("flavors")?;
+                let flavors: Option<String> = row.try_get("flavors")?;
                 // TODO: can we get rid of this unwrap here
-                flavors.split(',').map(|f| f.parse().unwrap()).collect()
+                match flavors {
+                    Some(flavors) => flavors
+                        .split(',')
+                        .map(|f| f.parse::<i32>().unwrap().try_into().unwrap())
+                        .collect(),
+                    None => Vec::new(),
+                }
             },
             project: row.try_get::<i32, _>("project")?.try_into().unwrap(),
         })
