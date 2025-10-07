@@ -22,14 +22,14 @@ pub struct FlavorGroup {
 impl<'r> FromRow<'r, MySqlRow> for FlavorGroup {
     fn from_row(row: &'r MySqlRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
-            id: row.try_get("id")?,
+            id: row.try_get::<i32, _>("id")?.try_into().unwrap(),
             name: row.try_get("name")?,
             flavors: {
                 let flavors: String = row.try_get("flavors")?;
                 // TODO: can we get rid of this unwrap here
                 flavors.split(',').map(|f| f.parse().unwrap()).collect()
             },
-            project: row.try_get("project_id")?,
+            project: row.try_get::<i32, _>("project")?.try_into().unwrap(),
         })
     }
 }
