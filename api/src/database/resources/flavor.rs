@@ -137,7 +137,7 @@ pub async fn select_maybe_flavor_detail_from_db(
         pub id: i32,
         pub name: String,
         pub openstack_id: String, // UUIDv4
-        pub group_id: Option<u32>,
+        pub group_id: Option<i32>,
         pub group_name: Option<String>,
         pub weight: u32,
     }
@@ -172,7 +172,10 @@ pub async fn select_maybe_flavor_detail_from_db(
         name: flavor.name,
         openstack_id: flavor.openstack_id,
         group: match (flavor.group_id, flavor.group_name.clone()) {
-            (Some(id), Some(name)) => Some(FlavorGroupMinimal { id, name }),
+            (Some(id), Some(name)) => Some(FlavorGroupMinimal {
+                id: id as u32,
+                name,
+            }),
             _ => None,
         },
         group_name: flavor.group_name,
