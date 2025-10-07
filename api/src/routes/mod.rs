@@ -18,7 +18,6 @@ pub use user::*;
 
 // TODO: missing endpoints
 // - resources::flavor::access
-// - resources::flavor_group::usage
 // - quota::flavor_quota::check
 
 // TODO: improve the following endpoints
