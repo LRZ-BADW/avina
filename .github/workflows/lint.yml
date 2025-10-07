@@ -63,7 +63,7 @@ jobs:
       - name: Install mold
         run: sudo apt update && sudo apt install mold -y
       - name: Run clippy
-        run: SQLX_OFFLINE=true cargo clippy -- -D warnings
+        run: SQLX_OFFLINE=true cargo clippy --all --all-targets -- -D warnings
 
   spellcheck:
     name: spellcheck
