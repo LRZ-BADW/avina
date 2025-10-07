@@ -56,13 +56,6 @@ pub async fn select_flavor_group_name_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
-#[derive(Clone, Debug, PartialEq, FromRow)]
-pub struct FlavorGroupDb {
-    pub id: u32,
-    pub name: String,
-    pub project_id: u32,
-}
-
 #[tracing::instrument(
     name = "select_maybe_flavor_group_from_db",
     skip(transaction)
@@ -71,58 +64,32 @@ pub async fn select_maybe_flavor_group_from_db(
     transaction: &mut Transaction<'_, MySql>,
     flavor_group_id: u64,
 ) -> Result<Option<FlavorGroup>, UnexpectedOnlyError> {
-    #[derive(FromRow)]
-    pub struct FlavorGroupDb {
-        pub id: i32,
-        pub name: String,
-        pub project_id: i32,
-    }
-    let query1 = sqlx::query!(
+    let query = sqlx::query!(
         r#"
-        SELECT id, name, project_id
-        FROM resources_flavorgroup
-        WHERE id = ?
+        SELECT
+            g.id as id,
+            g.name as name,
+            g.project_id as project,
+            GROUP_CONCAT(f.id) as flavors
+        FROM resources_flavorgroup as g
+        LEFT JOIN resources_flavor as f
+        ON g.id = f.group_id
+        WHERE g.id = ?
+        GROUP BY g.id
         "#,
         flavor_group_id
     );
-    let row1 = transaction
-        .fetch_optional(query1)
+    let row = transaction
+        .fetch_optional(query)
         .await
         .context("Failed to execute select query")?;
-    let flavor_group = match row1 {
-        Some(row) => FlavorGroupDb::from_row(&row)
-            .context("Failed to parse flavor group row")?,
-        None => return Ok(None),
-    };
-    #[derive(FromRow)]
-    pub struct FlavorIdDb {
-        pub id: u32,
-    }
-    let query2 = sqlx::query!(
-        r#"
-        SELECT id
-        FROM resources_flavor
-        WHERE group_id = ?
-        "#,
-        flavor_group_id
-    );
-    let flavors = transaction
-        .fetch_all(query2)
-        .await
-        .context("Failed to execute select query")?
-        .into_iter()
-        .map(|row| FlavorIdDb::from_row(&row))
-        .collect::<Result<Vec<_>, _>>()
-        .context("Failed to parse flavor row")?
-        .into_iter()
-        .map(|row| row.id)
-        .collect::<Vec<_>>();
-    Ok(Some(FlavorGroup {
-        id: flavor_group.id as u32,
-        name: flavor_group.name,
-        project: flavor_group.project_id as u32,
-        flavors,
-    }))
+    Ok(match row {
+        Some(row) => Some(
+            FlavorGroup::from_row(&row)
+                .context("Failed to parse flavor group row")?,
+        ),
+        None => None,
+    })
 }
 
 #[tracing::instrument(name = "select_flavor_group_from_db", skip(transaction))]
@@ -178,8 +145,9 @@ pub async fn select_all_flavor_groups_from_db(
             g.name as name,
             g.project_id as project,
             GROUP_CONCAT(f.id) as flavors
-        FROM resources_flavorgroup as g, resources_flavor as f
-        WHERE g.id = f.group_id
+        FROM resources_flavorgroup as g
+        LEFT JOIN resources_flavor as f
+        ON g.id = f.group_id
         GROUP BY g.id
         "#,
     );
@@ -208,10 +176,10 @@ pub async fn select_lrz_flavor_groups_from_db(
             g.name as name,
             g.project_id as project,
             GROUP_CONCAT(f.id) as flavors
-        FROM resources_flavorgroup as g, resources_flavor as f
-        WHERE
-            g.id = f.group_id AND
-            g.name LIKE 'lrz.%'
+        FROM resources_flavorgroup as g
+        LEFT JOIN resources_flavor as f
+        ON g.id = f.group_id
+        WHERE g.name LIKE 'lrz.%'
         GROUP BY g.id
         "#,
     );
