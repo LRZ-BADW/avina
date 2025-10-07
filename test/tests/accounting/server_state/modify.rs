@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use avina::{Api, Token};
-use avina_test::{random_alphanumeric_string, random_uuid, spawn_app};
+use avina_test::{random_alphanumeric_string, spawn_app};
 use uuid::Uuid;
 
 use super::assert_equal_server_states;
