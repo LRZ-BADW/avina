@@ -138,6 +138,7 @@ pub async fn select_all_flavor_prices_from_db(
 )]
 pub async fn select_flavor_prices_for_period_from_db(
     transaction: &mut Transaction<'_, MySql>,
+    // BUG: this is never used to filter out outdated prices.
     begin: DateTime<Utc>,
     end: DateTime<Utc>,
 ) -> Result<Vec<FlavorPrice>, UnexpectedOnlyError> {
@@ -211,6 +212,64 @@ pub async fn select_flavor_prices_for_userclass_from_db(
             p.user_class = ?
         "#,
         user_class as u32
+    );
+    let rows = transaction
+        .fetch_all(query)
+        .await
+        .context("Failed to execute select query")?
+        .into_iter()
+        .map(|r| FlavorPriceRow::from_row(&r))
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert row to flavor price row")?
+        .into_iter()
+        .map(|row| {
+            Ok::<FlavorPrice, UnexpectedOnlyError>(FlavorPrice {
+                id: row.id,
+                flavor: row.flavor,
+                flavor_name: row.flavor_name,
+                user_class: row
+                    .user_class
+                    .try_into()
+                    .context("Failed to parse user class")?,
+                unit_price: row.unit_price,
+                start_time: row.start_time.fixed_offset(),
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .context("Failed to convert row to flavor price")?;
+    Ok(rows)
+}
+
+#[tracing::instrument(
+    name = "select_flavor_prices_for_userclass_and_period_from_db",
+    skip(transaction)
+)]
+pub async fn select_flavor_prices_for_userclass_and_period_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    user_class: UserClass,
+    // BUG: this is never used to filter out outdated prices.
+    begin: DateTime<Utc>,
+    end: DateTime<Utc>,
+) -> Result<Vec<FlavorPrice>, UnexpectedOnlyError> {
+    let query = sqlx::query!(
+        r#"
+        SELECT
+            p.id,
+            p.flavor_id as flavor,
+            f.name as flavor_name, 
+            p.user_class as user_class,
+            p.unit_price as unit_price,
+            p.start_time as start_time
+        FROM
+            pricing_flavorprice as p,
+            resources_flavor as f
+        WHERE
+            p.flavor_id = f.id AND
+            p.user_class = ? AND
+            p.start_time <= ?
+        "#,
+        user_class as u32,
+        end,
     );
     let rows = transaction
         .fetch_all(query)
