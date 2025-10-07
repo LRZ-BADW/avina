@@ -24,6 +24,7 @@ use crate::{
     error::{OptionApiError, UnexpectedOnlyError},
     openstack::OpenStack,
     routes::resources::flavor::usage::{
+        calculate_flavor_usage_for_all_simple,
         calculate_flavor_usage_for_project_simple,
         calculate_flavor_usage_for_user_simple,
     },
@@ -162,10 +163,12 @@ pub async fn calculate_flavor_group_usage_for_project(
 }
 
 pub async fn calculate_flavor_group_usage_for_all_simple(
-    _transaction: &mut Transaction<'_, MySql>,
-    _openstack: Data<OpenStack>,
+    transaction: &mut Transaction<'_, MySql>,
+    openstack: Data<OpenStack>,
 ) -> Result<Vec<FlavorGroupUsageSimple>, UnexpectedOnlyError> {
-    todo!()
+    let flavor_usage =
+        calculate_flavor_usage_for_all_simple(transaction, openstack).await?;
+    Ok(flavor_usage_to_flavor_group_usage(flavor_usage))
 }
 
 pub async fn calculate_flavor_group_usage_for_all_aggregate(
