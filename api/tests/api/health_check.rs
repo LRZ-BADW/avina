@@ -8,7 +8,7 @@ async fn health_check_works() {
 
     // act
     let response = client
-        .get(&format!("{}/health_check", &app.address))
+        .get(format!("{}/health_check", &app.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -30,7 +30,7 @@ async fn secured_health_check_returns_unauthorized_for_missing_token() {
 
     // act
     let response = client
-        .get(&format!("{}/api/secured_health_check", &app.address))
+        .get(format!("{}/api/secured_health_check", &app.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -52,7 +52,7 @@ async fn secured_health_check_returns_unauthorized_for_wrong_token() {
     // act
     let wrong_token = random_uuid();
     let response = client
-        .get(&format!("{}/api/secured_health_check", &app.address))
+        .get(format!("{}/api/secured_health_check", &app.address))
         .header("X-Auth-Token", wrong_token)
         .send()
         .await
@@ -78,7 +78,7 @@ async fn secured_health_check_works_with_valid_token() {
 
     // act
     let response = client
-        .get(&format!("{}/api/secured_health_check", &app.address))
+        .get(format!("{}/api/secured_health_check", &app.address))
         .header("X-Auth-Token", token)
         .send()
         .await

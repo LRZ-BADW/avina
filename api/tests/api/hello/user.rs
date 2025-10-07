@@ -13,7 +13,7 @@ async fn hello_returns_unauthorized_for_missing_token() {
 
     // act
     let response = client
-        .get(&format!("{}/api/hello", &app.address))
+        .get(format!("{}/api/hello", &app.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -35,7 +35,7 @@ async fn hello_returns_unauthorized_for_wrong_token() {
     // act
     let wrong_token = random_uuid();
     let response = client
-        .get(&format!("{}/api/hello", &app.address))
+        .get(format!("{}/api/hello", &app.address))
         .header("X-Auth-Token", wrong_token)
         .send()
         .await
@@ -61,7 +61,7 @@ async fn hello_works_with_valid_token() {
 
     // act
     let response = client
-        .get(&format!("{}/api/hello", &app.address))
+        .get(format!("{}/api/hello", &app.address))
         .header("X-Auth-Token", token)
         .send()
         .await

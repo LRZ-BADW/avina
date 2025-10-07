@@ -491,5 +491,5 @@ async fn e2e_lib_master_user_can_modify_project_user_budget() {
     let get = client.user_budget.get(user_budget.id).await;
 
     assert!(request.is_ok());
-    assert_eq!(get.unwrap().amount, new_user_budget_amount as u32);
+    assert_eq!(get.unwrap().amount, new_user_budget_amount);
 }
