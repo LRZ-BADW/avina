@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n        SELECT\n            g.id as id,\n            g.name as name,\n            g.project_id as project,\n            GROUP_CONCAT(f.id) as flavors\n        FROM resources_flavorgroup as g, resources_flavor as f\n        WHERE\n            g.id = f.group_id AND\n            g.name LIKE 'lrz.%'\n        GROUP BY g.id\n        ",
+  "query": "\n        SELECT\n            g.id as id,\n            g.name as name,\n            g.project_id as project,\n            GROUP_CONCAT(f.id) as flavors\n        FROM resources_flavorgroup as g\n        LEFT JOIN resources_flavor as f\n        ON g.id = f.group_id\n        WHERE g.name LIKE 'lrz.%'\n        GROUP BY g.id\n        ",
   "describe": {
     "columns": [
       {
@@ -50,5 +50,5 @@
       true
     ]
   },
-  "hash": "1e5e9d8a79ac967a8dec83b7067a00967e4b532f802773d6f545d8f5ef312e40"
+  "hash": "a38fd720713af4e8184e4974c729ae69f60fcb472ea3125b86a2ca4490ea73a1"
 }
