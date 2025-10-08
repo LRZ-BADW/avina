@@ -192,13 +192,30 @@ async fn e2e_lib_flavor_price_list_current() {
         .mount(&server.keystone_server)
         .await;
 
-    let user_class_1 = UserClass::UC1;
-    let flavor_1 = server
+    let user_class_0 = UserClass::UC1;
+    let flavor_0 = server
         .setup_test_flavor()
         .await
         .expect("Failed to setup test flavor");
+    let new_flavor_price_0 = NewFlavorPrice {
+        flavor_id: flavor_0.id as u64,
+        user_class: user_class_0,
+        unit_price: 0_f64,
+        start_time: Utc
+            .with_ymd_and_hms(Utc::now().year() - 1, 1, 1, 1, 1, 1)
+            .unwrap(),
+    };
+    let _flavor_price_0 = server
+        .setup_test_flavor_price_with_new_flavor_price(
+            &flavor_0,
+            new_flavor_price_0,
+        )
+        .await
+        .expect("Failed to setup test flavor group");
+
+    let user_class_1 = UserClass::UC1;
     let new_flavor_price_1 = NewFlavorPrice {
-        flavor_id: flavor_1.id as u64,
+        flavor_id: flavor_0.id as u64,
         user_class: user_class_1,
         unit_price: 0_f64,
         start_time: Utc
@@ -207,7 +224,7 @@ async fn e2e_lib_flavor_price_list_current() {
     };
     let flavor_price_1 = server
         .setup_test_flavor_price_with_new_flavor_price(
-            &flavor_1,
+            &flavor_0,
             new_flavor_price_1,
         )
         .await
@@ -243,7 +260,7 @@ async fn e2e_lib_flavor_price_list_current() {
         flavor_id: flavor_3.id as u64,
         user_class: user_class_3,
         unit_price: 0_f64,
-        start_time: Utc::now().with_year(2100).unwrap(),
+        start_time: Utc::now().with_year(Utc::now().year() + 1).unwrap(),
     };
     let _flavor_price_3 = server
         .setup_test_flavor_price_with_new_flavor_price(
@@ -266,4 +283,118 @@ async fn e2e_lib_flavor_price_list_current() {
     assert_eq!(list.len(), 2);
     assert!(list.contains(&flavor_price_1));
     assert!(list.contains(&flavor_price_2));
+}
+
+#[tokio::test]
+async fn e2e_lib_flavor_price_list_current_and_user_class() {
+    // arrange
+    let server = spawn_app().await;
+    let test_project = server
+        .setup_test_project(0, 0, 1)
+        .await
+        .expect("Failed to setup test project");
+    let user = test_project.normals[0].user.clone();
+    let token = test_project.normals[0].token.clone();
+    server
+        .mock_keystone_auth(&token, &user.openstack_id, &user.name)
+        .mount(&server.keystone_server)
+        .await;
+
+    let user_class_0 = UserClass::UC1;
+    let flavor_0 = server
+        .setup_test_flavor()
+        .await
+        .expect("Failed to setup test flavor");
+    let new_flavor_price_0 = NewFlavorPrice {
+        flavor_id: flavor_0.id as u64,
+        user_class: user_class_0,
+        unit_price: 0_f64,
+        start_time: Utc
+            .with_ymd_and_hms(Utc::now().year() - 1, 1, 1, 1, 1, 1)
+            .unwrap(),
+    };
+    let _flavor_price_0 = server
+        .setup_test_flavor_price_with_new_flavor_price(
+            &flavor_0,
+            new_flavor_price_0,
+        )
+        .await
+        .expect("Failed to setup test flavor group");
+
+    let user_class_1 = UserClass::UC1;
+    let new_flavor_price_1 = NewFlavorPrice {
+        flavor_id: flavor_0.id as u64,
+        user_class: user_class_1,
+        unit_price: 0_f64,
+        start_time: Utc
+            .with_ymd_and_hms(Utc::now().year(), 1, 1, 1, 1, 1)
+            .unwrap(),
+    };
+    let flavor_price_1 = server
+        .setup_test_flavor_price_with_new_flavor_price(
+            &flavor_0,
+            new_flavor_price_1,
+        )
+        .await
+        .expect("Failed to setup test flavor group");
+
+    let user_class_2 = UserClass::UC2;
+    let flavor_2 = server
+        .setup_test_flavor()
+        .await
+        .expect("Failed to setup test flavor");
+    let new_flavor_price_2 = NewFlavorPrice {
+        flavor_id: flavor_2.id as u64,
+        user_class: user_class_2,
+        unit_price: 0_f64,
+        start_time: Utc
+            .with_ymd_and_hms(Utc::now().year(), 1, 1, 1, 1, 1)
+            .unwrap(),
+    };
+    let _flavor_price_2 = server
+        .setup_test_flavor_price_with_new_flavor_price(
+            &flavor_2,
+            new_flavor_price_2,
+        )
+        .await
+        .expect("Failed to setup test flavor group");
+
+    let user_class_3 = UserClass::UC3;
+    let flavor_3 = server
+        .setup_test_flavor()
+        .await
+        .expect("Failed to setup test flavor");
+    let new_flavor_price_3 = NewFlavorPrice {
+        flavor_id: flavor_3.id as u64,
+        user_class: user_class_3,
+        unit_price: 0_f64,
+        start_time: Utc::now().with_year(Utc::now().year() + 1).unwrap(),
+    };
+    let _flavor_price_3 = server
+        .setup_test_flavor_price_with_new_flavor_price(
+            &flavor_3,
+            new_flavor_price_3,
+        )
+        .await
+        .expect("Failed to setup test flavor group");
+
+    let client = Api::new(
+        format!("{}/api", &server.address),
+        Token::from_str(&token).unwrap(),
+        None,
+        None,
+    )
+    .unwrap();
+
+    let list = client
+        .flavor_price
+        .list()
+        .current()
+        .user_class(flavor_price_1.user_class)
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(list.len(), 1);
+    assert!(list.contains(&flavor_price_1));
 }
