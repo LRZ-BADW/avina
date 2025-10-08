@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::Context;
 use avina_wire::{
     pricing::{FlavorPrice, FlavorPriceCreateData},
@@ -138,7 +140,6 @@ pub async fn select_all_flavor_prices_from_db(
 )]
 pub async fn select_flavor_prices_for_period_from_db(
     transaction: &mut Transaction<'_, MySql>,
-    // BUG: this is never used to filter out outdated prices.
     begin: DateTime<Utc>,
     end: DateTime<Utc>,
 ) -> Result<Vec<FlavorPrice>, UnexpectedOnlyError> {
@@ -157,6 +158,7 @@ pub async fn select_flavor_prices_for_period_from_db(
         WHERE
             p.flavor_id = f.id AND
             p.start_time <= ?
+        ORDER BY p.start_time DESC
         "#,
         end,
     );
@@ -184,7 +186,23 @@ pub async fn select_flavor_prices_for_period_from_db(
         })
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to flavor price")?;
-    Ok(rows)
+    let mut prices = Vec::new();
+    let mut done = HashMap::new();
+    for price in rows {
+        let this_done = done
+            .entry(price.flavor)
+            .or_insert(HashMap::new())
+            .entry(price.user_class)
+            .or_insert(false);
+        if *this_done {
+            continue;
+        }
+        if price.start_time <= begin {
+            *this_done = true;
+        }
+        prices.push(price);
+    }
+    Ok(prices)
 }
 
 #[tracing::instrument(
@@ -247,7 +265,6 @@ pub async fn select_flavor_prices_for_userclass_from_db(
 pub async fn select_flavor_prices_for_userclass_and_period_from_db(
     transaction: &mut Transaction<'_, MySql>,
     user_class: UserClass,
-    // BUG: this is never used to filter out outdated prices.
     begin: DateTime<Utc>,
     end: DateTime<Utc>,
 ) -> Result<Vec<FlavorPrice>, UnexpectedOnlyError> {
@@ -267,6 +284,7 @@ pub async fn select_flavor_prices_for_userclass_and_period_from_db(
             p.flavor_id = f.id AND
             p.user_class = ? AND
             p.start_time <= ?
+        ORDER BY p.start_time DESC
         "#,
         user_class as u32,
         end,
@@ -295,7 +313,23 @@ pub async fn select_flavor_prices_for_userclass_and_period_from_db(
         })
         .collect::<Result<Vec<_>, _>>()
         .context("Failed to convert row to flavor price")?;
-    Ok(rows)
+    let mut prices = Vec::new();
+    let mut done = HashMap::new();
+    for price in rows {
+        let this_done = done
+            .entry(price.flavor)
+            .or_insert(HashMap::new())
+            .entry(price.user_class)
+            .or_insert(false);
+        if *this_done {
+            continue;
+        }
+        if price.start_time <= begin {
+            *this_done = true;
+        }
+        prices.push(price);
+    }
+    Ok(prices)
 }
 
 pub struct NewFlavorPrice {
