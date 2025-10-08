@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n        SELECT\n            p.id,\n            p.flavor_id as flavor,\n            f.name as flavor_name, \n            p.user_class as user_class,\n            p.unit_price as unit_price,\n            p.start_time as start_time\n        FROM\n            pricing_flavorprice as p,\n            resources_flavor as f\n        WHERE\n            p.flavor_id = f.id AND\n            p.user_class = ? AND\n            p.start_time <= ?\n        ",
+  "query": "\n        SELECT\n            p.id,\n            p.flavor_id as flavor,\n            f.name as flavor_name, \n            p.user_class as user_class,\n            p.unit_price as unit_price,\n            p.start_time as start_time\n        FROM\n            pricing_flavorprice as p,\n            resources_flavor as f\n        WHERE\n            p.flavor_id = f.id AND\n            p.user_class = ? AND\n            p.start_time <= ?\n        ORDER BY p.start_time DESC\n        ",
   "describe": {
     "columns": [
       {
@@ -70,5 +70,5 @@
       false
     ]
   },
-  "hash": "49e94cca3778afe58d3d09d8c3912ecf4572f0023e0e4e2f269a2a64d6ba6c73"
+  "hash": "7cf2d64b957c3d11c1b3e7846c43984aae7bab2b2008ecf6cc151dc394889681"
 }
