@@ -68,8 +68,7 @@ pub async fn calculate_flavor_usage_for_user_simple(
         select_maybe_user_detail_from_db(transaction, user_id).await?
     else {
         return Err(anyhow!(format!(
-            "Could not select user with id {} from database.",
-            user_id
+            "Could not select user with id {user_id} from database."
         ))
         .into());
     };
