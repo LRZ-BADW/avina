@@ -1,0 +1,74 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        SELECT\n            q.id as id,\n            u.id as user,\n            u.name as username,\n            q.quota as quota,\n            g.id as flavor_group,\n            g.name as flavor_group_name\n        FROM\n            quota_flavorquota as f,\n            quota_quota as q,\n            resources_flavorgroup as g,\n            user_user as u\n        WHERE\n            f.quota_ptr_id = q.id AND\n            f.flavor_group_id = g.id AND\n            q.user_id = u.id AND\n            u.id = ? AND\n            g.id = ?\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | PRIMARY_KEY | AUTO_INCREMENT",
+          "max_size": 20
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "user",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | PRIMARY_KEY | AUTO_INCREMENT",
+          "max_size": 11
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 1020
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "quota",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 11
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "flavor_group",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | PRIMARY_KEY | AUTO_INCREMENT",
+          "max_size": 20
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "flavor_group_name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 256
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3cbc532482f6c55accc1bfd84c45aae4b6a34d958b70c135430e1ebb11b7168b"
+}
