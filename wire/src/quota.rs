@@ -27,6 +27,13 @@ impl Display for FlavorQuota {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FlavorQuotaCheckParams {
+    pub user: u32,
+    pub flavor: u32,
+    pub count: Option<u32>,
+}
+
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorQuotaCheck {

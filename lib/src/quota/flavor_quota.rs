@@ -2,10 +2,10 @@ use std::rc::Rc;
 
 use anyhow::Context;
 use avina_wire::quota::{
-    FlavorQuota, FlavorQuotaCheck, FlavorQuotaCreateData,
-    FlavorQuotaListParams, FlavorQuotaModifyData,
+    FlavorQuota, FlavorQuotaCheck, FlavorQuotaCheckParams,
+    FlavorQuotaCreateData, FlavorQuotaListParams, FlavorQuotaModifyData,
 };
-use reqwest::{Client, Method, StatusCode, Url};
+use reqwest::{Client, Method, StatusCode};
 
 use crate::{
     common::{SerializableNone, request, request_bare},
@@ -159,9 +159,7 @@ pub struct FlavorQuotaCheckRequest {
     url: String,
     client: Rc<Client>,
 
-    user: u32,
-    flavor: u32,
-    count: Option<u32>,
+    params: FlavorQuotaCheckParams,
 }
 
 impl FlavorQuotaCheckRequest {
@@ -170,30 +168,27 @@ impl FlavorQuotaCheckRequest {
             url: format!("{url}/check/"),
             client: Rc::clone(client),
 
-            user,
-            flavor,
-            count: None,
+            params: FlavorQuotaCheckParams {
+                user,
+                flavor,
+                count: None,
+            },
         }
     }
 
     pub fn count(&mut self, count: u32) -> &mut Self {
-        self.count = Some(count);
+        self.params.count = Some(count);
         self
     }
 
-    fn params(&self) -> Vec<(&str, String)> {
-        let mut params = Vec::new();
-        params.push(("user", self.user.to_string()));
-        params.push(("flavor", self.flavor.to_string()));
-        if let Some(count) = self.count {
-            params.push(("flavorcount", count.to_string()));
-        }
-        params
-    }
-
     pub async fn send(&self) -> Result<FlavorQuotaCheck, ApiError> {
-        let url = Url::parse_with_params(self.url.as_str(), self.params())
-            .context("Could not parse URL GET parameters.")?;
+        let params = serde_urlencoded::to_string(&self.params)
+            .context("Failed to encode URL parameters")?;
+        let url = if params.is_empty() {
+            self.url.clone()
+        } else {
+            format!("{}?{}", self.url, params)
+        };
         request(
             &self.client,
             Method::GET,
