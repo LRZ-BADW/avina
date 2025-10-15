@@ -11,6 +11,7 @@ use sqlx::MySqlPool;
 use crate::{authorization::require_admin_user, error::NormalApiError};
 
 #[tracing::instrument(name = "flavor_quota_check")]
+// TODO: the original python function cached the responses.
 pub async fn flavor_quota_check(
     user: ReqData<User>,
     project: ReqData<Project>,
