@@ -18,11 +18,11 @@ pub use user::*;
 
 // TODO: missing endpoints
 // - resources::flavor::access
-// - quota::flavor_quota::check
 
 // TODO: improve the following endpoints
 // - pricing::flavor_price::modify
 // - quota::flavor_quota::modify
+// - quota::flavor_quota::check
 // - accounting::server_state::modify
 // - resources::flavor_group::get
 // - resources::flavor::get
