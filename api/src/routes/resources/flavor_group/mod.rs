@@ -14,7 +14,7 @@ mod modify;
 use modify::flavor_group_modify;
 mod delete;
 use delete::flavor_group_delete;
-mod usage;
+pub mod usage;
 use usage::flavor_group_usage;
 
 pub fn flavor_groups_scope() -> Scope {
