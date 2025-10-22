@@ -10,10 +10,13 @@ use tabled::Tabled;
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorQuota {
+    #[cfg_attr(feature = "sqlx", sqlx(try_from = "i32"))]
     pub id: u32,
+    #[cfg_attr(feature = "sqlx", sqlx(try_from = "i32"))]
     pub user: u32,
     pub username: String,
     pub quota: i64,
+    #[cfg_attr(feature = "sqlx", sqlx(try_from = "i32"))]
     pub flavor_group: u32,
     pub flavor_group_name: String,
 }
