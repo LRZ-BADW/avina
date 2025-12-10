@@ -72,7 +72,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: taiki-e/install-action@v2.62.64
+      - uses: taiki-e/install-action@v2.62.65
         with:
           tool: cargo-spellcheck
       - name: Check spelling
