@@ -22,7 +22,7 @@ jobs:
   advisories:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: taiki-e/install-action@v2.62.64
@@ -34,7 +34,7 @@ jobs:
   bans:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: taiki-e/install-action@v2.62.64
@@ -46,7 +46,7 @@ jobs:
   licenses:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: taiki-e/install-action@v2.62.64
@@ -58,7 +58,7 @@ jobs:
   sources:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: taiki-e/install-action@v2.62.64
