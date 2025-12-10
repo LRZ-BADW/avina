@@ -16,9 +16,6 @@ pub use quota::*;
 pub use resources::*;
 pub use user::*;
 
-// TODO: missing endpoints
-// - resources::flavor::access
-
 // TODO: improve the following endpoints
 // - pricing::flavor_price::modify
 // - quota::flavor_quota::modify
