@@ -219,6 +219,7 @@ pub async fn select_maybe_flavor_id_by_openstack_id_from_db(
     })
 }
 
+#[allow(unused)]
 #[tracing::instrument(
     name = "select_flavor_id_by_openstack_id_from_db",
     skip(transaction)
@@ -266,6 +267,7 @@ pub async fn select_maybe_user_id_by_openstack_id_from_db(
     })
 }
 
+#[allow(unused)]
 #[tracing::instrument(
     name = "select_user_id_by_openstack_id_from_db",
     skip(transaction)
