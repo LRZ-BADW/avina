@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Install the Rust toolchain
@@ -55,7 +55,7 @@ jobs:
           mysql database: 'avina'
           mysql root password: 'password'
       - name: Check out repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Install the Rust toolchain
@@ -85,7 +85,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: checkout
-  #       uses: actions/checkout@v5
+  #       uses: actions/checkout@v6
   #       with:
   #         persist-credentials: false
   #     - name: install rust toolchain
