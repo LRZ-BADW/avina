@@ -54,7 +54,7 @@ thiserror = "2.0"
 chrono = { version = "0.4", features = ["serde"] }
 strum = { version = "0.27", features = ["derive"] }
 indexmap = "2.12"
-uuid = { version = "1.18", features = ["v4"] }
+uuid = { version = "1.19", features = ["v4"] }
 
 [dependencies.sqlx]
 version = "0.8"
