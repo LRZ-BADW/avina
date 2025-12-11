@@ -41,7 +41,7 @@ anyhow = "1"
 chrono = { version = "0.4", features = ["serde"] }
 jzon = "0.12"
 avina-wire = { version = "1.7", path = "../wire" }
-uuid = { version = "1.18", features = ["v4"] }
+uuid = { version = "1.19", features = ["v4"] }
 
 [dev-dependencies]
 cargo-husky = { workspace = true }
