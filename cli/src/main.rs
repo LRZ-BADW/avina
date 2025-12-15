@@ -328,6 +328,12 @@ enum Command {
     },
 }
 
+#[test]
+fn check_cli_parser() {
+    use clap::CommandFactory;
+    Cli::command().debug_assert();
+}
+
 #[tokio::main]
 async fn main() -> ExitCode {
     let cli = Cli::parse();
