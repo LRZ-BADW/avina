@@ -152,7 +152,12 @@ struct Cli {
     credentials: CredentialArgs,
 
     // TODO allow specifying user by name as well
-    #[clap(short, long, help = "ID of the user to impersonate", global = true)]
+    #[clap(
+        short = 'X',
+        long,
+        help = "ID of the user to impersonate",
+        global = true
+    )]
     impersonate: Option<u32>,
 
     #[clap(
@@ -165,7 +170,7 @@ struct Cli {
 
     #[clap(
         value_enum,
-        short,
+        short = 'F',
         long,
         help = "Format of the output",
         default_value_t = Format::Table(TableFormat::Rounded),
