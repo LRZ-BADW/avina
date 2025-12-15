@@ -26,7 +26,7 @@ pub struct ServerConsumptionAll {
     pub projects: HashMap<String, ServerConsumptionProject>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct ServerConsumptionParams {
     pub begin: Option<DateTime<FixedOffset>>,
     pub end: Option<DateTime<FixedOffset>>,

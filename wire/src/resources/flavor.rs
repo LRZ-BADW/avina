@@ -86,7 +86,7 @@ impl Display for FlavorDetailed {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct FlavorListParams {
     pub all: Option<bool>,
     #[serde(rename = "flavorgroup")]
@@ -120,7 +120,7 @@ impl FlavorCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorModifyData {
     pub id: u32,
 
@@ -146,7 +146,7 @@ impl FlavorModifyData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct FlavorUsageParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<u32>,
@@ -159,7 +159,7 @@ pub struct FlavorUsageParams {
 }
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorUsageSimple {
     pub user_id: u32,
     pub user_name: String,
@@ -174,7 +174,7 @@ pub struct FlavorUsageSimple {
 }
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorUsageAggregate {
     pub flavor_id: u32,
     pub flavor_name: String,

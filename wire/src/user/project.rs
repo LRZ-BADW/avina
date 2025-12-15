@@ -137,13 +137,13 @@ pub enum ProjectRetrieved {
     Normal(Project),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
 pub struct ProjectListParams {
     pub all: Option<bool>,
     pub userclass: Option<UserClass>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct ProjectCreateData {
     pub name: String,
     pub openstack_id: String, // UUIDv4
@@ -161,7 +161,7 @@ impl ProjectCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct ProjectModifyData {
     // TODO: why again is this here? since this is already a URL parameter
     pub id: u32,

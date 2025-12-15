@@ -135,13 +135,13 @@ pub struct UserImport {
     pub new_user_count: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct UserListParams {
     pub all: Option<bool>,
     pub project: Option<u32>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserCreateData {
     pub name: String,
     pub openstack_id: String, // UUIDv4
@@ -169,7 +169,7 @@ impl UserCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserModifyData {
     pub id: u32,
 

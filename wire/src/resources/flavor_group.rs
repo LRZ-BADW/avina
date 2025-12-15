@@ -77,13 +77,13 @@ impl Display for FlavorGroupDetailed {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct FlavorGroupListParams {
     pub all: Option<bool>,
 }
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorGroupCreated {
     pub id: u32,
     pub name: String,
@@ -99,13 +99,13 @@ impl Display for FlavorGroupCreated {
 }
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorGroupInitialize {
     pub new_flavor_group_count: u32,
     pub new_flavor_count: u32,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct FlavorGroupCreateData {
     pub name: String,
     pub flavors: Vec<u32>,
@@ -120,7 +120,7 @@ impl FlavorGroupCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct FlavorGroupModifyData {
     pub id: u32,
 
@@ -140,7 +140,7 @@ impl FlavorGroupModifyData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct FlavorGroupUsageParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<u32>,
@@ -153,7 +153,7 @@ pub struct FlavorGroupUsageParams {
 }
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorGroupUsageSimple {
     pub user_id: u32,
     pub user_name: String,
@@ -163,7 +163,7 @@ pub struct FlavorGroupUsageSimple {
 }
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct FlavorGroupUsageAggregate {
     pub flavorgroup_id: u32,
     pub flavorgroup_name: String,

@@ -4,12 +4,12 @@ use tabled::Tabled;
 use thiserror::Error;
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct ErrorResponse {
     pub detail: String,
 }
 
-#[derive(Debug, Error)]
+#[derive(Error, Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 #[error("{0}")]
 pub struct ConversionError(pub String);
 

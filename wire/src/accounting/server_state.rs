@@ -38,7 +38,7 @@ pub struct ServerStateImport {
     pub end_state_count: u32,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct ServerStateListParams {
     pub server: Option<Uuid>,
     pub user: Option<u32>,
@@ -46,7 +46,7 @@ pub struct ServerStateListParams {
     pub all: Option<bool>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct ServerStateCreateData {
     pub begin: DateTime<FixedOffset>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -80,7 +80,7 @@ impl ServerStateCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct ServerStateModifyData {
     pub id: u32,
 

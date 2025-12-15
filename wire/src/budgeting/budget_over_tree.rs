@@ -4,7 +4,7 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct BudgetOverTreeParams {
     pub all: Option<bool>,
     pub project: Option<u32>,
@@ -12,13 +12,13 @@ pub struct BudgetOverTreeParams {
     pub end: Option<DateTime<FixedOffset>>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct BudgetOverTreeServer {
     pub total: f64,
     pub flavors: HashMap<String, f64>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct BudgetOverTreeUser {
     pub cost: f64,
     pub budget_id: Option<u32>,
@@ -28,7 +28,7 @@ pub struct BudgetOverTreeUser {
     pub flavors: HashMap<String, f64>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct BudgetOverTreeProject {
     pub cost: f64,
     pub budget_id: Option<u32>,
@@ -40,7 +40,7 @@ pub struct BudgetOverTreeProject {
     pub flavors: Option<HashMap<String, f64>>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct BudgetOverTree {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cost: Option<f64>,

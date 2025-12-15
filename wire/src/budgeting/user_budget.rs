@@ -30,7 +30,7 @@ impl Display for UserBudget {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct UserBudgetListParams {
     pub user: Option<u32>,
     pub project: Option<u32>,
@@ -38,7 +38,7 @@ pub struct UserBudgetListParams {
     pub year: Option<u32>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct UserBudgetOverParams {
     pub end: Option<DateTime<FixedOffset>>,
     pub budget: Option<u32>,
@@ -49,7 +49,7 @@ pub struct UserBudgetOverParams {
     pub detail: Option<bool>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserBudgetCreateData {
     pub user: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -68,7 +68,7 @@ impl UserBudgetCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserBudgetModifyData {
     pub id: u32,
 

@@ -33,7 +33,7 @@ pub struct FlavorPriceInitialize {
     pub new_flavor_price_count: u32,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct FlavorPriceCreateData {
     pub flavor: u32,
     pub user_class: UserClass,
@@ -54,7 +54,7 @@ impl FlavorPriceCreateData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct FlavorPriceModifyData {
     pub id: u32,
 
@@ -80,7 +80,7 @@ impl FlavorPriceModifyData {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct FlavorPriceListParams {
     pub user_class: Option<UserClass>,
     pub current: Option<bool>,

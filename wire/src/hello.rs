@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use tabled::Tabled;
 
 #[cfg_attr(feature = "tabled", derive(Tabled))]
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct Hello {
     pub message: String,
 }
