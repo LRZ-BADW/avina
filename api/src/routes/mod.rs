@@ -22,7 +22,6 @@ pub use user::*;
 // - quota::flavor_quota::check
 // - accounting::server_state::modify
 // - resources::flavor_group::get
-// - resources::flavor::get
 // - quota::flavor_quota::get
 // - budgeting::budget_over_tree
 // - resources::server_cost
