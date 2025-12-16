@@ -8,8 +8,9 @@ use sqlx::MySqlPool;
 
 use super::FlavorIdParam;
 use crate::{
-    authorization::require_admin_user,
-    database::resources::flavor::select_flavor_detail_from_db,
+    database::resources::flavor::{
+        select_flavor_detail_from_db, select_lrz_flavor_detail_from_db,
+    },
     error::OptionApiError,
 };
 
@@ -20,14 +21,20 @@ pub async fn flavor_get(
     params: Path<FlavorIdParam>,
     // TODO: is the ValidationError variant ever used?
 ) -> Result<HttpResponse, OptionApiError> {
-    require_admin_user(&user)?;
     let mut transaction = db_pool
         .begin()
         .await
         .context("Failed to begin transaction")?;
-    let flavor_detail =
+    let flavor_detail = if user.is_staff {
         select_flavor_detail_from_db(&mut transaction, params.flavor_id as u64)
-            .await?;
+            .await?
+    } else {
+        select_lrz_flavor_detail_from_db(
+            &mut transaction,
+            params.flavor_id as u64,
+        )
+        .await?
+    };
     transaction
         .commit()
         .await
