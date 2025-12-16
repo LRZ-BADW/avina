@@ -98,6 +98,55 @@ pub async fn select_flavor_from_db(
 }
 
 #[tracing::instrument(
+    name = "select_maybe_lrz_flavor_from_db",
+    skip(transaction)
+)]
+pub async fn select_maybe_lrz_flavor_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    flavor_id: u64,
+) -> Result<Option<Flavor>, UnexpectedOnlyError> {
+    let query = sqlx::query!(
+        r#"
+        SELECT
+            f.id,
+            f.name,
+            f.openstack_id,
+            f.weight,
+            f.group_id,
+            g.name as group_name
+        FROM resources_flavor as f
+        LEFT JOIN resources_flavorgroup as g
+        ON f.group_id = g.id
+        WHERE
+            f.id = ? AND
+            g.name like 'lrz.%'
+        "#,
+        flavor_id
+    );
+    let row = transaction
+        .fetch_optional(query)
+        .await
+        .context("Failed to execute select query")?;
+    // TODO: isn't there a nicer way to write this?
+    Ok(match row {
+        Some(row) => {
+            Some(Flavor::from_row(&row).context("Failed to parse flavor row")?)
+        }
+        None => None,
+    })
+}
+
+#[tracing::instrument(name = "select_lrz_flavor_from_db", skip(transaction))]
+pub async fn select_lrz_flavor_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    flavor_id: u64,
+) -> Result<Flavor, NotFoundOrUnexpectedApiError> {
+    select_maybe_lrz_flavor_from_db(transaction, flavor_id)
+        .await?
+        .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
+}
+
+#[tracing::instrument(
     name = "select_minimal_flavors_by_group_from_db",
     skip(transaction)
 )]
@@ -183,12 +232,86 @@ pub async fn select_maybe_flavor_detail_from_db(
     }))
 }
 
-#[tracing::instrument(name = "select_user_detail_from_db", skip(transaction))]
+#[tracing::instrument(name = "select_flavor_detail_from_db", skip(transaction))]
 pub async fn select_flavor_detail_from_db(
     transaction: &mut Transaction<'_, MySql>,
     user_id: u64,
 ) -> Result<FlavorDetailed, NotFoundOrUnexpectedApiError> {
     select_maybe_flavor_detail_from_db(transaction, user_id)
+        .await?
+        .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
+}
+
+#[tracing::instrument(
+    name = "select_maybe_lrz_flavor_detail_from_db",
+    skip(transaction)
+)]
+pub async fn select_maybe_lrz_flavor_detail_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    flavor_id: u64,
+) -> Result<Option<FlavorDetailed>, UnexpectedOnlyError> {
+    #[derive(FromRow)]
+    pub struct FlavorDb {
+        pub id: i32,
+        pub name: String,
+        pub openstack_id: String, // UUIDv4
+        pub group_id: Option<i32>,
+        pub group_name: Option<String>,
+        pub weight: u32,
+    }
+    let query = sqlx::query!(
+        r#"
+        SELECT
+            f.id AS id,
+            f.name AS name,
+            f.openstack_id AS openstack_id,
+            g.id AS group_id,
+            g.name AS group_name,
+            f.weight AS weight
+        FROM resources_flavor AS f
+        LEFT JOIN resources_flavorgroup AS g
+        ON f.group_id = g.id
+        WHERE
+            f.id = ? AND
+            g.name like 'lrz.%'
+        "#,
+        flavor_id
+    );
+    let row = transaction
+        .fetch_optional(query)
+        .await
+        .context("Failed to execute select query")?;
+    let flavor = match row {
+        Some(row) => {
+            FlavorDb::from_row(&row).context("Failed to parse flavor row")?
+        }
+        None => return Ok(None),
+    };
+    Ok(Some(FlavorDetailed {
+        id: flavor.id as u32,
+        name: flavor.name,
+        openstack_id: flavor.openstack_id,
+        group: match (flavor.group_id, flavor.group_name.clone()) {
+            (Some(id), Some(name)) => Some(FlavorGroupMinimal {
+                id: id as u32,
+                name,
+            }),
+            _ => None,
+        },
+        group_name: flavor.group_name,
+        weight: flavor.weight,
+    }))
+}
+
+#[tracing::instrument(
+    name = "select_lrz_flavor_detail_from_db",
+    skip(transaction)
+)]
+pub async fn select_lrz_flavor_detail_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    user_id: u64,
+) -> Result<FlavorDetailed, NotFoundOrUnexpectedApiError> {
+    select_maybe_lrz_flavor_detail_from_db(transaction, user_id)
         .await?
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
