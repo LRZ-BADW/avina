@@ -1,0 +1,54 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        SELECT\n            g.id as id,\n            g.name as name,\n            g.project_id as project,\n            GROUP_CONCAT(f.id) as flavors\n        FROM resources_flavorgroup as g\n        LEFT JOIN resources_flavor as f\n        ON g.id = f.group_id\n        WHERE\n            g.id = ? AND\n            g.name like 'lrz.%'\n        GROUP BY g.id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | PRIMARY_KEY | AUTO_INCREMENT",
+          "max_size": 20
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 256
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "project",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | MULTIPLE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 11
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "flavors",
+        "type_info": {
+          "type": "Blob",
+          "flags": "",
+          "max_size": 16777216
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "613f551d429a0907e36b80cc378686a5445a44149a521ee87e470cbc46762911"
+}
