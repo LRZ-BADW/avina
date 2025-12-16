@@ -12,7 +12,10 @@ use sqlx::{Executor, MySql, MySqlPool, Transaction};
 use super::FlavorPriceIdParam;
 use crate::{
     authorization::require_admin_user,
-    database::pricing::flavor_price::select_flavor_price_from_db,
+    database::{
+        pricing::flavor_price::select_flavor_price_from_db,
+        resources::flavor::select_flavor_name_from_db,
+    },
     error::{NotFoundOrUnexpectedApiError, OptionApiError},
 };
 
@@ -58,6 +61,8 @@ pub async fn update_flavor_price_in_db(
     let unit_price = data.unit_price.unwrap_or(row.unit_price);
     let start_time = data.start_time.unwrap_or(row.start_time);
     let flavor = data.flavor.unwrap_or(row.flavor);
+    let flavor_name =
+        select_flavor_name_from_db(transaction, flavor as u64).await?;
     let query = sqlx::query!(
         r#"
         UPDATE pricing_flavorprice
@@ -80,7 +85,7 @@ pub async fn update_flavor_price_in_db(
         unit_price,
         start_time,
         flavor,
-        flavor_name: row.flavor_name,
+        flavor_name,
     };
     Ok(price)
 }
