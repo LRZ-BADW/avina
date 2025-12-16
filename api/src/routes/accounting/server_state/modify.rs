@@ -12,7 +12,11 @@ use sqlx::{Executor, MySql, MySqlPool, Transaction};
 use super::ServerStateIdParam;
 use crate::{
     authorization::require_admin_user,
-    database::accounting::server_state::select_server_state_from_db,
+    database::{
+        accounting::server_state::select_server_state_from_db,
+        resources::flavor::select_flavor_name_from_db,
+        user::user::select_user_name_from_db,
+    },
     error::{NotFoundOrUnexpectedApiError, OptionApiError},
 };
 
@@ -63,7 +67,10 @@ pub async fn update_server_state_in_db(
     let instance_name = data.instance_name.clone().unwrap_or(row.instance_name);
     let status = data.status.clone().unwrap_or(row.status);
     let user = data.user.unwrap_or(row.user);
+    let username = select_user_name_from_db(transaction, user as u64).await?;
     let flavor = data.flavor.unwrap_or(row.flavor);
+    let flavor_name =
+        select_flavor_name_from_db(transaction, user as u64).await?;
     let query1 = sqlx::query!(
         r#"
         UPDATE accounting_state
@@ -109,12 +116,10 @@ pub async fn update_server_state_in_db(
         instance_id,
         instance_name,
         flavor,
-        // TODO: we need to get the new flavor's name
-        flavor_name: row.flavor_name,
+        flavor_name,
         status,
         user,
-        // TODO: we need to get the new username
-        username: row.username,
+        username,
     };
     Ok(price)
 }
