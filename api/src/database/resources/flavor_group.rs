@@ -103,6 +103,57 @@ pub async fn select_flavor_group_from_db(
 }
 
 #[tracing::instrument(
+    name = "select_maybe_lrz_flavor_group_from_db",
+    skip(transaction)
+)]
+pub async fn select_maybe_lrz_flavor_group_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    flavor_group_id: u64,
+) -> Result<Option<FlavorGroup>, UnexpectedOnlyError> {
+    let query = sqlx::query!(
+        r#"
+        SELECT
+            g.id as id,
+            g.name as name,
+            g.project_id as project,
+            GROUP_CONCAT(f.id) as flavors
+        FROM resources_flavorgroup as g
+        LEFT JOIN resources_flavor as f
+        ON g.id = f.group_id
+        WHERE
+            g.id = ? AND
+            g.name like 'lrz.%'
+        GROUP BY g.id
+        "#,
+        flavor_group_id
+    );
+    let row = transaction
+        .fetch_optional(query)
+        .await
+        .context("Failed to execute select query")?;
+    Ok(match row {
+        Some(row) => Some(
+            FlavorGroup::from_row(&row)
+                .context("Failed to parse flavor group row")?,
+        ),
+        None => None,
+    })
+}
+
+#[tracing::instrument(
+    name = "select_lrz_flavor_group_from_db",
+    skip(transaction)
+)]
+pub async fn select_lrz_flavor_group_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    flavor_group_id: u64,
+) -> Result<FlavorGroup, NotFoundOrUnexpectedApiError> {
+    select_maybe_lrz_flavor_group_from_db(transaction, flavor_group_id)
+        .await?
+        .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
+}
+
+#[tracing::instrument(
     name = "select_minimal_flavor_groups_by_project_id_from_db",
     skip(transaction)
 )]
