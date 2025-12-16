@@ -18,7 +18,6 @@ pub use user::*;
 
 // TODO: improve the following endpoints
 // - pricing::flavor_price::modify
-// - quota::flavor_quota::modify
 // - quota::flavor_quota::check
 // - accounting::server_state::modify
 // - budgeting::budget_over_tree

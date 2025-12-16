@@ -12,7 +12,11 @@ use sqlx::{Executor, MySql, MySqlPool, Transaction};
 use super::FlavorQuotaIdParam;
 use crate::{
     authorization::require_admin_user,
-    database::quota::flavor_quota::select_flavor_quota_from_db,
+    database::{
+        quota::flavor_quota::select_flavor_quota_from_db,
+        resources::flavor_group::select_flavor_group_from_db,
+        user::user::select_user_from_db,
+    },
     error::{NotFoundOrUnexpectedApiError, OptionApiError},
 };
 
@@ -55,10 +59,13 @@ pub async fn update_flavor_quota_in_db(
 ) -> Result<FlavorQuota, NotFoundOrUnexpectedApiError> {
     let row = select_flavor_quota_from_db(transaction, data.id as u64).await?;
     let user = data.user.unwrap_or(row.user);
-    // TODO: what about the username
+    let username = select_user_from_db(transaction, user as u64).await?.name;
     let quota = data.quota.unwrap_or(row.quota);
     let flavor_group = data.flavor_group.unwrap_or(row.flavor_group);
-    // TODO: what about the flavor group name
+    let flavor_group_name =
+        select_flavor_group_from_db(transaction, flavor_group as u64)
+            .await?
+            .name;
     let query1 = sqlx::query!(
         r#"
         UPDATE quota_quota
@@ -91,12 +98,10 @@ pub async fn update_flavor_quota_in_db(
     let flavor_quota = FlavorQuota {
         id: data.id,
         user,
-        // TODO: we need to get the new username
-        username: row.username,
+        username,
         quota,
         flavor_group,
-        // TODO: we need to get the new flavor group name
-        flavor_group_name: row.flavor_group_name,
+        flavor_group_name,
     };
     Ok(flavor_quota)
 }
