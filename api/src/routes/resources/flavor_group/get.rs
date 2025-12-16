@@ -8,11 +8,12 @@ use sqlx::MySqlPool;
 
 use super::FlavorGroupIdParam;
 use crate::{
-    authorization::require_admin_user,
     database::{
         resources::{
             flavor::select_minimal_flavors_by_group_from_db,
-            flavor_group::select_flavor_group_from_db,
+            flavor_group::{
+                select_flavor_group_from_db, select_lrz_flavor_group_from_db,
+            },
         },
         user::project::select_project_minimal_from_db,
     },
@@ -26,17 +27,24 @@ pub async fn flavor_group_get(
     params: Path<FlavorGroupIdParam>,
     // TODO: is the ValidationError variant ever used?
 ) -> Result<HttpResponse, OptionApiError> {
-    require_admin_user(&user)?;
     let mut transaction = db_pool
         .begin()
         .await
         .context("Failed to begin transaction")?;
     // TODO: this can all be condensed into one database function
-    let flavor_group = select_flavor_group_from_db(
-        &mut transaction,
-        params.flavor_group_id as u64,
-    )
-    .await?;
+    let flavor_group = if user.is_staff {
+        select_flavor_group_from_db(
+            &mut transaction,
+            params.flavor_group_id as u64,
+        )
+        .await?
+    } else {
+        select_lrz_flavor_group_from_db(
+            &mut transaction,
+            params.flavor_group_id as u64,
+        )
+        .await?
+    };
     let flavors = select_minimal_flavors_by_group_from_db(
         &mut transaction,
         params.flavor_group_id as u64,
