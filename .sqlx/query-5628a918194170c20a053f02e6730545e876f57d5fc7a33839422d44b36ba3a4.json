@@ -1,0 +1,74 @@
+{
+  "db_name": "MySQL",
+  "query": "\n        SELECT\n            f.id AS id,\n            f.name AS name,\n            f.openstack_id AS openstack_id,\n            g.id AS group_id,\n            g.name AS group_name,\n            f.weight AS weight\n        FROM resources_flavor AS f\n        LEFT JOIN resources_flavorgroup AS g\n        ON f.group_id = g.id\n        WHERE\n            f.id = ? AND\n            g.name like 'lrz.%'\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | PRIMARY_KEY | AUTO_INCREMENT",
+          "max_size": 20
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 256
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "openstack_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 1020
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "group_id",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "PRIMARY_KEY | AUTO_INCREMENT",
+          "max_size": 20
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "group_name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "UNIQUE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 256
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "weight",
+        "type_info": {
+          "type": "Short",
+          "flags": "NOT_NULL | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 5
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "5628a918194170c20a053f02e6730545e876f57d5fc7a33839422d44b36ba3a4"
+}
