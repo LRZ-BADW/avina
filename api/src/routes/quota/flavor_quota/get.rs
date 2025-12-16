@@ -8,7 +8,6 @@ use sqlx::MySqlPool;
 
 use super::FlavorQuotaIdParam;
 use crate::{
-    authorization::require_admin_user,
     database::quota::flavor_quota::select_flavor_quota_from_db,
     error::OptionApiError,
 };
@@ -20,7 +19,6 @@ pub async fn flavor_quota_get(
     params: Path<FlavorQuotaIdParam>,
     // TODO: is the ValidationError variant ever used?
 ) -> Result<HttpResponse, OptionApiError> {
-    require_admin_user(&user)?;
     let mut transaction = db_pool
         .begin()
         .await
