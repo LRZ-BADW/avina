@@ -18,6 +18,5 @@ pub use user::*;
 
 // TODO: improve the following endpoints
 // - quota::flavor_quota::check
-// - budgeting::budget_over_tree
 // - resources::server_cost
 // - user::import

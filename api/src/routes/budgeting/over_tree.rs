@@ -47,6 +47,7 @@ use crate::{
 };
 
 // TODO: handle non-existent user class
+// what exactly was the problem here? Seems to work.
 async fn budget_over_tree_for_user(
     transaction: &mut Transaction<'_, MySql>,
     user_id: u64,
@@ -142,6 +143,7 @@ async fn budget_over_tree_for_user(
 }
 
 // TODO: handle non-existent user class
+// what exactly was the problem here? Seems to work.
 async fn budget_over_tree_for_project(
     transaction: &mut Transaction<'_, MySql>,
     project_id: u64,
