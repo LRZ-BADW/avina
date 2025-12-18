@@ -169,7 +169,8 @@ impl FlavorQuotaCheckRequest {
             client: Rc::clone(client),
 
             params: FlavorQuotaCheckParams {
-                user,
+                user: Some(user),
+                openstackproject: None,
                 flavor,
                 count: None,
             },
