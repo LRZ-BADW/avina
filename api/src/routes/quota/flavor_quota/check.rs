@@ -15,7 +15,9 @@ use crate::{
     database::{
         quota::flavor_quota::select_maybe_flavor_quota_by_user_and_group_from_db,
         resources::flavor::select_flavor_from_db,
-        user::user::select_user_from_db,
+        user::user::{
+            select_user_by_openstack_id_from_db, select_user_from_db,
+        },
     },
     error::{OptionApiError, UnexpectedOnlyError},
     openstack::OpenStack,
@@ -63,7 +65,6 @@ pub async fn flavor_quota_check(
     project: ReqData<Project>,
     db_pool: Data<MySqlPool>,
     openstack: Data<OpenStack>,
-    // TODO: the parameters the current scheduler filter uses are different
     params: Query<FlavorQuotaCheckParams>,
 ) -> Result<HttpResponse, OptionApiError> {
     require_admin_user(&user)?;
@@ -71,8 +72,20 @@ pub async fn flavor_quota_check(
         .begin()
         .await
         .context("Failed to begin transaction")?;
-    let user =
-        select_user_from_db(&mut transaction, params.user.into()).await?;
+    let user = match (params.user, &params.openstackproject) {
+        (Some(user_id), _) => {
+            select_user_from_db(&mut transaction, user_id as u64).await?
+        }
+        (_, Some(openstack_id)) => {
+            select_user_by_openstack_id_from_db(&mut transaction, openstack_id)
+                .await?
+        }
+        _ => {
+            return Err(OptionApiError::ValidationError(
+                "Neither user ID nor Openstack UUID provided.".to_string(),
+            ));
+        }
+    };
     let flavor =
         select_flavor_from_db(&mut transaction, params.flavor.into()).await?;
     let count = params.count.unwrap_or(1);
