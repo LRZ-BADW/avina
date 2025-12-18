@@ -32,7 +32,10 @@ impl Display for FlavorQuota {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct FlavorQuotaCheckParams {
-    pub user: u32,
+    // TODO: these two should rather be an enum
+    pub user: Option<u32>,
+    pub openstackproject: Option<String>,
+
     pub flavor: u32,
     pub count: Option<u32>,
 }
