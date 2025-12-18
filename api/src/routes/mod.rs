@@ -17,5 +17,5 @@ pub use resources::*;
 pub use user::*;
 
 // TODO: improve the following endpoints
-// - quota::flavor_quota::check
-// - user::import
+// - quota::flavor_quota::check ... cache results for short period
+// - user::import ... get master user and user class from ldap, and create budgets
