@@ -236,6 +236,57 @@ pub async fn select_maybe_user_from_db(
     })
 }
 
+#[tracing::instrument(
+    name = "select_maybe_user_by_openstack_id_from_db",
+    skip(transaction)
+)]
+pub async fn select_maybe_user_by_openstack_id_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    openstack_id: &str,
+) -> Result<Option<User>, UnexpectedOnlyError> {
+    let query = sqlx::query!(
+        r#"
+        SELECT
+            user.id AS id,
+            user.name AS name,
+            user.openstack_id AS openstack_id,
+            user.role AS role,
+            project.id as project,
+            project.name AS project_name,
+            user.is_staff AS is_staff,
+            user.is_active AS is_active
+        FROM user_user AS user, user_project AS project
+        WHERE
+            user.project_id = project.id AND
+            user.openstack_id = ?
+        "#,
+        openstack_id
+    );
+    let row = transaction
+        .fetch_optional(query)
+        .await
+        .context("Failed to execute select query")?;
+    Ok(match row {
+        Some(row) => {
+            Some(User::from_row(&row).context("Failed to parse user row")?)
+        }
+        None => None,
+    })
+}
+
+#[tracing::instrument(
+    name = "select_user_by_openstack_id_from_db",
+    skip(transaction)
+)]
+pub async fn select_user_by_openstack_id_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    openstack_id: &str,
+) -> Result<User, NotFoundOrUnexpectedApiError> {
+    select_maybe_user_by_openstack_id_from_db(transaction, openstack_id)
+        .await?
+        .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
+}
+
 #[tracing::instrument(name = "select_user_from_db", skip(transaction))]
 pub async fn select_user_from_db(
     transaction: &mut Transaction<'_, MySql>,
