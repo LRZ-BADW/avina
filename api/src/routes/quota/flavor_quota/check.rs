@@ -8,7 +8,9 @@ use avina_wire::{
     resources::Flavor,
     user::{Project, User},
 };
+use chrono::{DateTime, Utc};
 use sqlx::{MySql, MySqlPool, Transaction};
+use std::{collections::HashMap, sync::Mutex};
 
 use crate::{
     authorization::require_admin_user,
@@ -23,6 +25,63 @@ use crate::{
     openstack::OpenStack,
     routes::flavor_group::usage::calculate_flavor_group_usage_for_user_aggregate,
 };
+
+const CACHE_TIMEOUT_SECONDS: usize = 5;
+
+#[derive(Hash, PartialEq, Eq)]
+struct CacheKey {
+    username: String,
+    flavor_name: String,
+    count: usize,
+}
+
+impl CacheKey {
+    fn new(username: &str, flavor_name: &str, count: usize) -> Self {
+        Self {
+            username: username.to_string(),
+            flavor_name: flavor_name.to_string(),
+            count,
+        }
+    }
+}
+
+struct CacheValue {
+    underquota: bool,
+    datetime: DateTime<Utc>,
+}
+
+impl CacheValue {
+    fn new(underquota: bool) -> Self {
+        Self {
+            underquota,
+            datetime: Utc::now(),
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct QuotaCache(HashMap<CacheKey, CacheValue>);
+
+impl QuotaCache {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    fn set(&mut self, key: CacheKey, underquota: bool) {
+        self.0.insert(key, CacheValue::new(underquota));
+    }
+
+    fn get(&mut self, key: &CacheKey) -> Option<bool> {
+        let value = self.0.get(key)?;
+        if (Utc::now() - value.datetime).abs().num_seconds() as usize
+            >= CACHE_TIMEOUT_SECONDS
+        {
+            self.0.remove(key);
+            return None;
+        }
+        Some(value.underquota)
+    }
+}
 
 async fn check_flavor_quota(
     transaction: &mut Transaction<'_, MySql>,
