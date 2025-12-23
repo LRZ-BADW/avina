@@ -1,4 +1,4 @@
-use std::net::TcpListener;
+use std::{net::TcpListener, sync::Mutex};
 
 use actix_cors::Cors;
 use actix_web::{
@@ -16,7 +16,9 @@ use crate::{
     openstack::OpenStack,
     routes::{
         accounting_scope, budgeting_scope, health_check, hello_scope,
-        pricing_scope, quota_scope, resources_scope,
+        pricing_scope,
+        quota::flavor_quota::check::QuotaCache,
+        quota_scope, resources_scope,
         user::{
             project::create::{NewProject, insert_project_into_db},
             user::create::{NewUser, insert_user_into_db},
@@ -132,6 +134,7 @@ async fn run(
     let base_url = Data::new(ApplicationBaseUrl(base_url));
     let openstack = Data::new(openstack);
     let cloud_usage_url = Data::new(CloudUsageUrl(cloud_usage_url));
+    let quota_cache = Data::new(Mutex::new(QuotaCache::new()));
     let server = HttpServer::new(move || {
         // TODO: this should be configurable
         let cors = Cors::default()
@@ -146,6 +149,7 @@ async fn run(
             .app_data(base_url.clone())
             .app_data(openstack.clone())
             .app_data(cloud_usage_url.clone())
+            .app_data(quota_cache.clone())
             .route("/health_check", web::get().to(health_check))
             .service(
                 web::scope("/api")
