@@ -3,7 +3,7 @@ mod budgeting;
 mod health_check;
 mod hello;
 mod pricing;
-mod quota;
+pub mod quota;
 mod resources;
 pub mod user;
 

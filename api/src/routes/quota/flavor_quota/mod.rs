@@ -14,7 +14,7 @@ mod modify;
 use modify::flavor_quota_modify;
 mod delete;
 use delete::flavor_quota_delete;
-mod check;
+pub mod check;
 use check::flavor_quota_check;
 
 pub fn flavor_quotas_scope() -> Scope {
