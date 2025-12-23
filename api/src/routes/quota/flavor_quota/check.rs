@@ -117,13 +117,17 @@ async fn check_flavor_quota(
     Ok(underquota)
 }
 
-#[tracing::instrument(name = "flavor_quota_check", skip(openstack))]
+#[tracing::instrument(
+    name = "flavor_quota_check",
+    skip(openstack, quota_cache)
+)]
 // TODO: the original python function cached the responses.
 pub async fn flavor_quota_check(
     user: ReqData<User>,
     project: ReqData<Project>,
     db_pool: Data<MySqlPool>,
     openstack: Data<OpenStack>,
+    quota_cache: Data<Mutex<QuotaCache>>,
     params: Query<FlavorQuotaCheckParams>,
 ) -> Result<HttpResponse, OptionApiError> {
     require_admin_user(&user)?;
@@ -148,15 +152,24 @@ pub async fn flavor_quota_check(
     let flavor =
         select_flavor_from_db(&mut transaction, params.flavor.into()).await?;
     let count = params.count.unwrap_or(1);
-    let underquota = FlavorQuotaCheck {
-        underquota: check_flavor_quota(
-            &mut transaction,
-            openstack,
-            &user,
-            &flavor,
-            count,
-        )
-        .await?,
+    let underquota = {
+        let key = CacheKey::new(&user.name, &flavor.name, count as usize);
+        let cache_result = quota_cache.lock().unwrap().get(&key);
+        match cache_result {
+            Some(underquota) => underquota,
+            None => {
+                let underquota = check_flavor_quota(
+                    &mut transaction,
+                    openstack,
+                    &user,
+                    &flavor,
+                    count,
+                )
+                .await?;
+                quota_cache.lock().unwrap().set(key, underquota);
+                underquota
+            }
+        }
     };
     transaction
         .commit()
@@ -164,5 +177,5 @@ pub async fn flavor_quota_check(
         .context("Failed to commit transaction")?;
     Ok(HttpResponse::Ok()
         .content_type("application/json")
-        .json(underquota))
+        .json(FlavorQuotaCheck { underquota }))
 }
