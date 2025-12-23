@@ -1,3 +1,5 @@
+use std::{collections::HashMap, sync::Mutex};
+
 use actix_web::{
     HttpResponse,
     web::{Data, Query, ReqData},
@@ -10,7 +12,6 @@ use avina_wire::{
 };
 use chrono::{DateTime, Utc};
 use sqlx::{MySql, MySqlPool, Transaction};
-use std::{collections::HashMap, sync::Mutex};
 
 use crate::{
     authorization::require_admin_user,
