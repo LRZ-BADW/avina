@@ -20,5 +20,3 @@ pub use user::*;
 // - user::import:
 //   - get master user from ldap
 //   - user class from ldap
-//   - create project budget
-//   - create user budget
