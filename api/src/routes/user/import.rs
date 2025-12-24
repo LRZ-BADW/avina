@@ -6,12 +6,20 @@ use actix_web::{
 };
 use anyhow::Context;
 use avina_wire::user::{User, UserClass, UserImport};
+use chrono::{Datelike, Utc};
 use sqlx::MySqlPool;
 
 use crate::{
     authorization::require_admin_user,
-    database::user::{
-        project::select_all_projects_from_db, user::select_all_users_from_db,
+    database::{
+        budgeting::{
+            project_budget::{NewProjectBudget, insert_project_budget_into_db},
+            user_budget::{NewUserBudget, insert_user_budget_into_db},
+        },
+        user::{
+            project::select_all_projects_from_db,
+            user::select_all_users_from_db,
+        },
     },
     error::NormalApiError,
     openstack::OpenStack,
@@ -45,6 +53,8 @@ pub async fn user_import(
     let mut new_user_count = 0;
     let mut new_project_count = 0;
 
+    let year = Utc::now().year() as u32;
+
     let mut domain_name_by_id = HashMap::new();
     for os_domain in os_domains {
         domain_name_by_id.insert(os_domain.id.clone(), os_domain.name.clone());
@@ -57,8 +67,17 @@ pub async fn user_import(
                 // TODO: get userclass from ldap
                 user_class: UserClass::NA,
             };
-            insert_project_into_db(&mut transaction, &new_project).await?;
-            // TODO: create project budget
+            let project_id =
+                insert_project_into_db(&mut transaction, &new_project).await?;
+            insert_project_budget_into_db(
+                &mut transaction,
+                &NewProjectBudget {
+                    project_id,
+                    year,
+                    amount: 0,
+                },
+            )
+            .await?;
 
             new_project_count += 1;
         }
@@ -94,8 +113,16 @@ pub async fn user_import(
             is_staff: false,
             is_active: false,
         };
-        insert_user_into_db(&mut transaction, &new_user).await?;
-        // TODO: create user budget
+        let user_id = insert_user_into_db(&mut transaction, &new_user).await?;
+        insert_user_budget_into_db(
+            &mut transaction,
+            &NewUserBudget {
+                user_id,
+                year,
+                amount: 0,
+            },
+        )
+        .await?;
 
         new_user_count += 1;
     }
