@@ -47,6 +47,11 @@ impl Application {
         }
 
         let openstack = OpenStack::new(configuration.openstack).await?;
+        let avina_ldap_config = AvinaLdapConfig::new(
+            configuration.application.avina_ldap_url,
+            configuration.application.avina_ldap_token,
+            configuration.application.avina_ldap_default,
+        );
 
         let server = run(
             listener,
@@ -54,6 +59,7 @@ impl Application {
             configuration.application.base_url,
             openstack,
             configuration.application.cloud_usage_url,
+            avina_ldap_config,
         )
         .await?;
 
@@ -123,18 +129,40 @@ pub struct ApplicationBaseUrl(pub String);
 #[derive(Debug)]
 pub struct CloudUsageUrl(pub Option<String>);
 
+#[derive(Debug)]
+pub enum AvinaLdapConfig {
+    Enabled(String, String, bool),
+    Disabled(bool),
+}
+
+impl AvinaLdapConfig {
+    fn new(
+        url: Option<String>,
+        token: Option<String>,
+        default: Option<bool>,
+    ) -> Self {
+        let default = default.unwrap_or(true);
+        match (url, token) {
+            (Some(url), Some(token)) => Self::Enabled(url, token, default),
+            _ => Self::Disabled(default),
+        }
+    }
+}
+
 async fn run(
     listener: TcpListener,
     db_pool: MySqlPool,
     base_url: String,
     openstack: OpenStack,
     cloud_usage_url: Option<String>,
+    avina_ldap_data: AvinaLdapConfig,
 ) -> Result<Server, anyhow::Error> {
     let db_pool = Data::new(db_pool);
     let base_url = Data::new(ApplicationBaseUrl(base_url));
     let openstack = Data::new(openstack);
     let cloud_usage_url = Data::new(CloudUsageUrl(cloud_usage_url));
     let quota_cache = Data::new(Mutex::new(QuotaCache::new()));
+    let avina_ldap_data = Data::new(avina_ldap_data);
     let server = HttpServer::new(move || {
         // TODO: this should be configurable
         let cors = Cors::default()
@@ -150,6 +178,7 @@ async fn run(
             .app_data(openstack.clone())
             .app_data(cloud_usage_url.clone())
             .app_data(quota_cache.clone())
+            .app_data(avina_ldap_data.clone())
             .route("/health_check", web::get().to(health_check))
             .service(
                 web::scope("/api")
