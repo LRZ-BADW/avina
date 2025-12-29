@@ -2,11 +2,14 @@ use std::collections::HashMap;
 
 use actix_web::{
     HttpResponse,
+    http::StatusCode,
     web::{Data, ReqData},
 };
-use anyhow::Context;
+use anyhow::{Context, anyhow};
 use avina_wire::user::{User, UserClass, UserImport};
-use chrono::{Datelike, Utc};
+use chrono::{DateTime, Datelike, Utc};
+use reqwest::Client;
+use serde::Deserialize;
 use sqlx::MySqlPool;
 
 use crate::{
@@ -21,19 +24,117 @@ use crate::{
             user::select_all_users_from_db,
         },
     },
-    error::NormalApiError,
+    error::{NormalApiError, UnexpectedOnlyError},
     openstack::OpenStack,
     routes::{
         project::create::{NewProject, insert_project_into_db},
         user::user::create::{NewUser, insert_user_into_db},
     },
+    startup::AvinaLdapConfig,
 };
+
+#[derive(PartialEq, Clone, Debug, Deserialize)]
+struct AvinaLdapUser {
+    name: String,
+    project: String,
+    master: bool,
+    function: bool,
+}
+
+#[derive(PartialEq, Clone, Debug, Deserialize)]
+struct AvinaLdapProject {
+    name: String,
+    class: UserClass,
+}
+
+#[derive(PartialEq, Clone, Debug, Deserialize)]
+struct AvinaLdapData {
+    users: HashMap<String, AvinaLdapUser>,
+    projects: HashMap<String, AvinaLdapProject>,
+    timestamp: DateTime<Utc>,
+}
+
+#[derive(PartialEq, Clone, Debug, Deserialize)]
+struct AvinaLdapResponse(Option<AvinaLdapData>);
+
+struct AvinaLdap {
+    data: Option<AvinaLdapData>,
+}
+
+impl AvinaLdap {
+    #[tracing::instrument(name = "call_avina_ldap")]
+    async fn new(
+        config: &AvinaLdapConfig,
+    ) -> Result<Self, UnexpectedOnlyError> {
+        let (url, token, default) = match &config {
+            AvinaLdapConfig::Enabled(url, token, default) => {
+                (url, token, default)
+            }
+            AvinaLdapConfig::Disabled(default) => {
+                if !default {
+                    return Err(anyhow!(
+                        "avina-ldap disabled but using defaults also not configured."
+                    ).into());
+                }
+                return Ok(Self { data: None });
+            }
+        };
+        let response = Client::new()
+            .get(url)
+            .header("Authorization", token)
+            .send()
+            .await
+            .context("Call to avina-ldap failed.")?;
+        if response.status().as_u16() != StatusCode::OK {
+            return Err(
+                anyhow!("avina-ldap returned non-OK status code.").into()
+            );
+        }
+        let data: AvinaLdapResponse = serde_json::from_str(
+            response
+                .text()
+                .await
+                .context("Could not read response text")?
+                .as_str(),
+        )
+        .context("Could not parse response")?;
+        if data.0.is_none() && !default {
+            return Err(anyhow!(
+                    "avina-ldap returned nothing but using defaults also not configured."
+                ).into());
+        }
+        // TODO: we could also check if the data is outdated.
+        Ok(Self { data: data.0 })
+    }
+
+    fn get_userclass(&self, project_name: &str) -> UserClass {
+        if let Some(data) = &self.data
+            && let Some(project) = data.projects.get(project_name)
+        {
+            return project.class;
+        }
+        UserClass::NA
+    }
+
+    fn get_role(&self, username: &str) -> u32 {
+        if let Some(data) = &self.data
+            && let Some(user) = data.users.get(username)
+            && user.master
+            && !user.function
+        {
+            2
+        } else {
+            1
+        }
+    }
+}
 
 #[tracing::instrument(name = "user_import", skip(openstack))]
 pub async fn user_import(
     user: ReqData<User>,
     db_pool: Data<MySqlPool>,
     openstack: Data<OpenStack>,
+    avina_ldap_config: Data<AvinaLdapConfig>,
 ) -> Result<HttpResponse, NormalApiError> {
     require_admin_user(&user)?;
     let mut transaction = db_pool
@@ -49,6 +150,7 @@ pub async fn user_import(
     let usernames: Vec<String> = users.iter().map(|u| u.name.clone()).collect();
     let project_names: Vec<String> =
         projects.iter().map(|u| u.name.clone()).collect();
+    let ldap_data = AvinaLdap::new(&avina_ldap_config).await?;
 
     let mut new_user_count = 0;
     let mut new_project_count = 0;
@@ -62,10 +164,9 @@ pub async fn user_import(
             let project_name = os_domain.name;
 
             let new_project = NewProject {
-                name: project_name,
+                name: project_name.clone(),
                 openstack_id: os_domain.id,
-                // TODO: get userclass from ldap
-                user_class: UserClass::NA,
+                user_class: ldap_data.get_userclass(&project_name),
             };
             let project_id =
                 insert_project_into_db(&mut transaction, &new_project).await?;
@@ -104,12 +205,12 @@ pub async fn user_import(
             continue;
         };
 
+        let username = &os_project.name;
         let new_user = NewUser {
-            name: os_project.name.clone(),
+            name: username.clone(),
             openstack_id: os_project.id.clone(),
             project_id: project.id,
-            // TODO: get role from ldap
-            role: 1,
+            role: ldap_data.get_role(username),
             is_staff: false,
             is_active: false,
         };
