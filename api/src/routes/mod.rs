@@ -15,8 +15,3 @@ pub use pricing::*;
 pub use quota::*;
 pub use resources::*;
 pub use user::*;
-
-// TODO: improve the following endpoints
-// - user::import:
-//   - get master user from ldap
-//   - user class from ldap
