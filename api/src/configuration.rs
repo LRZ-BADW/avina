@@ -18,6 +18,9 @@ pub struct ApplicationSettings {
     pub base_url: String,
     pub insert_admin: bool,
     pub cloud_usage_url: Option<String>,
+    pub avina_ldap_url: Option<String>,
+    pub avina_ldap_token: Option<String>,
+    pub avina_ldap_default: Option<bool>,
 }
 
 fn deserialize_secret_string<'de, D>(

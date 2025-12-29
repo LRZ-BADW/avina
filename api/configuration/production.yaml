@@ -3,5 +3,8 @@ application:
   host: 0.0.0.0
   insert_admin: false
   cloud_usage_url: http://127.0.0.1:8880/
+  avina_ldap_url: http://127.0.0.1:8881/
+  avina_ldap_token: supersecrettoken
+  avina_ldap_default: false
 database:
   require_ssl: true
