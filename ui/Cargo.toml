@@ -15,7 +15,7 @@ version = "0.0.1"
 
 [dependencies]
 dioxus = { version = "0.6.3", features = ["fullstack"] }
-avina = { version = "1.8", path = "../lib" }
+avina = { version = "2.0", path = "../lib" }
 
 [features]
 default = []
