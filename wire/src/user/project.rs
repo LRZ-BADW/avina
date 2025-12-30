@@ -6,7 +6,7 @@ use rand::{
 };
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "sqlx")]
-use sqlx::FromRow;
+use sqlx::{self, FromRow};
 use strum::EnumIter;
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
