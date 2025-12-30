@@ -4,6 +4,245 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+## Repository - 2025-12-31
+
+### Documentation
+- add cli installation section with link
+
+### CI
+- add build job to test workflow
+- add --all --all-targets to clippy command in lint workflow
+- use production mariadb server version in test and lint workflows
+- use --locked for zizmor installation in workflow workflow
+- add missing mold install in test and lint workflows
+- use sqlx offline mode for clippy job in lint workflow
+- bump actions/checkout from 4 to 6
+- bump actions/labeler from 5 to 6
+- bump actions/stale from 9 to 10
+- bump taiki-e/install-action from 2.52.6 to 2.65.7
+
+### Misc
+- update spellcheck dictionary
+- update sqlx offline query data
+- improve cargo-husty pre-push hook
+
+## [avina-ui-v0.0.2] - 2025-12-31
+
+### Dependencies
+- bump avina from 1.8.0 to 2.0.0
+- bump dioxus from 0.6.3 to 0.7.2
+- run cargo update
+
+### Features
+- update rust edition to 2024
+- use lib to call user_me api endpoint
+
+### Documentation
+- describe how to run ui locally
+
+### Misc
+- add run_ui.sh script
+
+## [avina-test-v0.7.0] - 2025-12-31
+
+### Dependencies
+- bump avina-api from 0.8.0 to 1.0.0
+- bump avina-wire from 1.7.0 to 2.0.0
+- bump avina from 1.8.0 to 2.0.0
+- bump wiremock from 0.6.3 to 0.6.5
+- bump serde_json from 1.0.140 to 1.0.148
+- bump anyhow from 1.0.98 to 1.0.100
+- bump rand from 0.9.1 to 0.9.2
+- bump chrono from 0.4.41 to 0.4.42
+- bump reqwest from 0.12.19 to 0.13.0
+- bump uuid from 1.17.0 to 1.19.0
+- bump tokio from 1.45.1 to 1.48.0
+- run cargo update
+
+### Features
+- update rust edition to 2024
+- add various new setup functions
+- revise for async library calls
+
+### Fixes
+- use Uuid for instance_id
+- use enum for user_class
+- repair compilation on WASM
+
+### Tests
+- add tests for server cost endpoint
+- add tests for project budget modify endpoint
+- add tests for user budget modify endpoint
+- add tests for flavor price list endpoint
+
+## [avina-cli-v2.0.0] - 2025-12-31
+
+### Dependencies
+- bump avina-wire from 1.7.0 to 2.0.0
+- bump avina from 1.8.0 to 2.0.0
+- bump clap from 4.5.39 to 4.5.53
+- bump serde_json from 1.0.140 to 1.0.148
+- bump anyhow from 1.0.98 to 1.0.100
+- bump chrono from 0.4.41 to 0.4.42
+- bump uuid from 1.17.0 to 1.19.0
+- bump tokio from 1.45.1 to 1.48.0
+- run cargo update
+
+### Features
+- update rust edition to 2024
+- re-route all calls to rust api
+- revise for async library calls
+- make --current an actual flag on flavor-price list
+
+### Fixes
+- set global=true for top level cli arguments
+- use unique short options for global arguments
+- use Uuid for instance_id
+- use enum for user_class
+
+### Tests
+- add test check_cli_parser
+
+## [avina-lib-v2.0.0] - 2025-12-31
+
+### Dependencies
+- bump avina-wire from 1.7.0 to 2.0.0
+- bump serde_json from 1.0.140 to 1.0.148
+- bump anyhow from 1.0.98 to 1.0.100
+- bump chrono from 0.4.41 to 0.4.42
+- bump reqwest from 0.12.19 to 0.13.0
+- bump serde from 1.0.219 to 1.0.228
+- bump uuid from 1.17.0 to 1.19.0
+- bump thiserror from 2.0.12 to 2.0.17
+- run cargo update
+
+### Features
+- update rust edition to 2024
+- make all library calls async
+- add Debug derives to Api and Token structs
+- add missing common trait derives to various public structs
+- add BudgetOverTreeParams, FlavorQuotaCheckParams, FlavorUsageParams
+- don't set timeout in Api::new on wasm target
+- add FlavorGroupUsageParams and FlavorQuotaCheckParams.openstackproject
+
+### Fixes
+- use Uuid for instance_id
+- use enum for user_class
+- correct url for user-import endpoint
+
+### Refactors
+- rename FlavorGroupUsage to FlavorGroupUsageSimple
+- rename FlavorUsage to FlavorUsageSimple
+
+## [avina-api-v1.0.0] - 2025-12-31
+
+### Depencencies
+- bump avina-wire from 1.6.0 to 2.0.0
+- bump indexmap from 2.9.0 to 2.12.1
+- bump actix-web from 4.11.0 to 4.12.1
+- bump tracing-actix-web from 0.7.18 to 0.7.20
+- bump wiremock from 0.6.3 to 0.6.5
+- bump tracing from 0.1.41 to 0.1.44
+- bump tracing-subscriber from 0.3.19 to 0.3.22
+- bump strum from 0.27.1 to 0.27.2
+- bump serde_json from 1.0.140 to 1.0.148
+- bump config from 0.15.11 to 0.15.19
+- bump anyhow from 1.0.98 to 1.0.100
+- bump rand from 0.9.1 to 0.9.2
+- bump chrono from 0.4.41 to 0.4.42
+- bump reqwest from 0.12.19 to 0.13.0
+- bump serde from 1.0.219 to 1.0.228
+- bump uuid from 1.17.0 to 1.19.0
+- bump thiserror from 2.0.12 to 2.0.17
+- bump tokio from 1.45.1 to 1.48.0
+- update yanked tower-http dependency
+- run cargo update
+
+### Features
+- update rust edition to 2024
+- implement flavor usage endpoint
+- implement flavor-group usage endpoint
+- implement budget-over-tree endpoint
+- implement cloud-usage endpoint
+- implement flavor-quota check endpoint
+- implement proper user import endpoint with help of avina-ldap
+- extend flavor_price_list
+- add OpenStack functions get_domains, get_projects, and get_servers_of_project
+- setup actix-cors for localhost ui
+- add token, avina-ldap url, cloud-usage url to request extensions
+- add lrz flavor and flavor-group select functions
+- add select_flavor_quota_by_user_and_group_from_db
+- add select_user_by_openstack_id_from_db
+- add select_flavor_prices_for_userclass_and_period_from_db
+- fetch first row with select server states func
+
+### Fixes
+- use Uuid for instance_id
+- use enum for user_class
+- use left join for FlavorGroup selection
+- return new names from flavor_price_modify, server_state_modify, and flavor_quota_modify
+- corrent server_consumption get endpoint permissions
+- correct server_cost get endpoint permissions
+- correct budget modify endpoint permissions
+- filter out outdated prices in select_flavor_prices_for_*period_from_db functions
+- correct FlavorDb.group_id type
+- correct tracing name of select_maybe_flavor_detail_from_db and flavor_group_usage function
+- allow both filters on flavor-price list
+
+### Refactors
+- outsource utils::start_of_the_year function
+- simplify name retrieval in flavor_quota_modify
+- simplify calculate_flavor_group_usage_*_simple functions
+- remove unneeded project param from various endpoints
+
+### Misc
+- add run_api.sh script
+- rename api container to avina in build_api_container.sh
+- use rust:1 as image in build_api_container.sh
+- update to debian trixie in build_api_container.sh
+- use production mariadb server version in init_db.sh
+- allow OpenSSL license in cargo deny config
+
+### Documentation
+- use run_api.sh script in README.md
+
+## [avina-wire-v2.0.0] - 2025-12-31
+
+### Dependencies
+- bump clap from 4.5.39 to 4.5.53
+- bump strum from 0.27.1 to 0.27.2
+- bump rand from 0.9.1 to 0.9.2
+- bump chrono from 0.4.41 to 0.4.42
+- bump serde from 1.0.219 to 1.0.228
+- bump uuid from 1.17.0 to 1.19.0
+- bump thiserror from 2.0.12 to 2.0.17
+- run cargo update
+
+### Features
+- update rust edition to 2024
+- add BudgetOverTreeParams, FlavorQuotaCheckParams, FlavorUsageParams
+- add FlavorGroupUsageParams and FlavorQuotaCheckParams.openstackproject
+- add sqlx feature for optional sqlx dep
+- add tabled feature for optional tabled dependency
+- make BudgetOverTreeUser/Project.budget(_id) fields an Option
+- implement From<UserDetailed> for User
+
+### Fixes
+- use Uuid for instance_id
+- use enum for user_class
+- make tabled derives dependent on feature
+- use default skip_serializing_if
+- use default skip_serializing_if
+- add sqlx try_froms to FlavorQuota fields
+- add sqlx try_from to FlavorMinimal.id
+- correct id, project types in FromRow for FlavorGroup
+- adjust FlarvorGroup FromRow for left join
+
+### Refactors
+- rename FlavorGroupUsage to FlavorGroupUsageSimple
+- rename FlavorUsage to FlavorUsageSimple
+- move UserClass to user/project submodule
+
 ## Repository - 2025-06-05
 
 ### Dependencies
@@ -125,8 +364,7 @@ This is the combined changelog of all contained `avina` crates.
 - add user-budget over endpoint
 - add project-budget over endpoint
 - add budget bulk create endpoint
-
-- Merge pull request #272 from fredberto/project-user-budget-permissions
+- implement proper project and user budget permission checks
 
 ### Documentation
 - add development requirements section to README.md
