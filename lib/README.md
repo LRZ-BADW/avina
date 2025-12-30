@@ -6,7 +6,7 @@ foremost the budgeting system.
 ## Usage
 To use the library add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml
-avina = 1
+avina = 2
 ```
 After that you create a `Token` and `Api` object to interact with the API:
 ```rust
