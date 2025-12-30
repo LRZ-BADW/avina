@@ -461,7 +461,7 @@ dependencies = [
 
 [[package]]
 name = "avina-ui"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "avina",
  "dioxus",
