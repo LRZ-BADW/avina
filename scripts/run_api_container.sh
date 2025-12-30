@@ -4,6 +4,8 @@ docker stop avina || true
 docker rm avina || true
 docker run \
     --name avina \
+    --network host \
+    -e APP_ENVIRONMENT="local" \
     -e APP_OPENSTACK__KEYSTONE_ENDPOINT="${OS_AUTH_URL}" \
     -e APP_OPENSTACK__USERNAME="${OS_USERNAME}" \
     -e APP_OPENSTACK__PASSWORD="${OS_PASSWORD}" \
