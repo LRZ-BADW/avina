@@ -36,7 +36,7 @@ use crate::{
 #[derive(PartialEq, Clone, Debug, Deserialize)]
 struct AvinaLdapUser {
     name: String,
-    project: String,
+    project: Option<String>,
     master: bool,
     function: bool,
 }
@@ -44,7 +44,7 @@ struct AvinaLdapUser {
 #[derive(PartialEq, Clone, Debug, Deserialize)]
 struct AvinaLdapProject {
     name: String,
-    class: UserClass,
+    class: u32,
 }
 
 #[derive(PartialEq, Clone, Debug, Deserialize)]
@@ -94,10 +94,10 @@ impl AvinaLdap {
             response
                 .text()
                 .await
-                .context("Could not read response text")?
+                .context("Could not read avina-ldap response text")?
                 .as_str(),
         )
-        .context("Could not parse response")?;
+        .context("Could not parse avina-ldap response")?;
         if data.0.is_none() && !default {
             return Err(anyhow!(
                     "avina-ldap returned nothing but using defaults also not configured."
@@ -108,10 +108,11 @@ impl AvinaLdap {
     }
 
     fn get_userclass(&self, project_name: &str) -> UserClass {
+        // TODO: are these defaults the best way to handle this
         if let Some(data) = &self.data
             && let Some(project) = data.projects.get(project_name)
         {
-            return project.class;
+            return UserClass::try_from(project.class).unwrap_or(UserClass::NA);
         }
         UserClass::NA
     }
