@@ -469,7 +469,7 @@ dependencies = [
 
 [[package]]
 name = "avina-wire"
-version = "1.7.0"
+version = "2.0.0"
 dependencies = [
  "cargo-husky",
  "chrono",
