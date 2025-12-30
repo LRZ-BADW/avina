@@ -16,6 +16,7 @@ version = "0.0.2"
 [dependencies]
 dioxus = { version = "0.6.3", features = ["fullstack"] }
 avina = { version = "2.0", path = "../lib" }
+getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [features]
 default = []
