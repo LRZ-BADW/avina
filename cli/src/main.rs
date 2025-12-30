@@ -23,13 +23,7 @@ mod resources;
 #[cfg(feature = "user")]
 mod user;
 
-use accounting::ServerStateCommand;
-use budgeting::{ProjectBudgetCommand, UserBudgetCommand};
 use common::{Execute, Format, TableFormat};
-use pricing::FlavorPriceCommand;
-use quota::FlavorQuotaCommand;
-use resources::{FlavorCommand, FlavorGroupCommand};
-use user::UserCommand;
 
 #[derive(Args, Debug)]
 #[group(required = true, multiple = true)]
@@ -369,71 +363,7 @@ async fn main() -> ExitCode {
             std::process::exit(1);
         }
     };
-    let url = match cli.command {
-        Command::Hello { .. } | Command::Project { .. } => {
-            if cli.rust {
-                cli.rust_url
-            } else {
-                cli.url
-            }
-        }
-        Command::User {
-            command:
-                UserCommand::List { .. }
-                | UserCommand::Get { .. }
-                | UserCommand::Create { .. }
-                | UserCommand::Modify { .. }
-                | UserCommand::Delete { .. }
-                | UserCommand::Me,
-        } => {
-            if cli.rust {
-                cli.rust_url
-            } else {
-                cli.url
-            }
-        }
-        Command::ServerState {
-            command:
-                ServerStateCommand::List { .. }
-                | ServerStateCommand::Get { .. }
-                | ServerStateCommand::Create { .. }
-                | ServerStateCommand::Modify { .. }
-                | ServerStateCommand::Delete { .. },
-        } => {
-            if cli.rust {
-                cli.rust_url
-            } else {
-                cli.url
-            }
-        }
-        Command::UserBudget {
-            command: UserBudgetCommand::Delete { .. } | UserBudgetCommand::Sync,
-        }
-        | Command::ProjectBudget {
-            command: ProjectBudgetCommand::Delete { .. },
-        }
-        | Command::Flavor {
-            command: FlavorCommand::Delete { .. } | FlavorCommand::Modify { .. },
-        }
-        | Command::FlavorGroup {
-            command:
-                FlavorGroupCommand::Delete { .. }
-                | FlavorGroupCommand::Modify { .. },
-        }
-        | Command::FlavorPrice {
-            command: FlavorPriceCommand::Delete { .. },
-        }
-        | Command::FlavorQuota {
-            command: FlavorQuotaCommand::Delete { .. },
-        } => {
-            if cli.rust {
-                cli.rust_url
-            } else {
-                cli.url
-            }
-        }
-        _ => cli.url,
-    };
+    let url = if cli.rust { cli.rust_url } else { cli.url };
     let api = match Api::new(url, token, cli.impersonate, cli.timeout) {
         Ok(api) => api,
         Err(error) => {
