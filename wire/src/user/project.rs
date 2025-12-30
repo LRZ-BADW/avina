@@ -196,8 +196,8 @@ impl ProjectModifyData {
     Deserialize,
     Serialize,
     Copy,
-    sqlx::Type,
 )]
+#[cfg_attr(feature = "sqlx", derive(sqlx::Type))]
 pub enum UserClass {
     NA = 0,
     UC1 = 1,
