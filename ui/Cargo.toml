@@ -11,11 +11,15 @@ readme = "README.md"
 license = "MIT"
 version = "0.0.2"
 
+[package.metadata.cargo-machete]
+ignored = ["getrandom"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 dioxus = { version = "0.7.2", features = ["fullstack"] }
 avina = { version = "2.0", path = "../lib" }
+# NOTE: This is currently needed for WASM compilation
 getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [features]
