@@ -124,7 +124,8 @@ async fn e2e_lib_admin_cannot_modify_user_budget() {
     let new_flavor_price = NewFlavorPrice {
         flavor_id: flavor.id as u64,
         user_class: project_1.user_class,
-        unit_price: 200_f64, // cost: 133
+        // NOTE: this test fails at the beginning of a year without a ridiculously high price
+        unit_price: 100000_f64,
         start_time,
     };
     let _flavor_price = server
