@@ -32,14 +32,14 @@ if [[ -z "${SKIP_DOCKER}" ]]; then
         -d mariadb:10.6.21
 fi
 
-until mariadb -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" -D "" -e "QUIT"; do
+until mariadb --skip-ssl -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" -D "" -e "QUIT"; do
     >&2 echo "MariaDB is still unavailable - sleeping"
     sleep 1
 done
 
 >&2 echo "MariaDB is up and running on ${DB_HOST} on port ${DB_PORT}!"
 
-mariadb -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" -D "" -e "SET GLOBAL max_connections := 1000"
+mariadb --skip-ssl -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" -D "" -e "SET GLOBAL max_connections := 1000"
 
 export DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 sqlx database create
