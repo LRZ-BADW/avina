@@ -53,7 +53,7 @@ avina-wire = { version = "2.0", path = "../wire", features = ["sqlx"] }
 thiserror = "2.0"
 chrono = { version = "0.4", features = ["serde"] }
 strum = { version = "0.27", features = ["derive"] }
-indexmap = "2.12"
+indexmap = "2.13"
 uuid = { version = "1.19", features = ["v4"] }
 
 [dependencies.sqlx]
