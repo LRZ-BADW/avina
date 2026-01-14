@@ -4,6 +4,11 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+## [avina-api-v1.0.1] - 2026-01-14
+
+### Fixes
+- correct default is_active setting in user_import
+
 ## Repository - 2025-12-31
 
 ### Documentation
