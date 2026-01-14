@@ -213,7 +213,7 @@ pub async fn user_import(
             project_id: project.id,
             role: ldap_data.get_role(username),
             is_staff: false,
-            is_active: false,
+            is_active: true,
         };
         let user_id = insert_user_into_db(&mut transaction, &new_user).await?;
         insert_user_budget_into_db(
