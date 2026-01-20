@@ -1,23 +1,8 @@
 #!/bin/bash
 
-VERSION=0.0.2
+OWNER='gierens'
+NAME='avina-ui'
+CRATE='avina-ui'
+FOLDER='ui'
 
-docker build \
-    --tag "gierens/avina-ui:v${VERSION}" \
-    --tag "gierens/avina-ui:latest" \
-    --file ui/Dockerfile \
-    .
-
-if [ $? -eq 0 ]; then
-    echo "Successfully built the container"
-else
-    echo "Failed to build the container"
-    exit 1
-fi
-
-read -p "Publish container? " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    docker push "gierens/avina-ui:v${VERSION}"
-    docker push "gierens/avina-ui:latest"
-fi
+bash ./scripts/build_container.sh "${OWNER}" "${NAME}" "${CRATE}" "${FOLDER}"
