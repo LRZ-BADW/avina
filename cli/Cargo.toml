@@ -29,7 +29,7 @@ resources = ["avina/resources"]
 user = ["avina/user"]
 
 [dependencies]
-avina = { version = "2.0", path = "../lib" }
+avina = { version = "2.1", path = "../lib" }
 avina-wire = { version = "2.1", path = "../wire", features = ["tabled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
