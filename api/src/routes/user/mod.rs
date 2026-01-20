@@ -12,6 +12,8 @@ mod me;
 use me::user_me;
 mod import;
 use import::user_import;
+mod sync;
+use sync::user_sync;
 
 pub fn user_scope() -> Scope {
     scope("/user")
@@ -19,4 +21,5 @@ pub fn user_scope() -> Scope {
         .service(users_scope())
         .route("/me", get().to(user_me))
         .route("/import", get().to(user_import))
+        .route("/sync", get().to(user_sync))
 }
