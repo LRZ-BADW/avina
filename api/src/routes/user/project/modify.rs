@@ -3,14 +3,13 @@ use actix_web::{
     web::{Data, Json, Path, ReqData},
 };
 use anyhow::Context;
-use avina_wire::user::{Project, ProjectModifyData, User};
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use avina_wire::user::{ProjectModifyData, User};
+use sqlx::MySqlPool;
 
 use super::ProjectIdParam;
 use crate::{
     authorization::require_admin_user,
-    database::user::project::select_project_from_db,
-    error::{NotFoundOrUnexpectedApiError, OptionApiError},
+    database::user::project::update_project_in_db, error::OptionApiError,
 };
 
 #[tracing::instrument(name = "project_modify")]
@@ -39,37 +38,4 @@ pub async fn project_modify(
     Ok(HttpResponse::Ok()
         .content_type("application/json")
         .json(project))
-}
-
-#[tracing::instrument(name = "update_project_in_db", skip(data, transaction))]
-pub async fn update_project_in_db(
-    transaction: &mut Transaction<'_, MySql>,
-    data: &ProjectModifyData,
-) -> Result<Project, NotFoundOrUnexpectedApiError> {
-    let row = select_project_from_db(transaction, data.id as u64).await?;
-    let name = data.name.clone().unwrap_or(row.name);
-    let openstack_id = data.openstack_id.clone().unwrap_or(row.openstack_id);
-    let user_class = data.user_class.unwrap_or(row.user_class);
-    let query = sqlx::query!(
-        r#"
-        UPDATE user_project
-        SET name = ?, openstack_id = ?, user_class = ?
-        WHERE id = ?
-        "#,
-        name,
-        openstack_id,
-        user_class as u32,
-        data.id,
-    );
-    transaction
-        .execute(query)
-        .await
-        .context("Failed to execute update query")?;
-    let project = Project {
-        id: data.id,
-        name,
-        openstack_id,
-        user_class,
-    };
-    Ok(project)
 }

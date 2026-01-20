@@ -1,5 +1,5 @@
 use anyhow::Context;
-use avina_wire::user::{Project, ProjectMinimal, UserClass};
+use avina_wire::user::{Project, ProjectMinimal, ProjectModifyData, UserClass};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
@@ -253,4 +253,37 @@ pub async fn select_user_class_by_project_from_db(
         ),
         None => None,
     })
+}
+
+#[tracing::instrument(name = "update_project_in_db", skip(data, transaction))]
+pub async fn update_project_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &ProjectModifyData,
+) -> Result<Project, NotFoundOrUnexpectedApiError> {
+    let row = select_project_from_db(transaction, data.id as u64).await?;
+    let name = data.name.clone().unwrap_or(row.name);
+    let openstack_id = data.openstack_id.clone().unwrap_or(row.openstack_id);
+    let user_class = data.user_class.unwrap_or(row.user_class);
+    let query = sqlx::query!(
+        r#"
+        UPDATE user_project
+        SET name = ?, openstack_id = ?, user_class = ?
+        WHERE id = ?
+        "#,
+        name,
+        openstack_id,
+        user_class as u32,
+        data.id,
+    );
+    transaction
+        .execute(query)
+        .await
+        .context("Failed to execute update query")?;
+    let project = Project {
+        id: data.id,
+        name,
+        openstack_id,
+        user_class,
+    };
+    Ok(project)
 }
