@@ -4,6 +4,93 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+## Repository - 2025-01-20
+
+### CI
+- bump taiki-e/install-action from 2.65.7 to 2.67.0
+
+### Docs
+- Add missing colon to all todo comments.
+
+### Scripts
+- enable skip ssl in .mariadb.cnf
+- add --skip-ssl to mariadb commands in init_db.sh
+- update version in build_api_container.sh
+- update version in build_ui_container.sh
+- consolidate container build scripts into build_container.sh
+
+## [avina-api-v1.1.0] - 2026-01-20
+
+### Features
+- implement user_sync endpoint with role and user class update
+- add no default functions to AvinaLdap
+- add functions update_project_user_class_in_db and update_user_role_in_db
+
+### Refactors
+- move update_user/project_in_db to database module
+- move AvinaLdap to new ldap module
+
+### Fixes
+- add missing transaction commit in user_sync
+
+### Dependencies
+- bump avina-wire from 2.0.0 to 2.1.0
+- bump tokio from 1.48.0 to 1.49.0
+- bump indexmap from 2.12.1 to 2.13.0
+- bump serde_json from 1.0.148 to 1.0.149
+- bump tracing-actix-web from 0.7.20 to 0.7.21
+
+## [avina-cli-v2.1.0] - 2025-01-20
+
+### Features
+- add user sync call and command
+
+### Dependencies
+- bump avina-wire from 2.0.0 to 2.1.0
+- bump avina-lib from 2.0.0 to 2.1.0
+- bump clap from 4.5.53 to 4.5.54
+- bump tokio from 1.48.0 to 1.49.0
+- bump serde_json from 1.0.148 to 1.0.149
+
+## [avina-test-v0.8.0] - 2025-01-20
+
+### Tests
+- fix e2e_lib_admin_cannot_modify_user_budget for start of year
+
+### Dependencies
+- bump avina-wire from 2.0.0 to 2.1.0
+- bump avina-lib from 2.0.0 to 2.1.0
+- bump avina-api from 1.0.1 to 1.1.0
+- bump tokio from 1.48.0 to 1.49.0
+- bump serde_json from 1.0.148 to 1.0.149
+
+## [avina-ui-v0.0.3] - 2025-01-20
+
+### Dependencies
+- bump avina-lib from 2.0.0 to 2.1.0
+- bump dioxus from 0.7.2 to 0.7.3
+
+### Misc
+- add release flag to build command in ui Dockerfile
+- install wasm-opt in ui Dockerfile
+
+## [avina-lib-v2.1.0] - 2025-01-20
+
+### Features
+- add user sync call
+
+### Dependencies
+- bump avine-wire from 2.0.0 to 2.1.0
+- bump serde_json from 1.0.148 to 1.0.149
+
+## [avina-wire-v2.1.0] - 2025-01-20
+
+### Features
+- add UserSync struct
+
+### Dependencies
+- bump clap from 4.5.53 to 4.5.54
+
 ## [avina-api-v1.0.1] - 2026-01-14
 
 ### Fixes
