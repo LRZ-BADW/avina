@@ -73,6 +73,10 @@ pub async fn user_sync(
         }
     }
 
+    transaction
+        .commit()
+        .await
+        .context("Failed to commit transaction")?;
     Ok(HttpResponse::Ok()
         .content_type("application/json")
         .json(UserSync {
