@@ -287,3 +287,24 @@ pub async fn update_project_in_db(
     };
     Ok(project)
 }
+
+#[tracing::instrument(
+    name = "update_project_user_class_in_db",
+    skip(transaction)
+)]
+pub async fn update_project_user_class_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    project_id: u32,
+    user_class: UserClass,
+) -> Result<Project, NotFoundOrUnexpectedApiError> {
+    update_project_in_db(
+        transaction,
+        &ProjectModifyData {
+            id: project_id,
+            name: None,
+            openstack_id: None,
+            user_class: Some(user_class),
+        },
+    )
+    .await
+}
