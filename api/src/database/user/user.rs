@@ -1,5 +1,7 @@
 use anyhow::Context;
-use avina_wire::user::{User, UserClass, UserDetailed, UserMinimal};
+use avina_wire::user::{
+    User, UserClass, UserDetailed, UserMinimal, UserModifyData,
+};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
@@ -364,4 +366,48 @@ pub async fn select_user_class_by_user_from_db(
         ),
         None => None,
     })
+}
+
+#[tracing::instrument(name = "update_user_in_db", skip(data, transaction))]
+pub async fn update_user_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &UserModifyData,
+) -> Result<User, NotFoundOrUnexpectedApiError> {
+    let row = select_user_from_db(transaction, data.id as u64).await?;
+    let name = data.name.clone().unwrap_or(row.name);
+    let openstack_id = data.openstack_id.clone().unwrap_or(row.openstack_id);
+    let project_id = data.project.unwrap_or(row.project);
+    let role = data.role.unwrap_or(row.role);
+    let is_staff = data.is_staff.unwrap_or(row.is_staff);
+    let is_active = data.is_active.unwrap_or(row.is_active);
+    let query = sqlx::query!(
+        r#"
+        UPDATE user_user
+        SET name = ?, openstack_id = ?, project_id = ?, role = ?, is_staff = ?, is_active = ?
+        WHERE id = ?
+        "#,
+        name,
+        openstack_id,
+        project_id,
+        role,
+        is_staff,
+        is_active,
+        data.id,
+    );
+    transaction
+        .execute(query)
+        .await
+        .context("Failed to execute update query")?;
+    let user = User {
+        id: data.id,
+        name,
+        openstack_id,
+        project: project_id,
+        // TODO: we need to get the new project's name
+        project_name: row.project_name,
+        role,
+        is_staff,
+        is_active,
+    };
+    Ok(user)
 }
