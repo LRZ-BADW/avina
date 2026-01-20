@@ -411,3 +411,24 @@ pub async fn update_user_in_db(
     };
     Ok(user)
 }
+
+#[tracing::instrument(name = "update_user_role_in_db", skip(transaction))]
+pub async fn update_user_role_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    user_id: u32,
+    user_role: u32,
+) -> Result<User, NotFoundOrUnexpectedApiError> {
+    update_user_in_db(
+        transaction,
+        &UserModifyData {
+            id: user_id,
+            name: None,
+            openstack_id: None,
+            project: None,
+            role: Some(user_role),
+            is_staff: None,
+            is_active: None,
+        },
+    )
+    .await
+}
