@@ -109,6 +109,17 @@ pub(crate) enum UserCommand {
         )]
         quiet: bool,
     },
+
+    #[clap(about = "Sync users and projects to latest LDAP data")]
+    Sync {
+        #[clap(
+            long,
+            short,
+            action,
+            help = "Suppress output if nothing is imported"
+        )]
+        quiet: bool,
+    },
 }
 pub(crate) use UserCommand::*;
 
@@ -166,6 +177,7 @@ impl Execute for UserCommand {
             Delete { name_or_id } => delete(api, name_or_id).await,
             Me => me(api, format).await,
             Import { quiet } => import(api, format, *quiet).await,
+            Sync { quiet } => sync(api, format, *quiet).await,
         }
     }
 }
@@ -275,6 +287,21 @@ async fn import(
 ) -> Result<(), Box<dyn Error>> {
     let result = api.user.import().await?;
     if !quiet || result.new_project_count > 0 || result.new_user_count > 0 {
+        return print_single_object(result, format);
+    }
+    Ok(())
+}
+
+async fn sync(
+    api: avina::Api,
+    format: Format,
+    quiet: bool,
+) -> Result<(), Box<dyn Error>> {
+    let result = api.user.sync().await?;
+    if !quiet
+        || result.updated_project_count > 0
+        || result.updated_user_count > 0
+    {
         return print_single_object(result, format);
     }
     Ok(())

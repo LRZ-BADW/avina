@@ -3,7 +3,7 @@ use std::rc::Rc;
 use anyhow::Context;
 use avina_wire::user::{
     User, UserCreateData, UserDetailed, UserImport, UserListParams,
-    UserModifyData,
+    UserModifyData, UserSync,
 };
 use reqwest::{Client, Method, StatusCode};
 
@@ -261,6 +261,25 @@ impl UserApi {
         // TODO use Url.join
         let url = format!(
             "{}/import",
+            self.url
+                .rfind('/')
+                .map(|i| &self.url[..i])
+                .unwrap_or(&self.url)
+        );
+        request(
+            &self.client,
+            Method::GET,
+            url.as_str(),
+            SerializableNone!(),
+            StatusCode::OK,
+        )
+        .await
+    }
+
+    pub async fn sync(&self) -> Result<UserSync, ApiError> {
+        // TODO use Url.join
+        let url = format!(
+            "{}/sync",
             self.url
                 .rfind('/')
                 .map(|i| &self.url[..i])
