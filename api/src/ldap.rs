@@ -104,4 +104,25 @@ impl AvinaLdap {
             1
         }
     }
+
+    pub fn get_userclass_no_default(
+        &self,
+        project_name: &str,
+    ) -> Option<UserClass> {
+        if let Some(data) = &self.data
+            && let Some(project) = data.projects.get(project_name)
+        {
+            return UserClass::try_from(project.class).ok();
+        }
+        None
+    }
+
+    pub fn get_role_no_default(&self, username: &str) -> Option<u32> {
+        if let Some(data) = &self.data
+            && let Some(user) = data.users.get(username)
+        {
+            return Some(if user.master && !user.function { 2 } else { 1 });
+        }
+        None
+    }
 }
