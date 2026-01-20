@@ -36,7 +36,9 @@ pub async fn user_sync(
     let users = select_all_users_from_db(&mut transaction).await?;
     let mut updated_user_count = 0;
     for user in users {
-        let role = ldap_data.get_role(&user.name);
+        let Some(role) = ldap_data.get_role_no_default(&user.name) else {
+            continue;
+        };
         if role != user.role {
             update_user_role_in_db(&mut transaction, user.id, role)
                 .await
@@ -51,7 +53,11 @@ pub async fn user_sync(
     let projects = select_all_projects_from_db(&mut transaction).await?;
     let mut updated_project_count = 0;
     for project in projects {
-        let user_class = ldap_data.get_userclass(&project.name);
+        let Some(user_class) =
+            ldap_data.get_userclass_no_default(&project.name)
+        else {
+            continue;
+        };
         if project.user_class == UserClass::NA && user_class != UserClass::NA {
             update_project_user_class_in_db(
                 &mut transaction,
