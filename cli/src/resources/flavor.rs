@@ -76,7 +76,7 @@ pub(crate) enum FlavorCommand {
         #[clap(help = "Name of the flavor")]
         name: String,
 
-        // TODO verify that this is a UUIDv4
+        // TODO: verify that this is a UUIDv4
         #[clap(help = "Openstack UUIDv4 of the flavor")]
         openstack_id: String,
 
@@ -261,7 +261,7 @@ async fn modify(
     print_single_object(request.send().await?, format)
 }
 
-// TODO replace all command functions errors by anyhow::Error
+// TODO: replace all command functions errors by anyhow::Error
 async fn delete(
     api: avina::Api,
     name_or_id: &str,
@@ -301,7 +301,7 @@ async fn usage(
             } else if filter.all {
                 request.all_aggregate().await?
             } else {
-                // TODO this causes a http 500 error
+                // TODO: this causes a http 500 error
                 request.mine_aggregate().await?
             },
             format,
@@ -324,7 +324,7 @@ async fn usage(
     }
 }
 
-// TODO the find id functions can be condensed into a macro
+// TODO: the find id functions can be condensed into a macro
 pub(crate) async fn find_id(
     api: &avina::Api,
     name_or_id: &str,
@@ -332,7 +332,7 @@ pub(crate) async fn find_id(
     if let Ok(id) = name_or_id.parse::<u32>() {
         return Ok(id);
     }
-    // TODO cache me across arguments
+    // TODO: cache me across arguments
     let me = api.user.me().await.context("Failed to get own user")?;
     let mut request = api.flavor.list();
     if me.is_staff {

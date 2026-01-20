@@ -36,7 +36,7 @@ pub struct CloudUsageAggregate {
     pub flavors: Vec<CloudUsageFlavorSlot>,
 }
 
-// TODO how could we handle a table representation of this?
+// TODO: how could we handle a table representation of this?
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct CloudUsage {
     pub overview: CloudUsageOverview,

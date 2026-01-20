@@ -54,7 +54,7 @@ pub struct ServerStateCreateData {
     pub instance_id: Uuid,
     pub instance_name: String,
     pub flavor: u32,
-    // TODO we need an enum here
+    // TODO: we need an enum here
     pub status: String,
     pub user: u32,
 }
@@ -95,7 +95,7 @@ pub struct ServerStateModifyData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flavor: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    // TODO we need an enum here
+    // TODO: we need an enum here
     pub status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<u32>,

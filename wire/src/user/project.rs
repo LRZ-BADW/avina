@@ -97,7 +97,7 @@ pub struct ProjectDetailed {
     pub name: String,
     pub openstack_id: String, // UUIDv4 without dashes
     pub user_class: UserClass,
-    // TODO rethink list output in detailed structs:
+    // TODO: rethink list output in detailed structs:
     // maybe we could have only the first few entries followed by ...
     // in the output
     #[cfg_attr(feature = "tabled", tabled(skip))]

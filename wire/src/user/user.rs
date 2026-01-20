@@ -152,7 +152,7 @@ pub struct UserListParams {
 pub struct UserCreateData {
     pub name: String,
     pub openstack_id: String, // UUIDv4
-    // TODO can't this be optional?
+    // TODO: can't this be optional?
     pub project: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     // this could be an enum right

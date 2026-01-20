@@ -182,7 +182,7 @@ impl FlavorPriceApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<FlavorPrice, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -199,7 +199,7 @@ impl FlavorPriceApi {
         flavor: u32,
         user_class: UserClass,
     ) -> FlavorPriceCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         FlavorPriceCreateRequest::new(
             url.as_ref(),
@@ -210,13 +210,13 @@ impl FlavorPriceApi {
     }
 
     pub fn modify(&self, id: u32) -> FlavorPriceModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         FlavorPriceModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,
@@ -230,7 +230,7 @@ impl FlavorPriceApi {
     }
 
     pub async fn initialize(&self) -> Result<FlavorPriceInitialize, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/initialize/", self.url);
         request(
             &self.client,

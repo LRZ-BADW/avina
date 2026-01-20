@@ -145,7 +145,7 @@ struct Cli {
     #[clap(flatten)]
     credentials: CredentialArgs,
 
-    // TODO allow specifying user by name as well
+    // TODO: allow specifying user by name as well
     #[clap(
         short = 'X',
         long,
@@ -337,7 +337,7 @@ fn check_cli_parser() {
 async fn main() -> ExitCode {
     let cli = Cli::parse();
     let token = match match cli.credentials.token {
-        // TODO handle error when Token cannot be created due to wrong format
+        // TODO: handle error when Token cannot be created due to wrong format
         Some(token) => Token::from_str(token.as_str()),
         None => {
             let auth_url = cli.credentials.auth_url.unwrap();
@@ -453,7 +453,7 @@ async fn main() -> ExitCode {
     } {
         Ok(_) => {}
         Err(error) => {
-            // TODO it could be useful to use Debug here to see the error chain
+            // TODO: it could be useful to use Debug here to see the error chain
             eprintln!("{}: {}", "error".bold().red(), error);
             return ExitCode::FAILURE;
         }

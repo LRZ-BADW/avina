@@ -60,7 +60,7 @@ pub struct FlavorMinimal {
     pub name: String,
 }
 
-// TODO maybe rethink the Display implementations
+// TODO: maybe rethink the Display implementations
 impl Display for FlavorMinimal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&format!("Flavor(id={}, name={})", self.id, self.name))

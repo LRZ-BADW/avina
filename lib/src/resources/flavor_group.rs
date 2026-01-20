@@ -340,7 +340,7 @@ impl FlavorGroupApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<FlavorGroupDetailed, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -353,19 +353,19 @@ impl FlavorGroupApi {
     }
 
     pub fn create(&self, name: String) -> FlavorGroupCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         FlavorGroupCreateRequest::new(url.as_ref(), &self.client, name)
     }
 
     pub fn modify(&self, id: u32) -> FlavorGroupModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         FlavorGroupModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,
@@ -379,7 +379,7 @@ impl FlavorGroupApi {
     }
 
     pub async fn initialize(&self) -> Result<FlavorGroupInitialize, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/initialize/", self.url);
         request(
             &self.client,

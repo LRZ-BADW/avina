@@ -22,7 +22,7 @@ pub(crate) struct UserListFilter {
         long,
         help = "Display users of project with given name, ID, or OpenStack ID"
     )]
-    // TODO validate that this is a valid project ID
+    // TODO: validate that this is a valid project ID
     project: Option<String>,
 }
 
@@ -53,7 +53,7 @@ pub(crate) enum UserCommand {
         )]
         project: String,
 
-        // TODO we need some enum here
+        // TODO: we need some enum here
         #[clap(long, short, help = "Role of the user (1=user, 2=masteruser)")]
         role: Option<u32>,
 
@@ -82,7 +82,7 @@ pub(crate) enum UserCommand {
         )]
         project: Option<String>,
 
-        // TODO we need some enum here
+        // TODO: we need some enum here
         #[clap(long, short, help = "Role of the user (1=user, 2=masteruser)")]
         role: Option<u32>,
 
@@ -314,7 +314,7 @@ pub(crate) async fn find_id(
     if let Ok(id) = name_or_id.parse::<u32>() {
         return Ok(id);
     }
-    // TODO cache me across arguments
+    // TODO: cache me across arguments
     let me = api.user.me().await.context("Failed to get own user")?;
     let mut request = api.user.list();
     if me.is_staff {

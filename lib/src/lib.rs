@@ -101,7 +101,7 @@ pub struct Api {
 
 impl Api {
     pub fn new(
-        // TODO this should be a url::Url
+        // TODO: this should be a url::Url
         url: String,
         token: Token,
         impersonate: Option<u32>,
