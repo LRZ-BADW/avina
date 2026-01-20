@@ -135,6 +135,13 @@ pub struct UserImport {
     pub new_user_count: u32,
 }
 
+#[cfg_attr(feature = "tabled", derive(Tabled))]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+pub struct UserSync {
+    pub updated_project_count: u32,
+    pub updated_user_count: u32,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct UserListParams {
     pub all: Option<bool>,
