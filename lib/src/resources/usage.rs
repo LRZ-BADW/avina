@@ -17,7 +17,7 @@ pub struct UsageApi {
 impl UsageApi {
     pub fn new(base_url: &str, client: &Rc<Client>) -> UsageApi {
         UsageApi {
-            // TODO add the missing / that the end
+            // TODO: add the missing / that the end
             url: format!("{base_url}/resources/usage"),
             client: Rc::clone(client),
         }

@@ -216,7 +216,7 @@ async fn usage(
             } else if filter.all {
                 request.all_aggregate().await?
             } else {
-                // TODO this causes a http 500 error
+                // TODO: this causes a http 500 error
                 request.mine_aggregate().await?
             },
             format,
@@ -246,7 +246,7 @@ pub(crate) async fn find_id(
     if let Ok(id) = name_or_id.parse::<u32>() {
         return Ok(id);
     }
-    // TODO cache me across arguments
+    // TODO: cache me across arguments
     let me = api.user.me().await.context("Failed to get own user")?;
     let mut request = api.flavor_group.list();
     if me.is_staff {

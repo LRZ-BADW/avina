@@ -588,7 +588,7 @@ pub async fn spawn_app() -> TestApp {
         )
         .mount(&keystone_server)
         .await;
-    // TODO check data sent to keystone
+    // TODO: check data sent to keystone
 
     let application = Application::build(configuration.clone())
         .await

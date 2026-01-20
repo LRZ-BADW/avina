@@ -51,7 +51,7 @@ pub(crate) enum ProjectCommand {
 
     #[clap(about = "Modify a project")]
     Modify {
-        // TODO use name OpenStack consistently
+        // TODO: use name OpenStack consistently
         #[clap(help = "Name, ID, or openstack ID of the project")]
         name_or_id: String,
 
@@ -149,7 +149,7 @@ async fn get(
     Ok(())
 }
 
-// TODO something here doesn't work ... no idea why so far
+// TODO: something here doesn't work ... no idea why so far
 async fn create(
     api: avina::Api,
     format: Format,
@@ -203,7 +203,7 @@ pub(crate) async fn find_id(
     if let Ok(id) = name_or_id.parse::<u32>() {
         return Ok(id);
     }
-    // TODO cache me across arguments
+    // TODO: cache me across arguments
     let me = api.user.me().await.context("Failed to get own user")?;
     let mut request = api.project.list();
     if me.is_staff {

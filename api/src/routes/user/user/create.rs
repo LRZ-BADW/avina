@@ -28,7 +28,7 @@ impl TryFrom<UserCreateData> for NewUser {
     // TODO: we might need a more complex function with access to the database
     //       and the transaction
     fn try_from(data: UserCreateData) -> Result<Self, Self::Error> {
-        // TODO really validate data, role range, uuid, string length
+        // TODO: really validate data, role range, uuid, string length
         Ok(Self {
             name: data.name,
             openstack_id: data.openstack_id,

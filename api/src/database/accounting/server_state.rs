@@ -543,12 +543,12 @@ pub struct NewServerState {
     pub instance_id: Uuid,
     pub instance_name: String,
     pub flavor: u32,
-    // TODO we need an enum here
+    // TODO: we need an enum here
     pub status: String,
     pub user: u32,
 }
 
-// TODO really validate data
+// TODO: really validate data
 impl TryFrom<ServerStateCreateData> for NewServerState {
     type Error = String;
 

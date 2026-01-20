@@ -27,7 +27,7 @@ pub(crate) struct ServerStateListFilter {
         long,
         help = "Display server states of server with given UUID"
     )]
-    // TODO validate that this is a valid server UUIDv4
+    // TODO: validate that this is a valid server UUIDv4
     server: Option<Uuid>,
 
     #[clap(
@@ -73,7 +73,7 @@ pub(crate) enum ServerStateCommand {
         #[clap(help = "Name, ID, or OpenStack UUIDv4 of the flavor")]
         flavor: String,
 
-        // TODO need some enum of choices here
+        // TODO: need some enum of choices here
         #[clap(help = "Status of the instance")]
         status: String,
 
@@ -117,7 +117,7 @@ pub(crate) enum ServerStateCommand {
         )]
         flavor: Option<String>,
 
-        // TODO we need some enum here
+        // TODO: we need some enum here
         #[clap(
             long,
             short,

@@ -336,7 +336,7 @@ impl FlavorUsageRequest {
         .await
     }
 
-    // TODO this causes a http 500 error
+    // TODO: this causes a http 500 error
     pub async fn mine_aggregate(
         &mut self,
     ) -> Result<Vec<FlavorUsageAggregate>, ApiError> {
@@ -372,7 +372,7 @@ impl FlavorApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<FlavorDetailed, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -389,19 +389,19 @@ impl FlavorApi {
         name: String,
         openstack_id: String,
     ) -> FlavorCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         FlavorCreateRequest::new(url.as_ref(), &self.client, name, openstack_id)
     }
 
     pub fn modify(&self, id: u32) -> FlavorModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         FlavorModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,
@@ -415,7 +415,7 @@ impl FlavorApi {
     }
 
     pub async fn import(&self) -> Result<FlavorImport, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/import/", self.url);
         request(
             &self.client,

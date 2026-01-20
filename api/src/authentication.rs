@@ -13,7 +13,7 @@ use crate::{
     openstack::{OpenStack, ProjectMinimal as OpenstackProjectMinimal},
 };
 
-// TODO revise error handling here as well and test errors
+// TODO: revise error handling here as well and test errors
 
 #[derive(Clone, Debug)]
 pub struct Token(pub String);
@@ -96,7 +96,7 @@ pub async fn extract_user_and_project(
     .fetch_one(db_pool.get_ref())
     .await
     else {
-        // TODO apply context and map_err
+        // TODO: apply context and map_err
         return Err(unauthorized_error(
             "Failed to retrieve user and project from database",
         ));

@@ -189,7 +189,7 @@ impl UserApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<UserDetailed, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -207,7 +207,7 @@ impl UserApi {
         openstack_id: String,
         project: u32,
     ) -> UserCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         UserCreateRequest::new(
             url.as_ref(),
@@ -219,13 +219,13 @@ impl UserApi {
     }
 
     pub fn modify(&self, id: u32) -> UserModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         UserModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,
@@ -239,7 +239,7 @@ impl UserApi {
     }
 
     pub async fn me(&self) -> Result<UserDetailed, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!(
             "{}/me",
             self.url
@@ -258,7 +258,7 @@ impl UserApi {
     }
 
     pub async fn import(&self) -> Result<UserImport, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!(
             "{}/import",
             self.url
@@ -277,7 +277,7 @@ impl UserApi {
     }
 
     pub async fn sync(&self) -> Result<UserSync, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!(
             "{}/sync",
             self.url

@@ -208,7 +208,7 @@ impl ServerStateApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<ServerState, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -229,7 +229,7 @@ impl ServerStateApi {
         status: String,
         user: u32,
     ) -> ServerStateCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         ServerStateCreateRequest::new(
             url.as_ref(),
@@ -244,13 +244,13 @@ impl ServerStateApi {
     }
 
     pub fn modify(&self, id: u32) -> ServerStateModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         ServerStateModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,
@@ -264,7 +264,7 @@ impl ServerStateApi {
     }
 
     pub async fn import(&self) -> Result<ServerStateImport, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/import/", self.url);
         request(
             &self.client,

@@ -326,7 +326,7 @@ impl UserBudgetApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<UserBudget, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -339,19 +339,19 @@ impl UserBudgetApi {
     }
 
     pub fn create(&self, user: u32) -> UserBudgetCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         UserBudgetCreateRequest::new(url.as_ref(), &self.client, user)
     }
 
     pub fn modify(&self, id: u32) -> UserBudgetModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         UserBudgetModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,

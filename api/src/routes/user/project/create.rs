@@ -22,7 +22,7 @@ impl TryFrom<ProjectCreateData> for NewProject {
     type Error = String;
 
     fn try_from(data: ProjectCreateData) -> Result<Self, Self::Error> {
-        // TODO really validate data, user_class range, uuid, string length
+        // TODO: really validate data, user_class range, uuid, string length
         Ok(Self {
             name: data.name,
             openstack_id: data.openstack_id,

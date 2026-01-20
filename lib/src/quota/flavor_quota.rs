@@ -214,7 +214,7 @@ impl FlavorQuotaApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<FlavorQuota, ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -231,7 +231,7 @@ impl FlavorQuotaApi {
         flavor_group: u32,
         user: u32,
     ) -> FlavorQuotaCreateRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/", self.url);
         FlavorQuotaCreateRequest::new(
             url.as_ref(),
@@ -242,13 +242,13 @@ impl FlavorQuotaApi {
     }
 
     pub fn modify(&self, id: u32) -> FlavorQuotaModifyRequest {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         FlavorQuotaModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO use Url.join
+        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,

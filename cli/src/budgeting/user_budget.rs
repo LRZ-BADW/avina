@@ -35,7 +35,7 @@ pub(crate) struct UserBudgetListFilter {
     all: bool,
 
     #[clap(short, long, help = "Display user budgets of the given year")]
-    // TODO validate that this is a valid year
+    // TODO: validate that this is a valid year
     year: Option<u32>,
 }
 

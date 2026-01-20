@@ -20,7 +20,7 @@ pub struct Token {
 }
 
 impl Token {
-    // TODO maybe use generic request method in here
+    // TODO: maybe use generic request method in here
     pub async fn new(
         auth_url: &str,
         username: &str,
@@ -114,7 +114,7 @@ impl FromStr for Token {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self {
-            // TODO validate that string has correct format
+            // TODO: validate that string has correct format
             token: s.trim().to_string(),
             inner: None,
         })
