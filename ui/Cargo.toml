@@ -18,7 +18,7 @@ ignored = ["getrandom"]
 
 [dependencies]
 dioxus = { version = "0.7.2", features = ["fullstack"] }
-avina = { version = "2.0", path = "../lib" }
+avina = { version = "2.1", path = "../lib" }
 # NOTE: This is currently needed for WASM compilation
 getrandom = { version = "0.3", features = ["wasm_js"] }
 

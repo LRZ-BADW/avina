@@ -19,7 +19,7 @@ name = "main"
 harness = false
 
 [dependencies]
-avina = { version = "2.0", path = "../lib" }
+avina = { version = "2.1", path = "../lib" }
 avina-api = { version = "1.0", path = "../api" }
 avina-wire = { version = "2.1", path = "../wire" }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
