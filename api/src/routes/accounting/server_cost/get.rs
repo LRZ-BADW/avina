@@ -72,13 +72,13 @@ async fn get_flavor_price_map_for_period(
     }
     for uprices in prices.values_mut() {
         for fprices in uprices.values_mut() {
-            let mut i = fprices.len() - 1;
-            while i > 0 {
+            let mut i = 0;
+            while i < fprices.len() {
                 if fprices[i].start_time <= begin {
-                    *fprices = fprices.split_off(i);
+                    let _ = fprices.split_off(i + 1);
                     break;
                 }
-                i -= 1;
+                i += 1;
             }
         }
     }
