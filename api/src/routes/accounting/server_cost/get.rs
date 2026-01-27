@@ -153,11 +153,11 @@ async fn get_flavor_price_periods(
                 .unwrap()
                 .entry(price.flavor_name.clone())
                 .or_insert(0.0) = price.unit_price;
+            i += 1;
         } else {
             periods.insert(current_time, current_prices.clone());
-            current_time = prices.get(i).unwrap().start_time.to_utc();
+            current_time = price.start_time.to_utc();
         }
-        i += 1;
     }
     periods.insert(current_time, current_prices.clone());
 
