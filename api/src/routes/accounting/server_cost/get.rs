@@ -166,12 +166,12 @@ async fn get_flavor_price_periods(
 
 fn calculate_flavor_consumption_cost(
     flavor_consumption: f64,
-    prices: Prices,
+    prices: &Prices,
     user_class: UserClass,
-    flavor: String,
+    flavor: &str,
 ) -> f64 {
     let mut cost = 0.0;
-    if let Some(price) = prices.get(&user_class).unwrap().get(&flavor) {
+    if let Some(price) = prices.get(&user_class).unwrap().get(flavor) {
         cost = (flavor_consumption * price) / ((365 * 24 * 60 * 60) as f64);
     }
     cost
@@ -219,9 +219,9 @@ pub async fn calculate_server_cost_for_server_normal(
             }
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
-                prices.clone(),
+                prices,
                 user_class,
-                flavor_name,
+                &flavor_name,
             );
             if flavor_cost <= 0. {
                 continue;
@@ -269,9 +269,9 @@ pub async fn calculate_server_cost_for_server_detail(
         for (flavor_name, flavor_consumption) in consumption {
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
-                prices.clone(),
+                prices,
                 user_class,
-                flavor_name.clone(),
+                &flavor_name,
             );
             *cost.flavors.entry(flavor_name).or_default() += flavor_cost;
             if flavor_cost <= 0. {
@@ -362,9 +362,9 @@ pub async fn calculate_server_cost_for_user_normal(
             }
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
-                prices.clone(),
+                prices,
                 user_class,
-                flavor_name,
+                &flavor_name,
             );
             cost.total += flavor_cost;
         }
@@ -423,9 +423,9 @@ pub async fn calculate_server_cost_for_user_detail(
             for (flavor_name, flavor_consumption) in server_consumption {
                 let flavor_cost = calculate_flavor_consumption_cost(
                     flavor_consumption,
-                    prices.clone(),
+                    prices,
                     user_class,
-                    flavor_name.clone(),
+                    &flavor_name,
                 );
                 *server_cost.flavors.entry(flavor_name.clone()).or_default() +=
                     flavor_cost;
@@ -520,9 +520,9 @@ pub async fn calculate_server_cost_for_project_normal(
             }
             let flavor_cost = calculate_flavor_consumption_cost(
                 flavor_consumption,
-                prices.clone(),
+                prices,
                 user_class,
-                flavor_name,
+                &flavor_name,
             );
             if flavor_cost <= 0. {
                 continue;
@@ -595,9 +595,9 @@ pub async fn calculate_server_cost_for_project_detail(
                 for (flavor_name, flavor_consumption) in server_consumption {
                     let flavor_cost = calculate_flavor_consumption_cost(
                         flavor_consumption,
-                        prices.clone(),
+                        prices,
                         user_class,
-                        flavor_name.clone(),
+                        &flavor_name,
                     );
                     *server_cost
                         .flavors
@@ -705,9 +705,9 @@ pub async fn calculate_server_cost_for_all_normal(
                 }
                 let flavor_cost = calculate_flavor_consumption_cost(
                     flavor_consumption,
-                    prices.clone(),
+                    prices,
                     project.user_class,
-                    flavor_name,
+                    &flavor_name,
                 );
                 if flavor_cost <= 0. {
                     continue;
@@ -795,9 +795,9 @@ pub async fn calculate_server_cost_for_all_detail(
                     {
                         let flavor_cost = calculate_flavor_consumption_cost(
                             flavor_consumption,
-                            prices.clone(),
+                            prices,
                             project.user_class,
-                            flavor_name.clone(),
+                            &flavor_name,
                         );
                         *server_cost
                             .flavors
