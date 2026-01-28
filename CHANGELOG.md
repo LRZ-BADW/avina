@@ -4,6 +4,15 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+## [avina-api-v1.1.1] - 2026-01-28
+
+### Fixes
+- fix iteration in get_flavor_prices_for_periods
+- fix filtering in get_flavor_price_map_for_period
+
+### Features
+- optimize calculate_flavor_consumption_cost
+
 ## Repository - 2025-01-20
 
 ### CI
