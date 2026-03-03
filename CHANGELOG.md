@@ -4,6 +4,21 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+### Dependencies
+except api crate:
+- bump bytes from 1.11.0 to 1.11.1
+- bump time from 0.3.44 to 0.3.47
+
+## [avina-api-v1.1.2] - 2026-03-03
+
+### Fixes
+- use correct project for cost calculation in user_budget_modify
+- don't overwrite calling user with queried on in user_budget_list
+
+### Dependencies
+- bump bytes from 1.11.0 to 1.11.1
+- bump time from 0.3.44 to 0.3.47
+
 ## [avina-api-v1.1.1] - 2026-01-28
 
 ### Fixes
