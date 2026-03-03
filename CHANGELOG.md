@@ -13,7 +13,8 @@ except api crate:
 
 ### Fixes
 - use correct project for cost calculation in user_budget_modify
-- don't overwrite calling user with queried on in user_budget_list
+- don't shadow calling user with queried on in user_budget_list
+- don't shadow calling user with queried on in project_budget_list
 
 ### Dependencies
 - bump bytes from 1.11.0 to 1.11.1
