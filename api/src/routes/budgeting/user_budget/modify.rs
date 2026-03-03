@@ -69,7 +69,7 @@ pub async fn user_budget_modify(
     let ServerCostForProject::Detail(project_cost) =
         calculate_server_cost_for_project(
             &mut transaction,
-            user.project as u64,
+            user_budget_user.project as u64,
             begin,
             end,
             Some(true),
@@ -82,7 +82,7 @@ pub async fn user_budget_modify(
     let project_budget =
         select_maybe_project_budget_by_project_and_year_from_db(
             &mut transaction,
-            user.project as u64,
+            user_budget_user.project as u64,
             user_budget.year,
         )
         .await?;
