@@ -48,14 +48,18 @@ pub async fn project_budget_list(
         .await?
     } else if let Some(user_id) = params.user {
         // TODO: this can be optimized when the user is the current user
-        let user = select_user_from_db(&mut transaction, user_id as u64)
-            .await
-            .context("Failed to select user")?;
-        require_master_user(&user, user.project)?;
+        let queried_user =
+            select_user_from_db(&mut transaction, user_id as u64)
+                .await
+                .context("Failed to select user")?;
+        require_master_user(&user, queried_user.project)?;
         // TODO: since we already query the user we have the project id
         //       and can thus use select_project_budgets_by_project_from_db
-        select_project_budgets_by_user_from_db(&mut transaction, user.id as u64)
-            .await?
+        select_project_budgets_by_user_from_db(
+            &mut transaction,
+            queried_user.id as u64,
+        )
+        .await?
     } else if let Some(year) = params.year {
         require_admin_user(&user)?;
         select_project_budgets_by_year_from_db(&mut transaction, year).await?
