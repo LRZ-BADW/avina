@@ -3,3 +3,5 @@ rules:
     config:
       policies:
         "*": ref-pin
+  superfluous-actions:
+    disable: true
