@@ -21,6 +21,7 @@ permissions: {}
 
 env:
   CARGO_TERM_COLOR: always
+  DX_VERSION: "0.7.4"
   SQLX_VERSION: "0.8.6"
   SQLX_FEATURES: "rustls,mysql"
   DATABASE_URL: "mysql://root:password@127.0.0.1:3306/avina"
@@ -44,6 +45,29 @@ jobs:
         run: sudo apt update && sudo apt install mold -y
       - name: Build all crates
         run: SQLX_OFFLINE=true cargo build --all
+
+  build-ui:
+    name: build-ui
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install the Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Rust Cache Action
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: dioxus-cli-${{ env.DX_VERSION }}
+      - name: Install mold
+        run: sudo apt update && sudo apt install mold -y
+      - name: Install Dioxus CLI
+        run: cargo install dioxus-cli --version="${DX_VERSION}"
+      - name: Build UI crate with Dioxus
+        run: dx build --package avina-ui
 
   test:
     name: test
