@@ -17,7 +17,7 @@ Make sure the UI runs locally, see [here](../ui/README.md) and then execute:
 
 ```bash
 source admin-openrc.sh
-scripts/run_ui.sh
+scripts/run_ui_wrapper.sh
 ```
 
 This spawns the wrapper UI on `http://localhost:8888`.
