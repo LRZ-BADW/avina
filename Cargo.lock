@@ -504,6 +504,7 @@ dependencies = [
  "avina",
  "dioxus",
  "getrandom 0.3.4",
+ "strum",
 ]
 
 [[package]]
