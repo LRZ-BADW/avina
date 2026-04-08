@@ -1,7 +1,9 @@
-use crate::API_URL;
+use std::str::FromStr;
+
 use avina::{Api, Token};
 use dioxus::prelude::*;
-use std::str::FromStr;
+
+use crate::API_URL;
 
 #[component]
 pub fn HelloPage(token: String) -> Element {
