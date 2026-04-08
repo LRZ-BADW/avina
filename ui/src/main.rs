@@ -4,24 +4,36 @@ use avina::{Api, Token};
 use dioxus::prelude::*;
 use strum::{EnumIter, IntoEnumIterator};
 
+mod components;
+
+use components::button::{Button, ButtonVariant};
+
 const API_URL: &str = "http://localhost:8000/api";
+const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
 
 fn main() {
     launch(app);
 }
 
-#[derive(Debug, EnumIter, Clone, Copy)]
+#[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Page {
     Hello,
     Me,
 }
 
 macro_rules! rsx_with_page_bar {
-    ($signal:ident, $content:expr) => {
+    ($signal:ident, $page:expr, $content:expr) => {
         rsx! {
+            document::Stylesheet { href: THEME_CSS }
             div {
                 for page in Page::iter() {
-                    button {
+                    Button {
+                        variant: if page == $page {
+                            ButtonVariant::Ghost
+                        } else {
+                            ButtonVariant::Outline
+                        },
+                        disabled: page == $page,
                         onclick: move |_| *$signal.write() = page,
                         "{page:?}"
                     }
@@ -51,8 +63,8 @@ fn app() -> Element {
     };
     let mut signal = use_signal(|| Page::Hello);
     match *signal.read() {
-        Page::Hello => rsx_with_page_bar!(signal, Hello { token }),
-        Page::Me => rsx_with_page_bar!(signal, Me { token }),
+        Page::Hello => rsx_with_page_bar!(signal, Page::Hello, Hello { token }),
+        Page::Me => rsx_with_page_bar!(signal, Page::Me, Me { token }),
     }
 }
 
