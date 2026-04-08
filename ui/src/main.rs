@@ -22,7 +22,7 @@ enum Page {
 }
 
 macro_rules! rsx_with_page_bar {
-    ($signal:ident, $page:expr, $content:expr) => {
+    ($signal:ident, $page:ty, $content:stmt) => {
         rsx! {
             document::Stylesheet { href: THEME_CSS }
             div {
