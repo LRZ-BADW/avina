@@ -1,12 +1,11 @@
-use std::str::FromStr;
-
-use avina::{Api, Token};
 use dioxus::prelude::*;
 use strum::{EnumIter, IntoEnumIterator};
 
 mod components;
+mod pages;
 
 use components::button::{Button, ButtonVariant};
+use pages::{HelloPage, ProfilePage};
 
 const API_URL: &str = "http://localhost:8000/api";
 const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
@@ -17,8 +16,8 @@ fn main() {
 
 #[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Page {
+    Profile,
     Hello,
-    Me,
 }
 
 macro_rules! rsx_with_page_bar {
@@ -61,45 +60,13 @@ fn app() -> Element {
     let Some(token) = future.read_unchecked().as_ref().cloned() else {
         return rsx! { p { "Logging you in ..." } };
     };
-    let mut signal = use_signal(|| Page::Hello);
+    let mut signal = use_signal(|| Page::Profile);
     match *signal.read() {
-        Page::Hello => rsx_with_page_bar!(signal, Page::Hello, Hello { token }),
-        Page::Me => rsx_with_page_bar!(signal, Page::Me, Me { token }),
-    }
-}
-
-#[component]
-fn Hello(token: String) -> Element {
-    let future = use_resource(move || {
-        let token_str = token.clone();
-        async move {
-            let token = Token::from_str(&token_str).unwrap();
-            let api = Api::new(API_URL.to_string(), token, None, None).unwrap();
-            api.hello.user().await.unwrap()
+        Page::Profile => {
+            rsx_with_page_bar!(signal, Page::Profile, ProfilePage { token })
         }
-    });
-    let Some(hello) = future.read_unchecked().as_ref().cloned() else {
-        return rsx! {};
-    };
-    rsx! {
-        p { "{hello}" }
-    }
-}
-
-#[component]
-fn Me(token: String) -> Element {
-    let future = use_resource(move || {
-        let token_str = token.clone();
-        async move {
-            let token = Token::from_str(&token_str).unwrap();
-            let api = Api::new(API_URL.to_string(), token, None, None).unwrap();
-            api.user.me().await.unwrap()
+        Page::Hello => {
+            rsx_with_page_bar!(signal, Page::Hello, HelloPage { token })
         }
-    });
-    let Some(user) = future.read_unchecked().as_ref().cloned() else {
-        return rsx! {};
-    };
-    rsx! {
-        p { "{user:?}" }
     }
 }
