@@ -16,7 +16,29 @@ pub fn ProfilePage(token: String) -> Element {
     let Some(user) = future.read_unchecked().as_ref().cloned() else {
         return rsx! {};
     };
+    let role = if user.is_staff {
+        "Administrator"
+    } else if user.role == 2 {
+        "Master User"
+    } else if user.role == 1 {
+        "User"
+    } else {
+        "Unknown"
+    };
     rsx! {
-        p { "{user:?}" }
+        h1 { "Profile" }
+        h2 { "User" }
+        table {
+            tr { td { b { "ID:" } }, td { "{user.id}" } }
+            tr { td { b { "Name:" } }, td { "{user.name}" } }
+            tr { td { b { "UUID:" } }, td { "{user.openstack_id}" } }
+            tr { td { b { "Role:" } }, td { "{role}" } }
+        }
+        h2 { "Project" }
+        table {
+            tr { td { b { "ID:" } }, td { "{user.project.id}" } }
+            tr { td { b { "Name:" } }, td { "{user.project.name}" } }
+            tr { td { b { "User Class:" } }, td { "{user.project.user_class}" } }
+        }
     }
 }
