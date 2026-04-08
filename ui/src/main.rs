@@ -38,7 +38,9 @@ macro_rules! rsx_with_page_bar {
                     }
                 }
             }
-            $content
+            div {
+                $content
+            }
         }
     };
 }
