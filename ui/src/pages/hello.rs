@@ -18,11 +18,11 @@ pub fn HelloPage(token: String) -> Element {
     let hello = match future.read().as_ref() {
         Some(Ok(hello)) => hello.clone(),
         Some(Err(ApiError::ResponseError(message))) => {
-            tracing::warn!("API Response Error: {message}");
+            tracing::warn!("API Error Response: {message}");
             return rsx! { p { b { "Error: " }, "{message}" } };
         }
         Some(Err(ApiError::UnexpectedError(error))) => {
-            tracing::error!("API Unexpected Error: {error}");
+            tracing::error!("Unexpected API Error: {error}");
             return rsx! { p { b { "Error: " }, "Unexpected error, please contact support." } };
         }
         None => {
