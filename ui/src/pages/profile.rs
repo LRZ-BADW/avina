@@ -18,11 +18,12 @@ pub fn ProfilePage(token: String) -> Element {
     let user = match future.read_unchecked().as_ref() {
         Some(Ok(user)) => user.clone(),
         Some(Err(ApiError::ResponseError(message))) => {
+            tracing::warn!("API Response Error: {message}");
             return rsx! { p { b { "Error: " }, "{message}" } };
         }
-        Some(Err(ApiError::UnexpectedError(_error))) => {
-            // TODO: log the message
-            return rsx! { p { b { "Error: " }, "Internal error, please contact support." } };
+        Some(Err(ApiError::UnexpectedError(error))) => {
+            tracing::error!("API Unexpected Error: {error}");
+            return rsx! { p { b { "Error: " }, "Unexpected error, please contact support." } };
         }
         None => {
             return rsx! { p { "Loading ..." } };
