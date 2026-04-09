@@ -15,7 +15,7 @@ pub fn ProfilePage(token: String) -> Element {
             api.user.me().await
         }
     });
-    let user = match future.read_unchecked().as_ref() {
+    let user = match future.read().as_ref() {
         Some(Ok(user)) => user.clone(),
         Some(Err(ApiError::ResponseError(message))) => {
             tracing::warn!("API Response Error: {message}");
