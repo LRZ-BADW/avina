@@ -56,12 +56,22 @@ fn app() -> Element {
             window.parent.postMessage("request-token", "*");
             "#,
         );
-        let token_str: String = eval.recv().await.unwrap();
-        token_str
+        eval.recv::<String>().await
     });
-    let Some(token) = future.read().as_ref().cloned() else {
-        return rsx! { p { "Logging you in ..." } };
+    let token = match future.read().as_ref() {
+        Some(Ok(token)) => token.clone(),
+        Some(Err(error)) => {
+            tracing::error!("Failed to evaluate token, due to {error}");
+            return rsx! { p { b { "Error: " }, "Unexpected error, please contact support." } };
+        }
+        None => {
+            return rsx! { p { "Logging you in ..." } };
+        }
     };
+    if token == "request-token" {
+        tracing::error!("No token provided to UI");
+        return rsx! { p { b { "Error: " }, "No token provided to UI." } };
+    }
     let mut signal = use_signal(|| Page::Profile);
     match *signal.read() {
         Page::Profile => {
