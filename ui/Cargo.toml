@@ -23,6 +23,7 @@ avina = { version = "2.1", path = "../lib" }
 getrandom = { version = "0.3", features = ["wasm_js"] }
 strum = "0.28.0"
 dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version = "0.0.1", default-features = false }
+tracing = "0.1.44"
 
 [features]
 default = []

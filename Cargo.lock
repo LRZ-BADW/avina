@@ -506,6 +506,7 @@ dependencies = [
  "dioxus-primitives",
  "getrandom 0.3.4",
  "strum",
+ "tracing",
 ]
 
 [[package]]
