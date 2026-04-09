@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use strum::{EnumIter, IntoEnumIterator};
 
+mod common;
 mod components;
 mod pages;
 
@@ -73,12 +74,21 @@ fn app() -> Element {
         return rsx! { p { b { "Error: " }, "No token provided to UI." } };
     }
     let mut signal = use_signal(|| Page::Profile);
+    let api_url = API_URL.to_string();
     match *signal.read() {
         Page::Profile => {
-            rsx_with_page_bar!(signal, Page::Profile, ProfilePage { token })
+            rsx_with_page_bar!(
+                signal,
+                Page::Profile,
+                ProfilePage { api_url, token }
+            )
         }
         Page::Hello => {
-            rsx_with_page_bar!(signal, Page::Hello, HelloPage { token })
+            rsx_with_page_bar!(
+                signal,
+                Page::Hello,
+                HelloPage { api_url, token }
+            )
         }
     }
 }
