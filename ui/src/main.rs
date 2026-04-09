@@ -59,7 +59,7 @@ fn app() -> Element {
         let token_str: String = eval.recv().await.unwrap();
         token_str
     });
-    let Some(token) = future.read_unchecked().as_ref().cloned() else {
+    let Some(token) = future.read().as_ref().cloned() else {
         return rsx! { p { "Logging you in ..." } };
     };
     let mut signal = use_signal(|| Page::Profile);
