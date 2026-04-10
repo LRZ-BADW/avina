@@ -502,6 +502,7 @@ name = "avina-ui"
 version = "0.0.3"
 dependencies = [
  "avina",
+ "avina-wire",
  "dioxus",
  "dioxus-primitives",
  "getrandom 0.3.4",
