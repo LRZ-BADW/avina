@@ -11,9 +11,11 @@ macro_rules! api_call {
 
         use avina::{Api, Token, error::ApiError};
 
+        let token = $token;
+        let api_url = $api_url;
         match use_resource(move || {
-            let token_str = $token.clone();
-            let url = $api_url.clone();
+            let token_str = token.clone();
+            let url = api_url.clone();
             async move {
                 let token = Token::from_str(&token_str)?;
                 let $api = Api::new(url, token, None, None)?;

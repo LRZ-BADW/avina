@@ -1,5 +1,5 @@
-mod hello;
+mod prices;
 mod profile;
 
-pub use hello::HelloPage;
+pub use prices::PricesPage;
 pub use profile::ProfilePage;

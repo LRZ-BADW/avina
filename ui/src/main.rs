@@ -7,7 +7,7 @@ mod components;
 mod pages;
 
 use components::button::{Button, ButtonVariant};
-use pages::{HelloPage, ProfilePage};
+use pages::{PricesPage, ProfilePage};
 
 const API_URL: &str = "http://localhost:8000/api";
 const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
@@ -18,8 +18,8 @@ fn main() {
 
 #[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Page {
+    Prices,
     Profile,
-    Hello,
 }
 
 macro_rules! rsx_with_page_bar {
@@ -76,21 +76,21 @@ fn app() -> Element {
         tracing::error!("No token provided to UI");
         return rsx! { p { b { "Error: " }, "No token provided to UI." } };
     }
-    let mut signal = use_signal(|| Page::Profile);
+    let mut signal = use_signal(|| Page::Prices);
     let api_url = API_URL.to_string();
     match *signal.read() {
+        Page::Prices => {
+            rsx_with_page_bar!(
+                signal,
+                Page::Prices,
+                PricesPage { api_url, token }
+            )
+        }
         Page::Profile => {
             rsx_with_page_bar!(
                 signal,
                 Page::Profile,
                 ProfilePage { api_url, token }
-            )
-        }
-        Page::Hello => {
-            rsx_with_page_bar!(
-                signal,
-                Page::Hello,
-                HelloPage { api_url, token }
             )
         }
     }

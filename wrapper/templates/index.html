@@ -1,11 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html class="flex-html">
     <head>
         <title>{{ title }}</title>
+        <style>
+            .flex-body, .flex-html {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0
+            }
+
+            .flex-row-container {
+                display: flex;
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .flex-row {
+                flex-grow: 1;
+                border: none;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
     </head>
-    <body>
-        <h1>{{ title }}</h1>
-        <p>Django UI Wrapper</p>
+    <body class="flex-body">
+        <div class="flex-row-container">
+            <h1><center>UI Wrapper</center></h1>
+            <iframe src="http://localhost:8080/" id="frame" class="flex-row"></iframe>
+        </div>
         <script>
             var token = "{{ token }}";
             window.addEventListener("message", function(event) {
@@ -14,6 +39,5 @@
                 }
             }, false);
         </script>
-        <iframe src="http://localhost:8080/" id="frame" width="100%" height="500" frameborder="0"></iframe>
     </body>
 </html>
