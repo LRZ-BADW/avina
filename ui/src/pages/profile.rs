@@ -1,7 +1,5 @@
 use dioxus::prelude::*;
 
-use crate::api_call;
-
 #[component]
 pub fn ProfilePage(api_url: String, token: String) -> Element {
     let user = api_call!(api_url, token, api, api.user.me().await);

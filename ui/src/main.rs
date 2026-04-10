@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use strum::{EnumIter, IntoEnumIterator};
 
+#[macro_use]
 mod common;
 mod components;
 mod pages;
@@ -62,8 +63,10 @@ fn app() -> Element {
     let token = match future.read().as_ref() {
         Some(Ok(token)) => token.clone(),
         Some(Err(error)) => {
-            tracing::error!("Failed to evaluate token, due to {error}");
-            return rsx! { p { b { "Error: " }, "Unexpected error, please contact support." } };
+            return_unexpected_error!(
+                "Failed to evaluate token, due to {}",
+                error
+            );
         }
         None => {
             return rsx! { p { "Logging you in ..." } };
