@@ -67,9 +67,6 @@ pub fn PricesPage(api_url: String, token: String) -> Element {
             }
         }
     }
-    tracing::debug!("Current: {:?}\n", current);
-    tracing::debug!("Future: {:?}\n", future);
-    tracing::debug!("Past: {:?}\n", past);
 
     rsx! {
         h2 { "Flavor Prices" }
