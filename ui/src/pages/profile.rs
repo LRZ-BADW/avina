@@ -13,19 +13,25 @@ pub fn ProfilePage(api_url: String, token: String) -> Element {
         "Unknown"
     };
     rsx! {
-        h1 { "Profile" }
-        h2 { "User" }
+        h2 { "Profile" }
+        hr {}
+
+        h3 { "User" }
         table {
             tr { td { b { "ID:" } }, td { "{user.id}" } }
             tr { td { b { "Name:" } }, td { "{user.name}" } }
             tr { td { b { "UUID:" } }, td { "{user.openstack_id}" } }
             tr { td { b { "Role:" } }, td { "{role}" } }
         }
-        h2 { "Project" }
+        br {}
+
+        h3 { "Project" }
         table {
             tr { td { b { "ID:" } }, td { "{user.project.id}" } }
             tr { td { b { "Name:" } }, td { "{user.project.name}" } }
             tr { td { b { "User Class:" } }, td { "{user.project.user_class}" } }
         }
+        br {}
+
     }
 }
