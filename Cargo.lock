@@ -503,6 +503,7 @@ version = "0.0.3"
 dependencies = [
  "avina",
  "avina-wire",
+ "chrono",
  "dioxus",
  "dioxus-primitives",
  "getrandom 0.3.4",
