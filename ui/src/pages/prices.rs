@@ -1,4 +1,7 @@
-use avina_wire::user::UserClass;
+use std::collections::HashMap;
+
+use avina_wire::{pricing::FlavorPrice, user::UserClass};
+use chrono::Utc;
 use dioxus::prelude::*;
 
 #[component]
@@ -24,9 +27,73 @@ pub fn PricesPage(api_url: String, token: String) -> Element {
             user.project.name
         );
     };
+
+    let mut map: HashMap<u32, HashMap<UserClass, Vec<FlavorPrice>>> =
+        HashMap::new();
+    for price in prices {
+        map.entry(price.flavor)
+            .or_default()
+            .entry(price.user_class)
+            .or_default()
+            .push(price);
+    }
+
+    let now = Utc::now();
+
+    let mut current = Vec::new();
+    let mut future = Vec::new();
+    let mut past = Vec::new();
+    for (_flavor_id, uc_map) in map {
+        for (_user_class, prices) in uc_map {
+            let mut latest = None;
+            for price in prices {
+                if price.start_time > now {
+                    future.push(price);
+                    continue;
+                }
+                if latest.is_none() {
+                    latest = Some(price);
+                    continue;
+                }
+                if price.start_time > latest.clone().unwrap().start_time {
+                    past.push(latest.unwrap());
+                    latest = Some(price);
+                    continue;
+                }
+                past.push(price);
+            }
+            if let Some(latest) = latest {
+                current.push(latest);
+            }
+        }
+    }
+    tracing::debug!("Current: {:?}\n", current);
+    tracing::debug!("Future: {:?}\n", future);
+    tracing::debug!("Past: {:?}\n", past);
+
     rsx! {
-        h1 { "Flavor Prices" }
+        h2 { "Flavor Prices" }
+        hr {}
+
+        h3 { "Current Prices" }
+        PriceTable { prices: current }
+        br {}
+
+        h3 { "Future Prices" }
+        PriceTable { prices: future }
+        br {}
+
+        h3 { "Past Prices" }
+        PriceTable { prices: past }
+        br {}
+    }
+}
+
+#[component]
+fn PriceTable(prices: Vec<FlavorPrice>) -> Element {
+    rsx! {
         div {
+            class: "table_wrapper",
             table {
                 class: "table",
                 class: "table-striped",
