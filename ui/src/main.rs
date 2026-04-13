@@ -7,9 +7,9 @@ mod components;
 mod pages;
 
 use components::button::{Button, ButtonVariant};
-use pages::{PricesPage, ProfilePage};
+use pages::{PricesPage, ProfilePage, UsagePage};
 
-const API_URL: &str = "http://localhost:8000/api";
+const API_URL: &str = "https://cc.lrz.de:1338/api";
 const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
 
 fn main() {
@@ -19,6 +19,7 @@ fn main() {
 #[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Page {
     Prices,
+    Usage,
     Profile,
 }
 
@@ -85,6 +86,13 @@ fn app() -> Element {
                 signal,
                 Page::Prices,
                 PricesPage { api_url, token }
+            )
+        }
+        Page::Usage => {
+            rsx_with_page_bar!(
+                signal,
+                Page::Usage,
+                UsagePage { api_url, token }
             )
         }
         Page::Profile => {
