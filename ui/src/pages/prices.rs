@@ -28,6 +28,8 @@ pub fn PricesPage(api_url: String, token: String) -> Element {
         h1 { "Flavor Prices" }
         div {
             table {
+                class: "table",
+                class: "table-striped",
                 thead {
                     tr {
                         th { "ID" },
