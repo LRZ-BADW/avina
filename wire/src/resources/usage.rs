@@ -25,7 +25,7 @@ pub struct CloudUsageOverview {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct CloudUsageFlavorSlot {
     pub name: String,
-    pub free: u32,
+    pub free: i32,
     pub total: u32,
 }
 
