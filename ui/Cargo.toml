@@ -25,6 +25,7 @@ getrandom = { version = "0.3", features = ["wasm_js"] }
 strum = "0.28.0"
 dioxus-primitives = { git = "https://github.com/DioxusLabs/components", version = "0.0.1", default-features = false }
 tracing = "0.1.44"
+chrono = "0.4.44"
 
 [features]
 default = []
