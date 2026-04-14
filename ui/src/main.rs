@@ -9,9 +9,12 @@ mod pages;
 use components::button::{Button, ButtonVariant};
 use pages::{PricesPage, ProfilePage, UsagePage};
 
-// TODO: we should pass this in as arguments or so
-const API_URL: &str = "https://cc.lrz.de:1338/api";
 const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
+
+#[cfg(not(feature = "local-api"))]
+const API_URL: &str = "https://cc.lrz.de:1338/api";
+#[cfg(feature = "local-api")]
+const API_URL: &str = "http://localhost:8000/api";
 
 fn main() {
     launch(app);
