@@ -1,3 +1,6 @@
+use std::cmp::max;
+
+use avina_wire::resources::{CloudUsageAggregate, CloudUsageFlavorSlot};
 use dioxus::prelude::*;
 
 #[component]
@@ -52,6 +55,21 @@ pub fn UsagePage(api_url: String, token: String) -> Element {
                 unit: "",
             }
         }
+
+        br {}
+        br {}
+
+        FlavorSlotRow { title: "LRZ Flavor Slots", aggregates: usage.lrz_flavor_slots }
+
+        br {}
+        br {}
+
+        FlavorSlotRow { title: "ACH Flavor Slots", aggregates: usage.ach_flavor_slots }
+
+        br {}
+        br {}
+
+        FlavorSlotRow { title: "Other Flavor Slots", aggregates: usage.other_flavor_slots }
     }
 }
 
@@ -97,6 +115,75 @@ fn PieChart(name: String, used: u64, total: u64, unit: String) -> Element {
                 class: "text-center",
                 "Used {used}{unit} of {total}{unit}"
             }
+        }
+    }
+}
+
+#[component]
+fn FlavorSlotRow(
+    title: String,
+    aggregates: Vec<CloudUsageAggregate>,
+) -> Element {
+    rsx! {
+        div {
+            class: "row",
+            h3 { "{title}" }
+            br {}
+            for aggregate in aggregates {
+                div {
+                    class: "col-lg-4",
+                    class: "col-md-4",
+                    class: "col-sm-6",
+                    class: "col-xs-12",
+                    h4 { "{aggregate.title}" },
+                    FlavorSlotTable { slots: aggregate.flavors }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn FlavorSlotTable(slots: Vec<CloudUsageFlavorSlot>) -> Element {
+    rsx! {
+        div {
+            class: "table_wrapper",
+            table {
+                class: "table",
+                style: "--bs-table-bg: #eeeeee;",
+                thead {
+                    tr {
+                        th { "Flavor" },
+                        th { "Slots (available)" },
+                        th { "Slots (total)"},
+                    }
+                }
+                tbody {
+                    for slot in slots {
+                        FlavorSlotTableRow { slot }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn FlavorSlotTableRow(slot: CloudUsageFlavorSlot) -> Element {
+    if slot.free < 0 {
+        tracing::warn!(
+            "Negative flavor slot free value for flavor {}.",
+            slot.name
+        );
+    }
+    let free = max(0, slot.free);
+    let color = if free > 0 { "#ccffcc" } else { "#ffcccc" };
+    rsx! {
+        tr {
+            style: "--bs-table-bg: {color}",
+            td { "{slot.name}" },
+            td { "{free}" },
+            td { "{slot.total}" },
         }
     }
 }
