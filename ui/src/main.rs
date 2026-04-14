@@ -43,6 +43,7 @@ macro_rules! rsx_with_page_bar {
             }
             br {}
             div {
+                class: "container-fluid",
                 $content
             }
         }
