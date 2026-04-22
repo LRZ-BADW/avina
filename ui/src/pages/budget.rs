@@ -73,7 +73,7 @@ pub fn BudgetPage(api_url: String, token: String) -> Element {
                 class: "col-md-6",
                 h3 { "Costs from Flavors" }
                 br {}
-                BarChart { title: "Cost from individual flavors in EUR", data: flavor_cost, skip_zero: true, label_size: None }
+                BarChart { caption: "Cost from individual flavors in EUR", data: flavor_cost }
             }
         }
 
@@ -82,7 +82,7 @@ pub fn BudgetPage(api_url: String, token: String) -> Element {
             class: "row",
             h3 { "Costs from Servers" }
             br {}
-            BarChart { title: "Cost from individual servers in EUR", data: server_cost, skip_zero: true, label_size: Some(400) }
+            BarChart { caption: "Cost from individual servers in EUR", data: server_cost, label_size: 400 }
         }
 
     }

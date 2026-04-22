@@ -54,9 +54,9 @@ pub fn UsagePieChart(
 
 #[component]
 pub fn BarChart(
-    title: String,
     data: HashMap<String, f64>,
-    skip_zero: bool,
+    show_zero: Option<bool>,
+    caption: Option<String>,
     label_size: Option<usize>,
 ) -> Element {
     let max = data
@@ -76,7 +76,7 @@ pub fn BarChart(
                 } else { "" },
                 tbody {
                     for (key, value) in data {
-                        if value >= 0.05 || !skip_zero {
+                        if value >= 0.05 || (show_zero.is_some() && show_zero.unwrap()) {
                             tr {
                                 th {
                                     scope: "row",
@@ -90,9 +90,11 @@ pub fn BarChart(
                         }
                     }
                 }
-                caption {
-                    class: "text-center",
-                    "{title}",
+                if let Some(caption) = caption {
+                    caption {
+                        class: "text-center",
+                        "{caption}",
+                    }
                 }
             }
         }
