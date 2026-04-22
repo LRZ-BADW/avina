@@ -9,6 +9,8 @@ mod pages;
 use components::button::{Button, ButtonVariant};
 use pages::{PricesPage, ProfilePage, UsagePage};
 
+const BOOTSTRAP_CSS: Asset = asset!("../assets/bootstrap.min.css");
+const CHARTS_CSS: Asset = asset!("../assets/charts.min.css");
 const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
 
 #[cfg(not(feature = "local-api"))]
@@ -30,6 +32,8 @@ enum Page {
 macro_rules! rsx_with_page_bar {
     ($signal:ident, $page:ty, $content:stmt) => {
         rsx! {
+            document::Stylesheet { href: BOOTSTRAP_CSS }
+            document::Stylesheet { href: CHARTS_CSS }
             document::Stylesheet { href: THEME_CSS }
             div {
                 for page in Page::iter() {
