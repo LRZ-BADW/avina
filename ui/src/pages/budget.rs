@@ -85,5 +85,36 @@ pub fn BudgetPage(api_url: String, token: String) -> Element {
             BarChart { caption: "Cost from individual servers in EUR", data: server_cost, label_size: 400 }
         }
 
+        br {}
+        div {
+            class: "row",
+            h3 { "Server Cost Details" }
+            br {}
+            div {
+                class: "table_wrapper",
+                table {
+                    class: "table",
+                    class: "table-striped",
+                    thead {
+                        tr {
+                            th { "ID" },
+                            th { "Total Cost [EUR]" },
+                            th { "Cost from Flavors" },
+                        }
+                    }
+                    tbody {
+                        for (uuid, server_cost) in user_tree.servers.iter() {
+                            tr {
+                                td { "{uuid}" }
+                                td { "{server_cost.total:.2}" }
+                                td {
+                                    BarChart { data: server_cost.flavors.clone() }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
