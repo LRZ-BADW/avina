@@ -1,6 +1,6 @@
+use std::{cmp::Ordering, collections::HashMap};
+
 use dioxus::prelude::*;
-use std::cmp::Ordering;
-use std::collections::HashMap;
 
 #[component]
 pub fn UsagePieChart(

@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
-use crate::components::charts::*;
 use dioxus::prelude::*;
+
+use crate::components::charts::*;
 
 #[component]
 pub fn BudgetPage(api_url: String, token: String) -> Element {

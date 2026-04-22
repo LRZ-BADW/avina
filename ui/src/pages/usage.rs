@@ -1,8 +1,9 @@
 use std::cmp::max;
 
-use crate::components::charts::UsagePieChart;
 use avina_wire::resources::{CloudUsageAggregate, CloudUsageFlavorSlot};
 use dioxus::prelude::*;
+
+use crate::components::charts::UsagePieChart;
 
 #[component]
 pub fn UsagePage(api_url: String, token: String) -> Element {
