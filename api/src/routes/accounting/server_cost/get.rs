@@ -92,8 +92,8 @@ async fn get_flavor_prices_for_period(
 ) -> Result<Vec<FlavorPrice>, UnexpectedOnlyError> {
     let mut prices = get_flavor_price_map_for_period(transaction, begin, end)
         .await?
-        .into_iter()
-        .flat_map(|(_, v)| v.into_iter().flat_map(|(_, w)| w))
+        .into_values()
+        .flat_map(|v| v.into_values().flatten())
         .collect::<Vec<FlavorPrice>>();
     prices.sort_by(|a, b| a.start_time.partial_cmp(&b.start_time).unwrap());
     Ok(prices)
