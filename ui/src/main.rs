@@ -6,8 +6,8 @@ mod common;
 mod components;
 mod pages;
 
-use components::button::{Button, ButtonVariant};
-use pages::{PricesPage, ProfilePage, UsagePage};
+use components::button::*;
+use pages::*;
 
 const BOOTSTRAP_CSS: Asset = asset!("../assets/bootstrap.min.css");
 const CHARTS_CSS: Asset = asset!("../assets/charts.min.css");
@@ -24,6 +24,7 @@ fn main() {
 
 #[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Page {
+    Budgets,
     Prices,
     Usage,
     Profile,
@@ -87,9 +88,16 @@ fn app() -> Element {
         tracing::error!("No token provided to UI");
         return rsx! { p { b { "Error: " }, "No token provided to UI." } };
     }
-    let mut signal = use_signal(|| Page::Prices);
+    let mut signal = use_signal(|| Page::Budgets);
     let api_url = API_URL.to_string();
     match *signal.read() {
+        Page::Budgets => {
+            rsx_with_page_bar!(
+                signal,
+                Page::Budgets,
+                BudgetPage { api_url, token }
+            )
+        }
         Page::Prices => {
             rsx_with_page_bar!(
                 signal,
