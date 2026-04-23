@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
-use avina_wire::user::UserDetailed;
+use avina_wire::{budgeting::BudgetOverTreeUser, user::UserDetailed};
 use dioxus::prelude::*;
 
-use crate::components::{
-    button::{Button, ButtonVariant},
-    charts::{BarChart, UsagePieChart},
-};
+use crate::components::{button::*, charts::*, dialog::*};
 
 #[component]
 pub fn BudgetProjectSubPage(
@@ -90,17 +87,91 @@ pub fn BudgetProjectSubPage(
             h3 { "Server Cost Details" }
             br {}
 
-            for (username, user_tree) in project_tree.users.iter() {
+            for (username, user_tree) in project_tree.users.clone() {
                 div {
                     class: "col-md-3",
-                    Button {
-                        variant: ButtonVariant::Ghost,
-                        UsagePieChart {
-                            name: "{username} Budget",
-                            used: user_tree.cost as u64,
-                            total: user_tree.budget.unwrap_or(0),
-                            unit: " EUR",
-                            size: 100,
+                    UserBudgetButtonAndDialog { username, user_tree }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn UserBudgetButtonAndDialog(
+    username: String,
+    user_tree: BudgetOverTreeUser,
+) -> Element {
+    let mut open = use_signal(|| false);
+
+    let flavor_cost = user_tree.flavors.clone();
+    let server_cost = user_tree
+        .servers
+        .iter()
+        .map(|(k, v)| (k.to_string(), v.total))
+        .collect::<HashMap<_, _>>();
+
+    rsx! {
+        Button {
+            variant: ButtonVariant::Ghost,
+            onclick: move |_| open.set(true),
+            UsagePieChart {
+                name: "{username} Budget",
+                used: user_tree.cost as u64,
+                total: user_tree.budget.unwrap_or(0),
+                unit: " EUR",
+                size: 100,
+            }
+        }
+        DialogRoot {
+            open: open(),
+            on_open_change: move |v| open.set(v),
+            DialogContent {
+                max_width: "80%",
+                max_height: "90%",
+                overflow_y: "scroll",
+                button {
+                    class: "dialog-close",
+                    r#type: "button",
+                    aria_label: "Close",
+                    tabindex: if open() { "0" } else { "-1" },
+                    onclick: move |_| open.set(false),
+                    "×"
+                }
+                DialogTitle { "User Budget and Cost: {username}" }
+                DialogDescription {
+                    div {
+                        class: "container-fluid",
+                        div {
+                            class: "row",
+                            div {
+                                class: "col-md-6",
+                                UsagePieChart {
+                                    name: "{username} Budget",
+                                    used: user_tree.cost as u64,
+                                    total: user_tree.budget.unwrap_or(0),
+                                    unit: " EUR",
+                                    size: 100,
+                                }
+                            }
+                            div {
+                                class: "col-md-6",
+                                "TODO: user budget setting here"
+                            }
+                        }
+                        br {}
+                        div {
+                            class: "row",
+                            h5 { "Costs from Flavors" }
+                            br {}
+                            BarChart { caption: "Cost from individual flavors in EUR", data: flavor_cost }
+                        }
+                        br {}
+                        div {
+                            class: "row",
+                            h5 { "Costs from Servers" }
+                            br {}
+                            BarChart { caption: "Cost from individual servers in EUR", data: server_cost, label_size: 400 }
                         }
                     }
                 }
