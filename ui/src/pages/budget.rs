@@ -99,7 +99,7 @@ pub fn BudgetPage(api_url: String, token: String) -> Element {
                         tr {
                             th { "ID" },
                             th { "Total Cost [EUR]" },
-                            th { "Cost from Flavors" },
+                            th { "Cost from Flavors [EUR]" },
                         }
                     }
                     tbody {
