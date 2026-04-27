@@ -61,7 +61,9 @@ pub fn BudgetProjectSubPage(
                     }
                     div {
                         class: "col-md-6",
-                        "TODO: project budget setting here"
+                        BudgetForm {
+                            prefix: user.project_name,
+                        }
                     }
                 }
             }
@@ -156,7 +158,9 @@ fn UserBudgetButtonAndDialog(
                             }
                             div {
                                 class: "col-md-6",
-                                "TODO: user budget setting here"
+                                BudgetForm {
+                                    prefix: username
+                                }
                             }
                         }
                         br {}
@@ -174,6 +178,50 @@ fn UserBudgetButtonAndDialog(
                             BarChart { caption: "Cost from individual servers in EUR", data: server_cost, label_size: 400 }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn BudgetForm(prefix: String) -> Element {
+    rsx! {
+        div {
+            class: "mb-3",
+            div {
+                label {
+                    class: "form-label",
+                    for: "{prefix}-budget-input",
+                    "New budget:"
+                }
+                div {
+                    class: "input-group",
+                    span {
+                        class: "input-group-text",
+                        "€"
+                    }
+                    input {
+                        type: "integer",
+                        class: "form-control",
+                        id: "{prefix}-budget-input",
+                        aria_describedby: "{prefix}-budget-input-help",
+                        value: "1000"
+                    }
+                    span {
+                        class: "input-group-text",
+                        ",00"
+                    }
+                }
+                div {
+                    id: "{prefix}-budget-input-help",
+                    class: "form-text",
+                    "Set a new user budget here."
+                }
+                Button {
+                    variant: ButtonVariant::Primary,
+                    onclick: None,
+                    "Save"
                 }
             }
         }
