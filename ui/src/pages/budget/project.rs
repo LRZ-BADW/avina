@@ -27,7 +27,7 @@ pub fn BudgetProjectSubPage(
         return_unexpected_error!("Could not find project in budget over tree.");
     };
     let project_cost = project_tree.cost;
-    let project_budget = project_tree.budget.unwrap_or(0);
+    let project_budget = use_signal(|| project_tree.budget.unwrap_or(0));
 
     let Some(flavor_cost) = project_tree.flavors.clone() else {
         return_unexpected_error!(
@@ -54,7 +54,7 @@ pub fn BudgetProjectSubPage(
                         UsagePieChart {
                             name: "Project Budget",
                             used: project_cost as u64,
-                            total: project_budget,
+                            total: *project_budget.read(),
                             unit: " EUR",
                             size: 100,
                         }
@@ -63,6 +63,7 @@ pub fn BudgetProjectSubPage(
                         class: "col-md-6",
                         BudgetForm {
                             prefix: user.project_name,
+                            value: project_budget
                         }
                     }
                 }
@@ -113,6 +114,8 @@ fn UserBudgetButtonAndDialog(
         .map(|(k, v)| (k.to_string(), v.total))
         .collect::<HashMap<_, _>>();
 
+    let user_budget = use_signal(|| user_tree.budget.unwrap_or(0));
+
     rsx! {
         Button {
             variant: ButtonVariant::Ghost,
@@ -120,7 +123,7 @@ fn UserBudgetButtonAndDialog(
             UsagePieChart {
                 name: "{username} Budget",
                 used: user_tree.cost as u64,
-                total: user_tree.budget.unwrap_or(0),
+                total: *user_budget.read(),
                 unit: " EUR",
                 size: 100,
             }
@@ -151,7 +154,7 @@ fn UserBudgetButtonAndDialog(
                                 UsagePieChart {
                                     name: "{username} Budget",
                                     used: user_tree.cost as u64,
-                                    total: user_tree.budget.unwrap_or(0),
+                                    total: *user_budget.read(),
                                     unit: " EUR",
                                     size: 100,
                                 }
@@ -159,7 +162,8 @@ fn UserBudgetButtonAndDialog(
                             div {
                                 class: "col-md-6",
                                 BudgetForm {
-                                    prefix: username
+                                    prefix: username,
+                                    value: user_budget,
                                 }
                             }
                         }
@@ -185,7 +189,22 @@ fn UserBudgetButtonAndDialog(
 }
 
 #[component]
-fn BudgetForm(prefix: String) -> Element {
+fn BudgetForm(prefix: String, mut value: Signal<u64>) -> Element {
+    let mut update = use_signal(|| (*value.read()).to_string());
+    let mut save = use_signal(|| false);
+    let mut error = use_signal(|| None);
+    if *save.read() {
+        *save.write() = false;
+        *error.write() = None;
+        if let Ok(new_value) = (*update.read()).parse() {
+            // TODO: actually try to modify the budget through the API
+            *value.write() = new_value;
+        } else {
+            *error.write() = Some(
+                "Error: Budget needs to be an integer number.".to_string(),
+            );
+        };
+    }
     rsx! {
         div {
             class: "mb-3",
@@ -206,11 +225,21 @@ fn BudgetForm(prefix: String) -> Element {
                         class: "form-control",
                         id: "{prefix}-budget-input",
                         aria_describedby: "{prefix}-budget-input-help",
-                        value: "1000"
+                        value: *value.read(),
+                        oninput: move |e| *update.write() = e.value(),
                     }
                     span {
                         class: "input-group-text",
                         ",00"
+                    }
+                }
+                if let Some(error) = (*error.read()).clone() {
+                    div {
+                        class: "form-text",
+                        b {
+                            style: "color: red;",
+                            "{error}"
+                        }
                     }
                 }
                 div {
@@ -220,7 +249,7 @@ fn BudgetForm(prefix: String) -> Element {
                 }
                 Button {
                     variant: ButtonVariant::Primary,
-                    onclick: None,
+                    onclick: move |_| *save.write() = true,
                     "Save"
                 }
             }
