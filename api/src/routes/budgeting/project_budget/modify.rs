@@ -76,7 +76,8 @@ pub async fn project_budget_modify(
         )));
     }
 
-    update_project_budget_in_db(&mut transaction, &data).await?;
+    let project_budget =
+        update_project_budget_in_db(&mut transaction, &data).await?;
     transaction
         .commit()
         .await
@@ -110,12 +111,12 @@ pub async fn update_project_budget_in_db(
         .execute(query)
         .await
         .context("Failed to execute update query")?;
-    let project = ProjectBudget {
+    let project_budget = ProjectBudget {
         id: data.id,
         amount,
         project: row.project,
         project_name: row.project_name,
         year: row.year,
     };
-    Ok(project)
+    Ok(project_budget)
 }
