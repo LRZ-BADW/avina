@@ -3,11 +3,9 @@ use strum::{EnumIter, IntoEnumIterator};
 
 use crate::{components::button::*, pages::profile::Role};
 
-mod all;
 mod project;
 mod user;
 
-use all::BudgetAllSubPage;
 use project::BudgetProjectSubPage;
 use user::BudgetUserSubPage;
 
@@ -15,13 +13,11 @@ use user::BudgetUserSubPage;
 enum SubPage {
     User,
     Project,
-    All,
 }
 
 impl SubPage {
     fn min_role(&self) -> Role {
         match self {
-            SubPage::All => Role::Admin,
             SubPage::Project => Role::Master,
             _ => Role::User,
         }
@@ -84,18 +80,6 @@ pub fn BudgetPage(api_url: String, token: String) -> Element {
                 role,
                 SubPage::Project,
                 BudgetProjectSubPage {
-                    api_url,
-                    token,
-                    user
-                }
-            )
-        }
-        SubPage::All => {
-            rsx_with_sub_page_bar!(
-                signal,
-                role,
-                SubPage::All,
-                BudgetAllSubPage {
                     api_url,
                     token,
                     user
