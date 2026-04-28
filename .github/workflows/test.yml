@@ -21,7 +21,7 @@ permissions: {}
 
 env:
   CARGO_TERM_COLOR: always
-  DX_VERSION: "0.7.4"
+  DX_VERSION: "0.7.5"
   SQLX_VERSION: "0.8.6"
   SQLX_FEATURES: "rustls,mysql"
   DATABASE_URL: "mysql://root:password@127.0.0.1:3306/avina"
