@@ -1,5 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
+use avina::{Api, Token, error::ApiError};
 use avina_wire::{budgeting::BudgetOverTreeUser, user::UserDetailed};
 use dioxus::prelude::*;
 
@@ -12,8 +13,8 @@ pub fn BudgetProjectSubPage(
     user: UserDetailed,
 ) -> Element {
     let budget_over_tree = api_call!(
-        api_url,
-        token,
+        api_url.clone(),
+        token.clone(),
         api,
         api.budget_over_tree
             .get()
@@ -54,7 +55,7 @@ pub fn BudgetProjectSubPage(
                         UsagePieChart {
                             name: "Project Budget",
                             used: project_cost as u64,
-                            total: *project_budget.read(),
+                            total: project_budget(),
                             unit: " EUR",
                             size: 100,
                         }
@@ -62,8 +63,12 @@ pub fn BudgetProjectSubPage(
                     div {
                         class: "col-md-6",
                         BudgetForm {
+                            api_url: api_url.clone(),
+                            token: token.clone(),
                             prefix: user.project_name,
-                            value: project_budget
+                            value: project_budget,
+                            budget_id: project_tree.budget_id,
+                            is_project_budget: Some(true),
                         }
                     }
                 }
@@ -87,13 +92,14 @@ pub fn BudgetProjectSubPage(
         br {}
         div {
             class: "row",
-            h3 { "Server Cost Details" }
+            h3 { "User Budgets and Costs" }
             br {}
+            p { "Click tiles to see details and set user budgets." }
 
             for (username, user_tree) in project_tree.users.clone() {
                 div {
                     class: "col-md-3",
-                    UserBudgetButtonAndDialog { username, user_tree }
+                    UserBudgetButtonAndDialog { api_url: api_url.clone(), token: token.clone(), username, user_tree }
                 }
             }
         }
@@ -102,6 +108,8 @@ pub fn BudgetProjectSubPage(
 
 #[component]
 fn UserBudgetButtonAndDialog(
+    api_url: String,
+    token: String,
     username: String,
     user_tree: BudgetOverTreeUser,
 ) -> Element {
@@ -154,7 +162,7 @@ fn UserBudgetButtonAndDialog(
                                 UsagePieChart {
                                     name: "{username} Budget",
                                     used: user_tree.cost as u64,
-                                    total: *user_budget.read(),
+                                    total: user_budget(),
                                     unit: " EUR",
                                     size: 100,
                                 }
@@ -162,8 +170,11 @@ fn UserBudgetButtonAndDialog(
                             div {
                                 class: "col-md-6",
                                 BudgetForm {
+                                    api_url: api_url.clone(),
+                                    token: token.clone(),
                                     prefix: username,
                                     value: user_budget,
+                                    budget_id: user_tree.budget_id,
                                 }
                             }
                         }
@@ -188,23 +199,90 @@ fn UserBudgetButtonAndDialog(
     }
 }
 
-#[component]
-fn BudgetForm(prefix: String, mut value: Signal<u64>) -> Element {
-    let mut update = use_signal(|| (*value.read()).to_string());
-    let mut save = use_signal(|| false);
-    let mut error = use_signal(|| None);
-    if *save.read() {
-        *save.write() = false;
-        *error.write() = None;
-        if let Ok(new_value) = (*update.read()).parse() {
-            // TODO: actually try to modify the budget through the API
-            *value.write() = new_value;
-        } else {
-            *error.write() = Some(
-                "Error: Budget needs to be an integer number.".to_string(),
-            );
-        };
+async fn update_budget(
+    api_url: String,
+    token_str: String,
+    budget_id: Option<u32>,
+    mut value: Signal<u64>,
+    input: Signal<String>,
+    mut error: Signal<Option<String>>,
+    is_project_budget: bool,
+) {
+    let Some(budget_id) = budget_id else {
+        tracing::error!("Unexpected error: no budget to configure.");
+        error.set(Some("Unexpected error, please contact support.".into()));
+        return;
+    };
+    let token = match Token::from_str(&token_str) {
+        Ok(token) => token,
+        Err(err) => {
+            tracing::error!("{}", err);
+            error.set(Some("Unexpected error, please contact support.".into()));
+            return;
+        }
+    };
+    let api = match Api::new(api_url, token, None, None) {
+        Ok(api) => api,
+        Err(err) => {
+            tracing::error!("{}", err);
+            error.set(Some("Unexpected error, please contact support.".into()));
+            return;
+        }
+    };
+    let Ok(amount) = input().parse::<u32>() else {
+        error.set(Some("Budget must be a positive integer number.".into()));
+        return;
+    };
+    if amount as u64 == value() {
+        error.set(None);
+        return;
     }
+    let result = if is_project_budget {
+        api.project_budget
+            .modify(budget_id)
+            .amount(amount)
+            .send()
+            .await
+            .map(|b| b.amount)
+    } else {
+        api.user_budget
+            .modify(budget_id)
+            .amount(amount)
+            .send()
+            .await
+            .map(|b| b.amount)
+    };
+    let updated_value = match result {
+        Ok(value) => value,
+        Err(ApiError::ResponseError(message)) => {
+            tracing::warn!("API Error Response: {message}");
+            error.set(Some(message.clone()));
+            return;
+        }
+        Err(ApiError::UnexpectedError(err)) => {
+            tracing::error!("Unexpected API Error: {err}");
+            error.set(Some(
+                "Unexpected error, please contact support.".to_string(),
+            ));
+            return;
+        }
+    };
+    value.set(updated_value as u64);
+    error.set(None);
+}
+
+#[component]
+fn BudgetForm(
+    api_url: String,
+    token: String,
+    budget_id: Option<u32>,
+    prefix: String,
+    mut value: Signal<u64>,
+    is_project_budget: Option<bool>,
+) -> Element {
+    let mut input = use_signal(|| (*value.read()).to_string());
+    let error = use_signal(|| None);
+
     rsx! {
         div {
             class: "mb-3",
@@ -225,20 +303,20 @@ fn BudgetForm(prefix: String, mut value: Signal<u64>) -> Element {
                         class: "form-control",
                         id: "{prefix}-budget-input",
                         aria_describedby: "{prefix}-budget-input-help",
-                        value: *value.read(),
-                        oninput: move |e| *update.write() = e.value(),
+                        value: value(),
+                        oninput: move |e| input.set(e.value()),
                     }
                     span {
                         class: "input-group-text",
                         ",00"
                     }
                 }
-                if let Some(error) = (*error.read()).clone() {
+                if let Some(error) = error().clone() {
                     div {
                         class: "form-text",
                         b {
                             style: "color: red;",
-                            "{error}"
+                            "Error: {error}"
                         }
                     }
                 }
@@ -249,7 +327,13 @@ fn BudgetForm(prefix: String, mut value: Signal<u64>) -> Element {
                 }
                 Button {
                     variant: ButtonVariant::Primary,
-                    onclick: move |_| *save.write() = true,
+                    onclick: move |_| {
+                        let api_url = api_url.clone();
+                        let token = token.clone();
+                        async move {
+                            update_budget(api_url, token, budget_id, value,  input, error, is_project_budget.unwrap_or(false)).await;
+                        }
+                    },
                     "Save"
                 }
             }
