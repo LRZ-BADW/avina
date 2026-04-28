@@ -141,12 +141,12 @@ pub async fn update_user_budget_in_db(
         .execute(query)
         .await
         .context("Failed to execute update query")?;
-    let project = UserBudget {
+    let user_budget = UserBudget {
         id: data.id,
         amount,
         user: row.user,
         username: row.username,
         year: row.year,
     };
-    Ok(project)
+    Ok(user_budget)
 }
