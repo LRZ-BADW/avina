@@ -21,7 +21,13 @@ ENV PATH="/.cargo/bin:$PATH"
 # Create the final bundle folder. Bundle always executes in release mode with optimizations enabled
 RUN dx bundle --platform web --package avina-ui --release
 
-FROM chef AS runtime
+FROM debian:trixie-slim as runtime
+RUN apt update -y \
+    && apt install -y --no-install-recommends openssl ca-certificates \
+    && apt autoremove -y \
+    && apt clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/target/dx/avina-ui/release/web/ /usr/local/app
 
 # set our port and make sure to listen for all connections
