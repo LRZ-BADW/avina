@@ -13,11 +13,6 @@ const BOOTSTRAP_CSS: Asset = asset!("../assets/bootstrap.min.css");
 const CHARTS_CSS: Asset = asset!("../assets/charts.min.css");
 const THEME_CSS: Asset = asset!("../assets/dx-components-theme.css");
 
-#[cfg(not(feature = "local-api"))]
-const API_URL: &str = "https://cc.lrz.de:1338/api";
-#[cfg(feature = "local-api")]
-const API_URL: &str = "http://localhost:8000/api";
-
 fn main() {
     launch(app);
 }
@@ -67,16 +62,16 @@ fn app() -> Element {
                 let token = event.data;
                 dioxus.send(token);
             });
-            window.parent.postMessage("request-token", "*");
+            window.parent.postMessage("request", "*");
             "#,
         );
         eval.recv::<String>().await
     });
-    let token = match future.read().as_ref() {
-        Some(Ok(token)) => token.clone(),
+    let response = match future.read().as_ref() {
+        Some(Ok(response)) => response.clone(),
         Some(Err(error)) => {
             return_unexpected_error!(
-                "Failed to evaluate token, due to {}",
+                "Failed to retrieve API URL or token, due to {}",
                 error
             );
         }
@@ -84,12 +79,16 @@ fn app() -> Element {
             return rsx! { p { "Logging you in ..." } };
         }
     };
-    if token == "request-token" {
-        tracing::error!("No token provided to UI");
-        return rsx! { p { b { "Error: " }, "No token provided to UI." } };
+    if response == "request" {
+        tracing::error!("No API URL and token provided to UI.");
+        return rsx! { p { b { "Error: " }, "No API URL and token provided to UI." } };
     }
+    let Some((api_url, token)) = response.split_once(' ') else {
+        tracing::error!("API URL and token provided to UI in invalid format.");
+        return rsx! { p { b { "Error: " }, "API URL and token provided to UI in invalid format." } };
+    };
+
     let mut signal = use_signal(|| Page::Budgets);
-    let api_url = API_URL.to_string();
     match *signal.read() {
         Page::Budgets => {
             rsx_with_page_bar!(

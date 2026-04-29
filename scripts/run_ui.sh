@@ -2,5 +2,4 @@
 
 dx serve \
     --cross-origin-policy \
-    --package avina-ui \
-    --features local-api
+    --package avina-ui

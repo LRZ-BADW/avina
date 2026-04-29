@@ -31,4 +31,3 @@ chrono = "0.4.44"
 default = []
 web = ["dioxus/web"]
 server = ["dioxus/server"]
-local-api = []
