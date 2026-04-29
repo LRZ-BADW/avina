@@ -32,10 +32,10 @@
             <iframe src="http://localhost:8080/" id="frame" class="flex-row"></iframe>
         </div>
         <script>
-            var token = "{{ token }}";
+            var response = "{{ api_url }} {{ token }}";
             window.addEventListener("message", function(event) {
-                if (event.data === "request-token") {
-                    document.getElementById('frame').contentWindow.postMessage(token, "*");
+                if (event.data === "request") {
+                    document.getElementById('frame').contentWindow.postMessage(response, "*");
                 }
             }, false);
         </script>
