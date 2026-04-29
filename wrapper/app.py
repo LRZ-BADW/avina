@@ -16,6 +16,7 @@ TEMPLATES = [
 ]
 
 
+api_url = None
 token = None
 
 
@@ -70,7 +71,14 @@ def revoke_api_token(keystone_url, token):
 
 
 def setup():
+    global api_url
     global token
+
+    api_url = getenv("AVINA_API_URL")
+
+    if not api_url:
+        print("Avina API URL is not set! Set AVINA_API_URL environment variable!")
+        exit(1)
 
     keystone_url = getenv("OS_AUTH_URL")
     username = getenv("OS_USERNAME")
@@ -111,7 +119,7 @@ def init():
 
 
 def home(request):
-    return django_render(request, "index.html", {"token": token})
+    return django_render(request, "index.html", {"api_url": api_url, "token": token})
 
 
 urlpatterns = [
