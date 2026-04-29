@@ -14,14 +14,12 @@ This is required prior to both `cargo test` and running the API locally.
 
 ### Running the API server locally
 ```bash
-source admin-openrc.sh
-source scripts/config_env.sh
-
 # optional: insert database dump
 scripts/enter_db.sh
 source lrz_budgeting.sql
 quit
 
+source admin-openrc.sh
 scripts/run_api.sh
 ```
 
