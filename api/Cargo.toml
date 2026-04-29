@@ -78,5 +78,5 @@ features = ["json", "rustls", "cookies"]
 once_cell = "1"
 cargo-husky = { workspace = true }
 wiremock = "0.6"
-rand = "0.9"
+rand = "0.10"
 avina-test = { path = "../test" }
