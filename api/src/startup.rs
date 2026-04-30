@@ -166,9 +166,10 @@ async fn run(
     let server = HttpServer::new(move || {
         // TODO: this should be configurable
         let cors = Cors::default()
-            .allowed_origin("http://localhost:8080")
-            .allowed_origin("https://tcc.cloud.mwn.de:1339")
-            .allowed_origin("https://cc.lrz.de:1339")
+            // .allowed_origin("http://localhost:8080")
+            // .allowed_origin("https://tcc.cloud.mwn.de:1339")
+            // .allowed_origin("https://cc.lrz.de:1339")
+            .allow_any_origin()
             .allow_any_header()
             .allow_any_method()
             .expose_any_header();
