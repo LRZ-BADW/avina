@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n horizon humanize sizeformat %}
-{% block title %}{% trans "Budgeting" %}{% endblock %}
+{% block title %}{% trans "Avina" %}{% endblock %}
 
 {% block page_header %}
   {% include "horizon/common/_domain_page_header.html" with title=_("Avina") %}
@@ -29,6 +29,15 @@
         border: none;
         margin: 0;
         padding: 0;
+    }
+
+    #main_content,
+    #content_body,
+    .container-fluid,
+    .row,
+    .col-xs-12
+    {
+        height: 100%;
     }
 </style>
 
