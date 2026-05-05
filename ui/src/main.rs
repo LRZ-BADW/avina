@@ -55,38 +55,52 @@ macro_rules! rsx_with_page_bar {
 }
 
 fn app() -> Element {
-    let future = use_resource(move || async move {
-        let mut eval = document::eval(
-            r#"
+    let api_url;
+    let token;
+    let mut counter = 0;
+    loop {
+        let future = use_resource(move || async move {
+            let mut eval = document::eval(
+                r#"
             window.addEventListener("message", function(event) {
                 let token = event.data;
                 dioxus.send(token);
             });
             window.parent.postMessage("request", "*");
             "#,
-        );
-        eval.recv::<String>().await
-    });
-    let response = match future.read().as_ref() {
-        Some(Ok(response)) => response.clone(),
-        Some(Err(error)) => {
-            return_unexpected_error!(
-                "Failed to retrieve API URL or token, due to {}",
-                error
             );
+            eval.recv::<String>().await
+        });
+        let response = match future.read().as_ref() {
+            Some(Ok(response)) => response.clone(),
+            Some(Err(error)) => {
+                if counter < 3 {
+                    counter += 1;
+                    continue;
+                }
+                return_unexpected_error!(
+                    "Failed to retrieve API URL or token, due to {}",
+                    error
+                );
+            }
+            None => {
+                return rsx! { p { "Logging you in ..." } };
+            }
+        };
+        if response == "request" {
+            tracing::error!("No API URL and token provided to UI.");
+            return rsx! { p { b { "Error: " }, "No API URL and token provided to UI." } };
         }
-        None => {
-            return rsx! { p { "Logging you in ..." } };
-        }
-    };
-    if response == "request" {
-        tracing::error!("No API URL and token provided to UI.");
-        return rsx! { p { b { "Error: " }, "No API URL and token provided to UI." } };
+        let Some((url, tok)) = response.split_once(' ') else {
+            tracing::error!(
+                "API URL and token provided to UI in invalid format."
+            );
+            return rsx! { p { b { "Error: " }, "API URL and token provided to UI in invalid format." } };
+        };
+        api_url = url.to_string();
+        token = tok.to_string();
+        break;
     }
-    let Some((api_url, token)) = response.split_once(' ') else {
-        tracing::error!("API URL and token provided to UI in invalid format.");
-        return rsx! { p { b { "Error: " }, "API URL and token provided to UI in invalid format." } };
-    };
 
     let mut signal = use_signal(|| Page::Budgets);
     match *signal.read() {
