@@ -4,10 +4,138 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+## Repository - 2026-05-06
+
+### CI
+- bump taiki-e/install-action from 2.67.0 to 2.75.25
+- bump webiny/action-conventional-commits from 1.3.0 to 1.4.2
+- bump dioxus from 0.7.4 to =0.7.5
+- add job that installs dx and builds avina-ui
+- disable superfluous-actions rule
+
+### Scripts
+- move config_env.sh into run_api.sh and update docs
+
+### Misc
+- remove OpenSSL from deny license allow list
+- update spellcheck dictionary
+
+## [avina-ui-v1.0.0] - 2026-05-06
+
+### Features
+- retry fetching login data three times
+- add budget page with user and project subpages and BudgetForm
+- adjust font sizes for body and headings
+- add usage page with public resources overview
+- add charts module with UsagePieChart and BarChart
+- import bootstrap and charts css
+- add flavor price page
+- create api_call and return_unexpected_error macro
+- improve error handling and logging
+- add profile page to display user and project info
+- add Role enum and From and Display impls
+- add multi-page functionality with page bar and buttons
+
+### Docs
+- add paragraph to readme about running with production api
+
+### Fixes
+- correct inputs to rsx_with_page_bar macro
+- adjust api_call for multiple invocations
+
+### Panel
+- add horizon panel plugin to embed the ui
+
+### Wrapper
+- send api_url to ui with token, configure in run_ui_wrapper.sh
+- let iframe grow as large as needed
+- change header line
+
+### Build
+- use clean debian:trixie-slim to reduce image size
+- ping dioxus-cli version in Dockerfile
+
 ### Dependencies
-except api crate:
-- bump bytes from 1.11.0 to 1.11.1
-- bump time from 0.3.44 to 0.3.47
+- add strum dependency
+- add dioxus-primitives dependency
+- add dependency avina-wire
+- add tracing dependency
+- add dependency chrono
+- bump dioxus from 0.7.3 to =0.7.5
+- bump strum from 0.27.2 to 0.28.0
+- bump uuid from 1.19.0 to 1.20.0
+- bump chrono from 0.4.42 to 0.4.43
+- bump avina-wire from 2.1.0 to 2.2.0
+- bump avina-lib from 2.1.0 to 2.2.0
+- run cargo update
+
+## [avina-cli-v2.2.0] - 2026-05-06
+
+### Dependencies
+- bump colored from 3.0.0 to 3.1.1
+- bump tokio from 1.50.0 to 1.52.1
+- bump clap from 4.5.54 to 4.5.55
+- bump uuid from 1.19.0 to 1.20.0
+- bump chrono from 0.4.42 to 0.4.43
+- bump avina-wire from 2.1.0 to 2.2.0
+- bump avina-lib from 2.1.0 to 2.2.0
+
+## [avina-test-v0.9.0] - 2026-05-06
+
+### Dependencies
+- bump rustls-webpki from 0.103.10 to 0.103.13
+- bump rand from 0.8.5/0.9.2 to 0.8.6/0.9.4
+- bump tokio from 1.50.0 to 1.52.1
+- bump uuid from 1.19.0 to 1.20.0
+- bump chrono from 0.4.42 to 0.4.43
+- bump avina-wire from 2.1.0 to 2.2.0
+- bump avina-lib from 2.1.0 to 2.2.0
+- bump avina-api from 1.1.0 to 1.2.0
+- run cargo update
+
+## [avina-lib-v2.2.0] - 2026-05-06
+
+### Dependencies
+- bump rustls-webpki from 0.103.10 to 0.103.13
+- bump thiserror from 2.0.17 to 2.0.18
+- bump uuid from 1.19.0 to 1.20.0
+- bump chrono from 0.4.42 to 0.4.43
+- bump avina-wire from 2.1.0 to 2.2.0
+- run cargo update
+
+## [avina-api-v1.2.0] - 2026-05-06
+
+### Features
+- setup cors for access from test and production ui
+
+### Fixes
+- return updated budget from modify functions
+
+### Dependencies
+- bump thiserror from 2.0.17 to 2.0.18
+- bump rustls-webpki from 0.103.10 to 0.103.13
+- bump rand from 0.8.5/0.9.2 to 0.8.6/0.9.4
+- bump strum from 0.27.2 to 0.28.0
+- bump indexmap from 2.13.0 to 2.14.0
+- bump tokio from 1.50.0 to 1.52.1
+- bump uuid from 1.19.0 to 1.20.0
+- bump chrono from 0.4.42 to 0.4.43
+- bump avina-wire from 2.1.0 to 2.2.0
+- run cargo update
+
+## [avina-wire-v2.2.0] - 2026-05-06
+
+### Fixes
+- make CloudUsageFlavorSlot.free an i32
+
+### Dependencies
+- bump thiserror from 2.0.17 to 2.0.18
+- bump rand from 0.8.5/0.9.2 to 0.8.6/0.9.4
+- bump strum from 0.27.2 to 0.28.0
+- bump clap from 4.5.54 to 4.5.55
+- bump uuid from 1.19.0 to 1.20.0
+- bump chrono from 0.4.42 to 0.4.43
+- run cargo update
 
 ## [avina-api-v1.1.2] - 2026-03-03
 
