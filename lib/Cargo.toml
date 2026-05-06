@@ -9,7 +9,7 @@ repository = "https://github.com/LRZ-BADW/avina"
 exclude = []
 readme = "README.md"
 license = "MIT"
-version = "2.1.0"
+version = "2.2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -40,7 +40,7 @@ thiserror = "2"
 anyhow = "1"
 chrono = { version = "0.4", features = ["serde"] }
 jzon = "0.12"
-avina-wire = { version = "2.1", path = "../wire" }
+avina-wire = { version = "2.2", path = "../wire" }
 uuid = { version = "1.20", features = ["v4"] }
 
 [dev-dependencies]
