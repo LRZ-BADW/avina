@@ -26,4 +26,4 @@ See: [cli/README.md](./cli/README.md)
 - [lib](lib): client-side API-binding library ![crates.io](https://img.shields.io/crates/v/avina?link=https://crates.io/crates/avina)
 - [test](test): shared test helpers and end-to-end tests
 - [wire](wire): library for shared data structures used for API communication ![crates.io](https://img.shields.io/crates/v/avina-wire?link=https://crates.io/crates/avina-wire)
-- [ui](ui): fullstack WASM web user interface ![crates.io](https://img.shields.io/crates/v/avina-ui?link=https://crates.io/crates/avina-ui)
+- [ui](ui): fullstack WASM web user interface
