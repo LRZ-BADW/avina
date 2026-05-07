@@ -1,3 +1,5 @@
+//! Middleware functions for authentication.
+
 use actix_web::{
     HttpMessage,
     body::MessageBody,
@@ -15,9 +17,14 @@ use crate::{
 
 // TODO: revise error handling here as well and test errors
 
+/// Wrapper type for API tokens.
 #[derive(Clone, Debug)]
 pub struct Token(pub String);
 
+/// Middleware function for validating the API token.
+///
+/// This extracts the token from the X-Auth-Token header, validates it against Keystone and appends
+/// it and the OpenStack project ID to the request extensions.
 pub async fn require_valid_token(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
@@ -41,6 +48,10 @@ pub async fn require_valid_token(
     next.call(req).await
 }
 
+/// Middleware function for appending the user and project.
+///
+/// This takes the previously added project ID extension and retrieves the corresponding avina user
+/// and project from the database, and pushes them into the request extensions, as well.
 pub async fn extract_user_and_project(
     req: ServiceRequest,
     next: Next<impl MessageBody>,
