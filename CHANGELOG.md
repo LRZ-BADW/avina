@@ -4,6 +4,19 @@ This is the combined changelog of all contained `avina` crates.
 ## [Unreleased]
 ...
 
+## Repository - 2026-05-07
+
+### CI
+- add docs job to test workflow that runs cargo doc
+
+### Documentation
+- remove version badge for ui crate in readme
+
+## [avina-api-v1.2.1] - 2026-05-07
+
+### Build
+- add build.rs that sets SQLX_OFFLINE when DOCS_RS is set
+
 ## Repository - 2026-05-06
 
 ### CI
