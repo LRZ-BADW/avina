@@ -69,6 +69,25 @@ jobs:
       - name: Build UI crate with Dioxus
         run: dx build --package avina-ui
 
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install the Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache Action
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: sqlx-${{ env.SQLX_VERSION }}
+      - name: Install mold
+        run: sudo apt update && sudo apt install mold -y
+      - name: Build docs
+        run: SQLX_OFFLINE=true cargo doc --no-deps
+
   test:
     name: test
     runs-on: ubuntu-latest
