@@ -1,3 +1,5 @@
+//! Types for avina's server cost endpoint.
+
 use std::{collections::HashMap, fmt::Debug};
 
 use chrono::{DateTime, FixedOffset};

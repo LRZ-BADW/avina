@@ -1,3 +1,5 @@
+//! Types for avina's pricing module.
+
 use std::fmt::Display;
 
 use chrono::{DateTime, FixedOffset};

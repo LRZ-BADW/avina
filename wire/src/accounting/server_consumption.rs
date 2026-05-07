@@ -1,3 +1,5 @@
+//! Types for avina's server consumption endpoint.
+
 use std::collections::HashMap;
 
 use chrono::{DateTime, FixedOffset};
