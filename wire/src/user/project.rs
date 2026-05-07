@@ -1,3 +1,5 @@
+//! Types for avina's project endpoints.
+
 use std::fmt::Display;
 
 use rand::{

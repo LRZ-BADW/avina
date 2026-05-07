@@ -1,3 +1,5 @@
+//! Types for avina's user budget endpoints.
+
 use std::fmt::Display;
 
 use chrono::{DateTime, FixedOffset};

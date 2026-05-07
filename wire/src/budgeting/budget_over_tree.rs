@@ -1,3 +1,5 @@
+//! Types for avina's bulk-over-tree endpoint.
+
 use std::collections::HashMap;
 
 use chrono::{DateTime, FixedOffset};

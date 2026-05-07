@@ -1,3 +1,5 @@
+//! Types for avina's resources module.
+
 mod flavor;
 mod flavor_group;
 mod usage;

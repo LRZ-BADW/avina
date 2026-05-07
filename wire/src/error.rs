@@ -1,3 +1,5 @@
+//! Types and helper functions for error handling.
+
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;

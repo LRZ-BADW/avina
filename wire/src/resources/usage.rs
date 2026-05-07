@@ -1,3 +1,5 @@
+//! Types for avina's usage endpoint.
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

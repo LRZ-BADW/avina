@@ -1,3 +1,5 @@
+//! Types for avina's user endpoints.
+
 use std::{cmp::PartialEq, fmt::Display};
 
 use serde::{Deserialize, Serialize};

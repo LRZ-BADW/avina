@@ -1,3 +1,5 @@
+//! Types for avina's budget-bulk-create endpoint.
+
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;

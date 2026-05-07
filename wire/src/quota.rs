@@ -1,3 +1,5 @@
+//! Types for avina's quota module.
+
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};

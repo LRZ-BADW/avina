@@ -1,3 +1,5 @@
+//! Miscellaneous helper functions.
+
 use std::{borrow::Borrow, fmt::Display};
 
 // TODO: use Option<&T> instead
