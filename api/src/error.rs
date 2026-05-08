@@ -1,3 +1,13 @@
+//! Errors the endpoints may return and useful functions and trait implementations.
+//!
+//! At the basis are the seven error enums, for example [NormalApiError]. While some have multiple
+//! variants, others only convey a single type of error. [From] implementations turn each more
+//! specific enum into less specific ones, for example, an [NotFoundOnlyError] can be turned into
+//! an [NotFoundOrUnexpectedApiError].
+//!
+//! For special cases, where an [actix_web::Error] needs to be returned, there are also
+//! a few helper functions for various kinds of HTTP errors.
+
 use actix_web::{
     HttpResponse, ResponseError,
     body::BoxBody,
@@ -9,6 +19,7 @@ use actix_web::{
 };
 use avina_wire::error::{ErrorResponse, error_chain_fmt};
 
+/// Wrap given message in an HTTP Unauthorized Error.
 pub fn unauthorized_error(message: &str) -> actix_web::Error {
     InternalError::from_response(
         anyhow::anyhow!(message.to_string()),
@@ -19,6 +30,7 @@ pub fn unauthorized_error(message: &str) -> actix_web::Error {
     .into()
 }
 
+/// Wrap the given message in an HTTP Internal Server Error.
 pub fn internal_server_error(message: &str) -> actix_web::Error {
     InternalError::from_response(
         anyhow::anyhow!(message.to_string()),
@@ -29,6 +41,7 @@ pub fn internal_server_error(message: &str) -> actix_web::Error {
     .into()
 }
 
+/// Wrap the given message in an HTTP Bad Request Error.
 pub fn bad_request_error(message: &str) -> actix_web::Error {
     InternalError::from_response(
         anyhow::anyhow!(message.to_string()),
@@ -39,6 +52,7 @@ pub fn bad_request_error(message: &str) -> actix_web::Error {
     .into()
 }
 
+/// Wrap the given message in an HTTP Not Found Error.
 pub fn not_found_error(message: &str) -> actix_web::Error {
     InternalError::from_response(
         anyhow::anyhow!(message.to_string()),
@@ -49,20 +63,26 @@ pub fn not_found_error(message: &str) -> actix_web::Error {
     .into()
 }
 
+/// Return an HTTP Not Found Error signalling a non-existent route.
 pub async fn not_found() -> Result<HttpResponse, actix_web::Error> {
     Err(not_found_error("This route does not exist."))
 }
 
+/// Like [NormalApiError] but with an additional not-found variant.
 #[derive(thiserror::Error)]
 pub enum OptionApiError {
+    /// Validation of the user input failed. The error message is contained within.
     #[error("{0}")]
     ValidationError(String),
+    /// The requested resource was not found.
     // NOTE: Do not change this string, because different not found
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
+    /// The user is unauthorized to perform the request. The error message is contained within.
     #[error("{0}")]
     AuthorizationError(String),
+    /// An unexpected error occurred, which is contained inside.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -184,12 +204,19 @@ impl From<UnexpectedOnlyError> for MinimalApiError {
     }
 }
 
+/// Typical error response many API endpoints return.
+///
+/// Either the validation of the user input failed, the user is not authorized
+/// for the specified action, or something unexpected happened.
 #[derive(thiserror::Error)]
 pub enum NormalApiError {
+    /// Validation of the user input failed. The error message is contained within.
     #[error("{0}")]
     ValidationError(String),
+    /// The user is unauthorized to perform the request. The error message is contained within.
     #[error("{0}")]
     AuthorizationError(String),
+    /// An unexpected error occurred, which is contained inside.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -241,10 +268,13 @@ impl From<MinimalApiError> for NormalApiError {
     }
 }
 
+/// Like [NormalApiError] but without unauthorized variant.
 #[derive(thiserror::Error)]
 pub enum MinimalApiError {
+    /// Validation of the user input failed. The error message is contained within.
     #[error("{0}")]
     ValidationError(String),
+    /// An unexpected error occurred, which is contained inside.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -255,12 +285,14 @@ impl std::fmt::Debug for MinimalApiError {
     }
 }
 
+/// The request can fail either when the resource does not exist, or unexpectedly.
 #[derive(thiserror::Error)]
 pub enum NotFoundOrUnexpectedApiError {
     // NOTE: Do not change this string, because different not found
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
+    /// An unexpected error occurred, which is contained inside.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -296,8 +328,10 @@ impl ResponseError for NotFoundOrUnexpectedApiError {
     }
 }
 
+/// The request can only fail due to an authorization error.
 #[derive(thiserror::Error)]
 pub enum AuthOnlyError {
+    /// The user is unauthorized to perform the request. The error message is contained within.
     #[error("{0}")]
     AuthorizationError(String),
 }
@@ -338,8 +372,10 @@ impl From<AuthOnlyError> for NormalApiError {
     }
 }
 
+/// The request can only fail when the resource does not exist.
 #[derive(thiserror::Error)]
 pub enum NotFoundOnlyError {
+    /// The requested resource was not found.
     // NOTE: Do not change this string, because different not found messages
     // messages can lead to information leakage
     #[error("Resource not found")]
@@ -380,8 +416,10 @@ impl From<NotFoundOnlyError> for OptionApiError {
     }
 }
 
+/// The request can only fail unexpectedly.
 #[derive(thiserror::Error)]
 pub enum UnexpectedOnlyError {
+    /// An unexpected error occurred, which is contained inside.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
