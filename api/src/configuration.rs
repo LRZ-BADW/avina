@@ -39,7 +39,12 @@ pub struct ApplicationSettings {
     pub avina_ldap_url: Option<String>,
     /// Token for accessing the avina-ldap service.
     pub avina_ldap_token: Option<String>,
-    /// Whether defaults should be used, when a user/project is not found via avina-ldap.
+    /// Whether defaults should be used, when no information is available from avina-ldap
+    ///
+    /// This is helpful either when the user or project in question is not found in avina-ldap's
+    /// data, during local execution or when avina-ldap was just started. When neither avina-ldap
+    /// configured nor this enabled, a runtime error is thrown, when [`crate::ldap::AvinaLdap`] is
+    /// used.
     pub avina_ldap_default: Option<bool>,
 }
 
