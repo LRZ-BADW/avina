@@ -1,9 +1,12 @@
+//! Queries regarding projects (LRZ projects).
+
 use anyhow::Context;
 use avina_wire::user::{Project, ProjectMinimal, ProjectModifyData, UserClass};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
 
+/// Select the project with the given ID from the database, or return [None].
 #[tracing::instrument(name = "select_maybe_project_from_db", skip(transaction))]
 pub async fn select_maybe_project_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -34,6 +37,10 @@ pub async fn select_maybe_project_from_db(
     })
 }
 
+/// Select the project with the given ID from the database, or return a "not found" error.
+///
+/// This calls [select_maybe_project_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_project_from_db", skip(transaction))]
 pub async fn select_project_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -44,6 +51,7 @@ pub async fn select_project_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select minimal info of the project with the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_project_minimal_from_db",
     skip(transaction)
@@ -76,6 +84,10 @@ pub async fn select_maybe_project_minimal_from_db(
     })
 }
 
+/// Select minimal info of the project with the given ID from the database, or return a "not found" error.
+///
+/// This calls [select_maybe_project_minimal_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_project_minimal_from_db",
     skip(transaction)
@@ -89,6 +101,7 @@ pub async fn select_project_minimal_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the name of the project with the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_project_name_from_db",
     skip(transaction)
@@ -125,6 +138,10 @@ pub async fn select_maybe_project_name_from_db(
     })
 }
 
+/// Select the name of the project with the given ID from the database, or return a "not found" error
+///
+/// This calls [select_maybe_project_minimal_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_project_name_from_db", skip(transaction))]
 pub async fn select_project_name_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -135,6 +152,7 @@ pub async fn select_project_name_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of all projects from the database.
 #[tracing::instrument(name = "select_all_projects_from_db", skip(transaction))]
 pub async fn select_all_projects_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -160,6 +178,7 @@ pub async fn select_all_projects_from_db(
     Ok(rows)
 }
 
+/// Select a list of all projects with the given user class from the database.
 #[tracing::instrument(
     name = "select_projects_by_userclass_from_db",
     skip(transaction)
@@ -191,6 +210,10 @@ pub async fn select_projects_by_userclass_from_db(
     Ok(rows)
 }
 
+/// Select the project with the given ID as list from the database.
+///
+/// This is helpful for keeping a consistent type interface when admin users may see a
+/// list of projects, while another user only sees their own.
 #[tracing::instrument(name = "select_projects_by_id_db", skip(transaction))]
 pub async fn select_projects_by_id_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -219,6 +242,7 @@ pub async fn select_projects_by_id_from_db(
     Ok(rows)
 }
 
+/// Select the user class of the project with the given ID from the database, or [None].
 #[tracing::instrument(
     name = "select_user_class_by_project_from_db",
     skip(transaction)
@@ -255,6 +279,7 @@ pub async fn select_user_class_by_project_from_db(
     })
 }
 
+/// Update the project with the given [ProjectModifyData] in the database.
 #[tracing::instrument(name = "update_project_in_db", skip(data, transaction))]
 pub async fn update_project_in_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -288,6 +313,9 @@ pub async fn update_project_in_db(
     Ok(project)
 }
 
+/// Update the user class of the project with the given ID in the database.
+///
+/// This simply uses [update_project_in_db].
 #[tracing::instrument(
     name = "update_project_user_class_in_db",
     skip(transaction)
