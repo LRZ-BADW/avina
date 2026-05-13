@@ -1,3 +1,5 @@
+//! Queries for flavor quotas.
+
 use anyhow::Context;
 use avina_wire::quota::{FlavorQuota, FlavorQuotaCreateData};
 use sqlx::{Executor, FromRow, MySql, Transaction};
@@ -6,6 +8,7 @@ use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
 };
 
+/// Select a flavor quota with the given ID from the database, or [None].
 #[tracing::instrument(
     name = "select_maybe_flavor_quota_from_db",
     skip(transaction)
@@ -49,6 +52,10 @@ pub async fn select_maybe_flavor_quota_from_db(
     })
 }
 
+/// Select a flavor quota with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_flavor_quota_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_flavor_quota_from_db", skip(transaction))]
 pub async fn select_flavor_quota_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -59,6 +66,7 @@ pub async fn select_flavor_quota_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of all flavor quotas from the database.
 #[tracing::instrument(
     name = "select_all_flavor_quotas_from_db",
     skip(transaction)
@@ -97,6 +105,7 @@ pub async fn select_all_flavor_quotas_from_db(
     Ok(rows)
 }
 
+/// Select the list of flavor quotas for the flavor group with the given ID from the database.
 #[tracing::instrument(
     name = "select_flavor_quotas_by_flavor_group_from_db",
     skip(transaction)
@@ -138,6 +147,7 @@ pub async fn select_flavor_quotas_by_flavor_group_from_db(
     Ok(rows)
 }
 
+/// Select the list of flavor quotas for the user with the given ID from the database.
 #[tracing::instrument(
     name = "select_flavor_quotas_by_user_from_db",
     skip(transaction)
@@ -179,6 +189,8 @@ pub async fn select_flavor_quotas_by_user_from_db(
     Ok(rows)
 }
 
+/// Select a flavor quota by user and flavor group with the respective IDs from the database, or
+/// [None].
 #[tracing::instrument(
     name = "select_maybe_flavor_quota_by_user_and_group_from_db",
     skip(transaction)
@@ -225,6 +237,11 @@ pub async fn select_maybe_flavor_quota_by_user_and_group_from_db(
     })
 }
 
+/// Select a flavor quota by user and flavor group with the respective IDs from the database, or
+/// a "not found" error.
+///
+/// This calls [select_maybe_flavor_quota_by_user_and_group_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_flavor_quota_by_user_and_group_from_db",
     skip(transaction)
@@ -243,6 +260,7 @@ pub async fn select_flavor_quota_by_user_and_group_from_db(
     .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Insert a new flavor quota based on the given [FlavorQuotaCreateData] into the database.
 #[tracing::instrument(
     name = "insert_flavor_quota_into_db",
     skip(new_flavor_quota, transaction)
