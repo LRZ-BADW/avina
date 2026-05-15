@@ -1,3 +1,5 @@
+//! Queries for project budgets.
+
 use anyhow::Context;
 use avina_wire::budgeting::{UserBudget, UserBudgetCreateData};
 use chrono::{Datelike, Utc};
@@ -7,6 +9,7 @@ use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
 };
 
+/// Select a user budget by the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_user_budget_from_db",
     skip(transaction)
@@ -39,6 +42,10 @@ pub async fn select_maybe_user_budget_from_db(
     })
 }
 
+/// Select a user budget with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_user_budget_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_user_budget_from_db", skip(transaction))]
 pub async fn select_user_budget_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -49,6 +56,9 @@ pub async fn select_user_budget_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a user budget by the given user ID and year from the database, or return [None].
+///
+/// There can only be one user budget per user and year.
 #[tracing::instrument(
     name = "select_maybe_user_budget_by_user_and_year_from_db",
     skip(transaction)
@@ -84,6 +94,11 @@ pub async fn select_maybe_user_budget_by_user_and_year_from_db(
     })
 }
 
+/// Select a user budget by the given user ID and year from the database, or a "not found" error.
+///
+/// There can only be one user budget per user and year. This function calls
+/// [select_maybe_user_budget_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_user_budget_by_user_and_year_from_db",
     skip(transaction)
@@ -102,6 +117,7 @@ pub async fn select_user_budget_by_user_and_year_from_db(
     .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of user budgets by the given project ID and year.
 #[tracing::instrument(
     name = "select_user_budgets_by_project_and_year_from_db",
     skip(transaction)
@@ -134,6 +150,7 @@ pub async fn select_user_budgets_by_project_and_year_from_db(
     Ok(rows)
 }
 
+/// Select a list of all user budgets from the database.
 #[tracing::instrument(
     name = "select_all_user_budgets_from_db",
     skip(transaction)
@@ -159,6 +176,7 @@ pub async fn select_all_user_budgets_from_db(
     Ok(rows)
 }
 
+/// Select a list of user budgets by the given project ID from the database.
 #[tracing::instrument(
     name = "select_user_budgets_by_project_from_db",
     skip(transaction)
@@ -188,6 +206,7 @@ pub async fn select_user_budgets_by_project_from_db(
     Ok(rows)
 }
 
+/// Select a list of user budgets by the given user ID from the database.
 #[tracing::instrument(
     name = "select_user_budgets_by_user_from_db",
     skip(transaction)
@@ -217,6 +236,7 @@ pub async fn select_user_budgets_by_user_from_db(
     Ok(rows)
 }
 
+/// Select a list of user budgets by the given year from the database.
 #[tracing::instrument(
     name = "select_user_budgets_by_year_from_db",
     skip(transaction)
@@ -246,15 +266,23 @@ pub async fn select_user_budgets_by_year_from_db(
     Ok(rows)
 }
 
+/// Simplified representation of data needed to create a new project budget.
 pub struct NewUserBudget {
+    /// User ID the budget belongs to.
     pub user_id: u64,
+    /// Year the budget is for.
     pub year: u32,
+    /// Amount the budget is set to (in EUR).
     pub amount: i64,
 }
 
 impl TryFrom<UserBudgetCreateData> for NewUserBudget {
     type Error = String;
 
+    /// Transform a [UserBudgetCreateData] into a [NewUserBudget].
+    ///
+    /// More specifically this also replaces not inputted data by defaults, e.g.,
+    /// 0. for the amount, and now in UTC for the start time.
     fn try_from(data: UserBudgetCreateData) -> Result<Self, Self::Error> {
         Ok(Self {
             user_id: data.user as u64,
@@ -264,6 +292,7 @@ impl TryFrom<UserBudgetCreateData> for NewUserBudget {
     }
 }
 
+/// Insert a new user budget based on the given [NewUserBudget] into the database.
 #[tracing::instrument(
     name = "insert_user_budget_into_db",
     skip(new_user_budget, transaction)
@@ -296,6 +325,10 @@ pub async fn insert_user_budget_into_db(
     Ok(id)
 }
 
+/// Synchronize next year's user budgets to the current one's.
+///
+/// This sets all user budgets for next year to the amount the respective user's budget has this
+/// year.
 #[tracing::instrument(name = "sync_user_budgets_in_db", skip(transaction))]
 pub async fn sync_user_budgets_in_db(
     transaction: &mut Transaction<'_, MySql>,
