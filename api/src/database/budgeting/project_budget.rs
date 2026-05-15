@@ -1,3 +1,5 @@
+//! Queries for project budgets.
+
 use anyhow::Context;
 use avina_wire::budgeting::{ProjectBudget, ProjectBudgetCreateData};
 use chrono::{Datelike, Utc};
@@ -7,6 +9,7 @@ use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
 };
 
+/// Select a project budget by the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_project_budget_from_db",
     skip(transaction)
@@ -39,6 +42,10 @@ pub async fn select_maybe_project_budget_from_db(
     })
 }
 
+/// Select a project budget with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_project_budget_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_project_budget_from_db",
     skip(transaction)
@@ -52,6 +59,9 @@ pub async fn select_project_budget_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a project budget by the given project ID and year from the database, or return [None].
+///
+/// There can only be one project budget per project and year.
 #[tracing::instrument(
     name = "select_maybe_project_budget_by_project_and_year_from_db",
     skip(transaction)
@@ -87,6 +97,11 @@ pub async fn select_maybe_project_budget_by_project_and_year_from_db(
     })
 }
 
+/// Select a project budget by the given project ID and year from the database, or a "not found" error.
+///
+/// There can only be one project budget per project and year. This function calls
+/// [select_maybe_project_budget_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_project_budget_by_project_and_year_from_db",
     skip(transaction)
@@ -105,6 +120,7 @@ pub async fn select_project_budget_by_project_and_year_from_db(
     .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of all project budgets from the database.
 #[tracing::instrument(
     name = "select_all_project_budgets_from_db",
     skip(transaction)
@@ -130,6 +146,7 @@ pub async fn select_all_project_budgets_from_db(
     Ok(rows)
 }
 
+/// Select a list of project budgets by the given project ID from the database.
 #[tracing::instrument(
     name = "select_project_budgets_by_project_from_db",
     skip(transaction)
@@ -159,6 +176,7 @@ pub async fn select_project_budgets_by_project_from_db(
     Ok(rows)
 }
 
+/// Select a list of project budgets by the given user ID from the database.
 #[tracing::instrument(
     name = "select_project_budgets_by_user_from_db",
     skip(transaction)
@@ -189,6 +207,7 @@ pub async fn select_project_budgets_by_user_from_db(
     Ok(rows)
 }
 
+/// Select a list of project budgets by the given year from the database.
 #[tracing::instrument(
     name = "select_project_budgets_by_year_from_db",
     skip(transaction)
@@ -218,15 +237,23 @@ pub async fn select_project_budgets_by_year_from_db(
     Ok(rows)
 }
 
+/// Simplified representation of data needed to create a new project budget.
 pub struct NewProjectBudget {
+    /// Project ID the budget belongs to.
     pub project_id: u64,
+    /// Year the budget is for.
     pub year: u32,
+    /// Amount the budget is set to (in EUR).
     pub amount: i64,
 }
 
 impl TryFrom<ProjectBudgetCreateData> for NewProjectBudget {
     type Error = String;
 
+    /// Transform a [ProjectBudgetCreateData] into a [NewProjectBudget].
+    ///
+    /// More specifically this also replaces not inputted data by defaults, e.g.,
+    /// 0. for the amount, and now in UTC for the start time.
     fn try_from(data: ProjectBudgetCreateData) -> Result<Self, Self::Error> {
         Ok(Self {
             project_id: data.project as u64,
@@ -236,6 +263,7 @@ impl TryFrom<ProjectBudgetCreateData> for NewProjectBudget {
     }
 }
 
+/// Insert a new project budget based on the given [NewProjectBudget] into the database.
 #[tracing::instrument(
     name = "insert_project_budget_into_db",
     skip(new_project_budget, transaction)
