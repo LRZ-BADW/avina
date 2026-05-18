@@ -1,3 +1,5 @@
+//! Implementation of the user-list endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Query, ReqData},
@@ -15,6 +17,16 @@ use crate::{
     error::NormalApiError,
 };
 
+/// Get a list of users.
+///
+/// By default this only returns the current user in a list. To retrieve more, the
+/// following filters may be used:
+///
+///   * `all`: returns all users in the system, can only be called by admin users.
+///   * `project`: returns all users in the project with the given ID, can only be called by master
+///     users of that project or admins.
+///
+/// Note, that given both filters, `all` takes precedence.
 #[tracing::instrument(name = "user_list")]
 pub async fn user_list(
     user: ReqData<User>,
