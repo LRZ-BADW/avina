@@ -9,11 +9,6 @@ members = [
     "ui",
 ]
 
-[workspace.dependencies.cargo-husky]
-version = "1.5"
-default-features = false
-features = [ "user-hooks" ]
-
 [profile]
 
 [profile.wasm-dev]
