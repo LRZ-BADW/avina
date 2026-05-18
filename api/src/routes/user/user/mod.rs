@@ -6,13 +6,13 @@ use serde::Deserialize;
 
 pub mod create;
 use create::user_create;
-mod list;
+pub mod list;
 use list::user_list;
-mod get;
+pub mod get;
 use get::user_get;
-mod modify;
+pub mod modify;
 use modify::user_modify;
-mod delete;
+pub mod delete;
 use delete::user_delete;
 
 pub fn users_scope() -> Scope {
