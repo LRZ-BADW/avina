@@ -27,7 +27,7 @@ pub fn users_scope() -> Scope {
 
 // TODO: wouldn't a general IdParam be better?
 #[derive(Deserialize, Debug)]
-struct UserIdParam {
+pub struct UserIdParam {
     // TODO: why is this necessary, when this is clearly read in query_as
     #[allow(unused)]
     user_id: u32,
