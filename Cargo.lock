@@ -412,7 +412,6 @@ version = "2.2.0"
 dependencies = [
  "anyhow",
  "avina-wire",
- "cargo-husky",
  "chrono",
  "jzon",
  "reqwest 0.13.2",
@@ -432,7 +431,6 @@ dependencies = [
  "anyhow",
  "avina-test",
  "avina-wire",
- "cargo-husky",
  "chrono",
  "config",
  "indexmap",
@@ -464,7 +462,6 @@ dependencies = [
  "anyhow",
  "avina",
  "avina-wire",
- "cargo-husky",
  "chrono",
  "clap",
  "colored",
@@ -484,7 +481,6 @@ dependencies = [
  "avina-api",
  "avina-wire",
  "bencher",
- "cargo-husky",
  "chrono",
  "futures",
  "once_cell",
@@ -515,7 +511,6 @@ dependencies = [
 name = "avina-wire"
 version = "2.2.0"
 dependencies = [
- "cargo-husky",
  "chrono",
  "clap",
  "rand 0.9.4",
@@ -738,12 +733,6 @@ checksum = "113b4343b5f6617e7ad401ced8de3cc8b012e73a594347c307b90db3e9271289"
 dependencies = [
  "bytes",
 ]
-
-[[package]]
-name = "cargo-husky"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b02b629252fe8ef6460461409564e2c21d0c8e77e0944f3d189ff06c4e932ad"
 
 [[package]]
 name = "cc"
