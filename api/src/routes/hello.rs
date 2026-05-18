@@ -16,7 +16,7 @@ pub fn hello_scope() -> Scope {
 }
 
 #[tracing::instrument(name = "hello_user")]
-async fn hello_user(
+pub async fn hello_user(
     user: ReqData<User>,
     project: ReqData<Project>,
 ) -> HttpResponse {
@@ -31,7 +31,7 @@ async fn hello_user(
 }
 
 #[tracing::instrument(name = "hello_admin")]
-async fn hello_admin(
+pub async fn hello_admin(
     user: ReqData<User>,
     project: ReqData<Project>,
 ) -> Result<HttpResponse, AuthOnlyError> {
