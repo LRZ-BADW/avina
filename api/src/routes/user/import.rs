@@ -1,3 +1,5 @@
+//! Implementation of the user-import endpoint.
+
 use std::collections::HashMap;
 
 use actix_web::{
@@ -31,6 +33,11 @@ use crate::{
     startup::AvinaLdapConfig,
 };
 
+/// Endpoint for importing users and projects from OpenStack.
+///
+/// This calls the Keystone API to list all users and projects, as well as avina-ldap
+/// and imports all those missing in the database. It also creates user and project
+/// budgets if necessary.
 #[tracing::instrument(name = "user_import", skip(openstack))]
 pub async fn user_import(
     user: ReqData<User>,
