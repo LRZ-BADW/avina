@@ -1,3 +1,5 @@
+//! Endpoints for users and projects.
+
 use actix_web::{
     Scope,
     web::{get, scope},
@@ -15,6 +17,13 @@ use import::user_import;
 pub mod sync;
 use sync::user_sync;
 
+/// Routes to user and project endpoints.
+///
+///   * `GET /api/user/projects` => [projects_scope]
+///   * `GET /api/user/users` => [users_scope]
+///   * `GET /api/user/me` => [user_me] endpoint
+///   * `GET /api/user/import` => [user_import] endpoint
+///   * `GET /api/user/sync` => [user_sync] endpoint
 pub fn user_scope() -> Scope {
     scope("/user")
         .service(projects_scope())
