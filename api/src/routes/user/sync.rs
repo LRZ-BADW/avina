@@ -1,3 +1,5 @@
+//! Implementation of the user-sync endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, ReqData},
@@ -19,6 +21,11 @@ use crate::{
     startup::AvinaLdapConfig,
 };
 
+/// Endpoint for re-synching users and projects to avina-ldap.
+///
+/// This compares the users and projects currently in the database to the
+/// information from avina-ldap, and updates the user's role or project's
+/// user class if necessary.
 #[tracing::instrument(name = "user_sync")]
 pub async fn user_sync(
     user: ReqData<User>,
