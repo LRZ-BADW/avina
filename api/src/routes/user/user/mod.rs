@@ -19,11 +19,11 @@ use delete::user_delete;
 
 /// Routes to user endpoints.
 ///
-///   * `POST /api/user/users/` => [user_create] endpoint
-///   * `GET /api/user/users` => [user_list] endpoint
-///   * `GET /api/user/users/{id}` => [user_get] endpoint
-///   * `PATCH /api/user/users/{id}/` => [user_modify] endpoint
-///   * `GET /api/user/users/{id}/` => [user_delete] endpoint
+///   - `POST /api/user/users/` => [user_create] endpoint
+///   - `GET /api/user/users` => [user_list] endpoint
+///   - `GET /api/user/users/{id}` => [user_get] endpoint
+///   - `PATCH /api/user/users/{id}/` => [user_modify] endpoint
+///   - `GET /api/user/users/{id}/` => [user_delete] endpoint
 pub fn users_scope() -> Scope {
     scope("/users")
         .route("/", post().to(user_create))

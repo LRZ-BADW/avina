@@ -22,8 +22,8 @@ use crate::{
 /// By default this only returns the current user in a list. To retrieve more, the
 /// following filters may be used:
 ///
-///   * `all`: returns all users in the system, can only be called by admin users.
-///   * `project`: returns all users in the project with the given ID, can only be called by master
+///   - `all`: returns all users in the system, can only be called by admin users.
+///   - `project`: returns all users in the project with the given ID, can only be called by master
 ///     users of that project or admins.
 ///
 /// Note, that given both filters, `all` takes precedence.

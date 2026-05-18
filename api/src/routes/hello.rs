@@ -13,8 +13,8 @@ use crate::{authorization::require_admin_user, error::AuthOnlyError};
 
 /// Routes to the hello-user and hello-admin endpoints.
 ///
-///   * `GET /api/hello` => [hello_user] endpoint
-///   * `GET /api/hello/admin` => [hello_admin] endpoint
+///   - `GET /api/hello` => [hello_user] endpoint
+///   - `GET /api/hello/admin` => [hello_admin] endpoint
 pub fn hello_scope() -> Scope {
     scope("/hello")
         .route("", get().to(hello_user))
