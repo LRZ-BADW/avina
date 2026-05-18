@@ -19,11 +19,11 @@ use delete::project_delete;
 
 /// Routes to project endpoints.
 ///
-///   * `POST /api/user/projects/` => [project_create] endpoint
-///   * `GET /api/user/projects` => [project_list] endpoint
-///   * `GET /api/user/projects/{id}` => [project_get] endpoint
-///   * `PATCH /api/user/projects/{id}/` => [project_modify] endpoint
-///   * `GET /api/user/projects/{id}/` => [project_delete] endpoint
+///   - `POST /api/user/projects/` => [project_create] endpoint
+///   - `GET /api/user/projects` => [project_list] endpoint
+///   - `GET /api/user/projects/{id}` => [project_get] endpoint
+///   - `PATCH /api/user/projects/{id}/` => [project_modify] endpoint
+///   - `GET /api/user/projects/{id}/` => [project_delete] endpoint
 pub fn projects_scope() -> Scope {
     scope("/projects")
         .route("/", post().to(project_create))

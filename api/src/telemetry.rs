@@ -14,10 +14,10 @@ use tracing_subscriber::{
 ///
 /// # Arguments
 ///
-/// * `name` - Name of the application.
-/// * `env_filter` - Verbosity to filter messages. This is overwritten
-///   by the `RUST_LOG` environment variable.
-/// * `sink` - Place to write messages to.
+///   - `name` - Name of the application.
+///   - `env_filter` - Verbosity to filter messages. This is overwritten
+///     by the `RUST_LOG` environment variable.
+///   - `sink` - Place to write messages to.
 pub fn get_subscriber<Sink>(
     name: String,
     env_filter: String,
