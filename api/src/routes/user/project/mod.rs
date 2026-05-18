@@ -6,13 +6,13 @@ use serde::Deserialize;
 
 pub mod create;
 use create::project_create;
-mod list;
+pub mod list;
 use list::project_list;
 pub mod get;
 use get::project_get;
-mod modify;
+pub mod modify;
 use modify::project_modify;
-mod delete;
+pub mod delete;
 use delete::project_delete;
 
 pub fn projects_scope() -> Scope {
