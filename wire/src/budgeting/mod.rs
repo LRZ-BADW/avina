@@ -1,3 +1,5 @@
+//! Types for avina's budgeting module.
+
 mod budget_bulk_create;
 mod budget_over_tree;
 mod project_budget;

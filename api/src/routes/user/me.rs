@@ -1,6 +1,9 @@
+//! Implementation of the user-me endpoint.
+
 use actix_web::{HttpResponse, web::ReqData};
 use avina_wire::user::{Project, ProjectMinimal, User, UserDetailed};
 
+/// Endpoint to return the calling user's information.
 #[tracing::instrument(name = "user_me")]
 pub async fn user_me(
     user: ReqData<User>,

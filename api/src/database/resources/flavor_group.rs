@@ -1,3 +1,5 @@
+//! Queries for flavor groups.
+
 use anyhow::Context;
 use avina_wire::resources::{
     FlavorGroup, FlavorGroupCreateData, FlavorGroupMinimal,
@@ -8,6 +10,7 @@ use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
 };
 
+/// Select the name of the flavor group with the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_flavor_group_name_from_db",
     skip(transaction)
@@ -43,6 +46,10 @@ pub async fn select_maybe_flavor_group_name_from_db(
     })
 }
 
+/// Select the name of the flavor group with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_flavor_group_name_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_flavor_group_name_from_db",
     skip(transaction)
@@ -56,6 +63,7 @@ pub async fn select_flavor_group_name_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the flavor group with the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_flavor_group_from_db",
     skip(transaction)
@@ -92,6 +100,10 @@ pub async fn select_maybe_flavor_group_from_db(
     })
 }
 
+/// Select the flavor group with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_flavor_group_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_flavor_group_from_db", skip(transaction))]
 pub async fn select_flavor_group_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -102,6 +114,9 @@ pub async fn select_flavor_group_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the LRZ flavor group with the given ID from the database, or return [None].
+///
+/// LRZ flavor groups are those with a name starting with `lrz.`.
 #[tracing::instrument(
     name = "select_maybe_lrz_flavor_group_from_db",
     skip(transaction)
@@ -140,6 +155,10 @@ pub async fn select_maybe_lrz_flavor_group_from_db(
     })
 }
 
+/// Select the LRZ flavor group with the given ID from the database, or a "not found" error.
+///
+/// LRZ flavor groups are those with a name starting with `lrz.`. This calls [select_maybe_lrz_flavor_group_from_db]
+/// and then turns a [None] response into a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_lrz_flavor_group_from_db",
     skip(transaction)
@@ -153,6 +172,8 @@ pub async fn select_lrz_flavor_group_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of flavor groups in minimal representation belonging to the project with the given
+/// ID, from the database.
 #[tracing::instrument(
     name = "select_minimal_flavor_groups_by_project_id_from_db",
     skip(transaction)
@@ -182,6 +203,7 @@ pub async fn select_minimal_flavor_groups_by_project_id_from_db(
     Ok(rows)
 }
 
+/// Select a list of all flavor groups from the database.
 #[tracing::instrument(
     name = "select_all_flavor_groups_from_db",
     skip(transaction)
@@ -213,6 +235,9 @@ pub async fn select_all_flavor_groups_from_db(
     Ok(rows)
 }
 
+/// Select a list of all LRZ flavor groups from the database.
+///
+/// LRZ flavor groups are those with a name starting with `lrz.`.
 #[tracing::instrument(
     name = "select_lrz_flavor_groups_from_db",
     skip(transaction)
@@ -245,6 +270,7 @@ pub async fn select_lrz_flavor_groups_from_db(
     Ok(rows)
 }
 
+/// Insert a new flavor group based on the given [FlavorGroupCreateData] into the database.
 #[tracing::instrument(
     name = "insert_flavor_group_into_db",
     skip(new_flavor_group, transaction)

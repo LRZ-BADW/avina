@@ -1,3 +1,5 @@
+//! Types for avina's flavor group endpoints.
+
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};

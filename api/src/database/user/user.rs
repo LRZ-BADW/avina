@@ -1,3 +1,5 @@
+//! Queries regarding users (LRZ users).
+
 use anyhow::Context;
 use avina_wire::user::{
     User, UserClass, UserDetailed, UserMinimal, UserModifyData,
@@ -6,6 +8,7 @@ use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
 
+/// Select the name of the user with the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_user_name_from_db",
     skip(transaction)
@@ -41,6 +44,10 @@ pub async fn select_maybe_user_name_from_db(
     })
 }
 
+/// Select the name of a user with the given ID from the database, or return a "not found" error.
+///
+/// This calls [select_maybe_user_name_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_user_name_from_db", skip(transaction))]
 pub async fn select_user_name_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -51,6 +58,7 @@ pub async fn select_user_name_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of all users from the database.
 #[tracing::instrument(name = "select_all_users_from_db", skip(transaction))]
 pub async fn select_all_users_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -82,6 +90,7 @@ pub async fn select_all_users_from_db(
     Ok(rows)
 }
 
+/// Select a list of all users belonging the project with the given ID from the database.
 #[tracing::instrument(
     name = "select_users_by_project_from_db",
     skip(transaction)
@@ -119,6 +128,10 @@ pub async fn select_users_by_project_from_db(
     Ok(rows)
 }
 
+/// Select the user with the given ID as list from the database.
+///
+/// This is helpful for keeping a consistent type interface when higher privileged users may see a
+/// list of users, while a normal user only sees himself.
 #[tracing::instrument(name = "select_users_by_id_db", skip(transaction))]
 pub async fn select_users_by_id_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -153,6 +166,7 @@ pub async fn select_users_by_id_from_db(
     Ok(rows)
 }
 
+/// Select the detailed representation of the user with the given ID, or [None].
 #[tracing::instrument(
     name = "select_maybe_user_detail_from_db",
     skip(transaction)
@@ -193,6 +207,10 @@ pub async fn select_maybe_user_detail_from_db(
     })
 }
 
+/// Select the detailed representation of the user with the given ID, or return a "not found" error.
+///
+/// This calls [select_user_detail_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_user_detail_from_db", skip(transaction))]
 pub async fn select_user_detail_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -203,6 +221,7 @@ pub async fn select_user_detail_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the user with the given ID from the database, or return [None].
 #[tracing::instrument(name = "select_maybe_user_from_db", skip(transaction))]
 pub async fn select_maybe_user_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -238,6 +257,7 @@ pub async fn select_maybe_user_from_db(
     })
 }
 
+/// Select the user with the given OpenStack UUID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_user_by_openstack_id_from_db",
     skip(transaction)
@@ -276,6 +296,10 @@ pub async fn select_maybe_user_by_openstack_id_from_db(
     })
 }
 
+/// Select the user with the given OpenStack UUID from the database, or return a "not found" error.
+///
+/// This calls [select_maybe_user_by_openstack_id_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_user_by_openstack_id_from_db",
     skip(transaction)
@@ -289,6 +313,10 @@ pub async fn select_user_by_openstack_id_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the user with the given ID from the database, or return a "not found" error.
+///
+/// This calls [select_maybe_user_from_db] and then turns a [None] response into
+/// a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_user_from_db", skip(transaction))]
 pub async fn select_user_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -299,6 +327,7 @@ pub async fn select_user_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the mininal representation of the users of the project of the given ID from the database, or [None].
 #[tracing::instrument(
     name = "select_minimal_users_by_project_id_from_db",
     skip(transaction)
@@ -328,6 +357,7 @@ pub async fn select_minimal_users_by_project_id_from_db(
     Ok(rows)
 }
 
+/// Select the user class of the project the user with the given ID belongs to from the database.
 #[tracing::instrument(
     name = "select_user_class_by_user_from_db",
     skip(transaction)
@@ -368,6 +398,7 @@ pub async fn select_user_class_by_user_from_db(
     })
 }
 
+/// Update the user with the given [UserModifyData] in the database.
 #[tracing::instrument(name = "update_user_in_db", skip(data, transaction))]
 pub async fn update_user_in_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -412,6 +443,9 @@ pub async fn update_user_in_db(
     Ok(user)
 }
 
+/// Update the role of the user with the given ID in the database.
+///
+/// This simply uses [update_user_in_db].
 #[tracing::instrument(name = "update_user_role_in_db", skip(transaction))]
 pub async fn update_user_role_in_db(
     transaction: &mut Transaction<'_, MySql>,

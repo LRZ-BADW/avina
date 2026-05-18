@@ -1,3 +1,5 @@
+//! Queries for server states.
+
 use std::str::FromStr;
 
 use anyhow::Context;
@@ -13,23 +15,40 @@ use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
 };
 
+/// Representation of a server state specifically for communication with the database.
+///
+/// This uses types, that can be directly deserialized from SQL and is then converted
+/// to [ServerState] afterwards.
 #[derive(FromRow)]
 pub struct ServerStateRow {
+    /// ID for the server state.
     #[sqlx(try_from = "i32")]
     pub id: u32,
+    /// Timestamp when the server was first observed in this state.
     pub begin: DateTime<Utc>,
+    /// Optional timestamp when the server was first observed having left this state.
+    ///
+    /// This is optional, as the server may still be in this state.
     pub end: Option<DateTime<Utc>>,
+    /// UUID of the OpenStack server/instance.
     pub instance_id: String,
+    /// Name of the OpenStack server/instance.
     pub instance_name: String,
+    /// ID of the flavor during this state.
     #[sqlx(try_from = "i64")]
     pub flavor: u32,
+    /// Name of the flavor during this state.
     pub flavor_name: String,
+    /// Status during this state (ACTIVE, SHELVED_OFFLOADED, ...)
     pub status: String,
+    /// ID of the user the server belongs to.
     #[sqlx(try_from = "i32")]
     pub user: u32,
+    /// Name of the user the server belongs to.
     pub username: String,
 }
 
+/// Select a server state by the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_server_state_from_db",
     skip(transaction)
@@ -90,6 +109,10 @@ pub async fn select_maybe_server_state_from_db(
     })
 }
 
+/// Select a server state with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_server_state_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_server_state_from_db", skip(transaction))]
 pub async fn select_server_state_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -100,6 +123,7 @@ pub async fn select_server_state_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of all server states from the database.
 #[tracing::instrument(
     name = "select_all_server_states_from_db",
     skip(transaction)
@@ -160,6 +184,7 @@ pub async fn select_all_server_states_from_db(
     Ok(rows)
 }
 
+/// Select a list of server states belonging to the project with the given ID from the database.
 #[tracing::instrument(
     name = "select_server_states_by_project_from_db",
     skip(transaction)
@@ -223,6 +248,7 @@ pub async fn select_server_states_by_project_from_db(
     Ok(rows)
 }
 
+/// Select a list of server states belonging to the user with the given ID from the database.
 #[tracing::instrument(
     name = "select_server_states_by_user_from_db",
     skip(transaction)
@@ -286,6 +312,11 @@ pub async fn select_server_states_by_user_from_db(
     Ok(rows)
 }
 
+/// Select a single or entire list of server states belonging to the server with the given UUID from
+/// the database.
+///
+/// In some cases, like authorization checks, it might suffice to get a single state instead of the
+/// entire list.
 #[tracing::instrument(
     name = "select_server_states_by_server_from_db",
     skip(transaction)
@@ -360,6 +391,8 @@ pub async fn select_server_states_by_server_from_db(
     Ok(rows)
 }
 
+/// Select the user class of the project the server with the given UUID belongs to from the
+/// database, or return [None].
 #[tracing::instrument(
     name = "select_user_class_by_server_from_db",
     skip(transaction)
@@ -405,6 +438,10 @@ pub async fn select_user_class_by_server_from_db(
     })
 }
 
+/// Select a list of server states belonging to the server with the given UUID, while it was part of
+/// the project with the given ID, from the database.
+///
+/// This is necessary, as users and therefore also their servers may switch projects.
 #[tracing::instrument(
     name = "select_server_states_by_server_and_project_from_db",
     skip(transaction)
@@ -471,6 +508,10 @@ pub async fn select_server_states_by_server_and_project_from_db(
     Ok(rows)
 }
 
+/// Select a list of server states belonging to the server with the given UUID, while it belongs to
+/// the user with the given ID, from the database.
+///
+/// This is necessary, as ownership to servers might change.
 #[tracing::instrument(
     name = "select_server_states_by_server_and_user_from_db",
     skip(transaction)
@@ -537,14 +578,24 @@ pub async fn select_server_states_by_server_and_user_from_db(
     Ok(rows)
 }
 
+/// Simplified representation of data needed to create a new server state.
 pub struct NewServerState {
+    /// Timestamp when the server was first observed in this state.
     pub begin: DateTime<Utc>,
+    /// Optional timestamp when the server was first observed having left this state.
+    ///
+    /// This is optional, as the server may still be in this state.
     pub end: Option<DateTime<Utc>>,
+    /// UUID of the OpenStack server/instance.
     pub instance_id: Uuid,
+    /// Name of the OpenStack server/instance.
     pub instance_name: String,
+    /// ID of the flavor during this state.
     pub flavor: u32,
+    /// Status during this state (ACTIVE, SHELVED_OFFLOADED, ...)
     // TODO: we need an enum here
     pub status: String,
+    /// ID of the user the server belongs to.
     pub user: u32,
 }
 
@@ -552,6 +603,9 @@ pub struct NewServerState {
 impl TryFrom<ServerStateCreateData> for NewServerState {
     type Error = String;
 
+    /// Transform a [ServerStateCreateData] into a [NewServerState].
+    ///
+    /// More specifically this only transforms begin and end to UTC.
     fn try_from(data: ServerStateCreateData) -> Result<Self, Self::Error> {
         Ok(Self {
             begin: data.begin.to_utc(),
@@ -565,6 +619,7 @@ impl TryFrom<ServerStateCreateData> for NewServerState {
     }
 }
 
+/// Insert a new server state based on the given [NewServerState] into the database.
 #[tracing::instrument(
     name = "insert_server_state_into_db",
     skip(new_server_state, transaction)
@@ -621,6 +676,12 @@ pub async fn insert_server_state_into_db(
     Ok(id)
 }
 
+/// Select server states from the database for the server with the given UUID, that where active
+/// between the optionally given begin and end timestamps, ordered by their ID and thus also begin.
+///
+/// If only begin is given, all states active afterwards are returned, and if only end is given, all
+/// states active before are returned. If neither is given, then all states are returned for the
+/// server.
 #[tracing::instrument(
     name = "select_ordered_server_states_by_server_begin_and_end_from_db",
     skip(transaction)
@@ -788,6 +849,13 @@ pub async fn select_ordered_server_states_by_server_begin_and_end_from_db(
     Ok(rows)
 }
 
+/// Select server states from the database belonging to the user with the given ID, that where
+/// active between the optionally given begin and end timestamps, ordered by their ID and thus also
+/// begin.
+///
+/// If only begin is given, all states active afterwards are returned, and if only end is given, all
+/// states active before are returned. If neither is given, then all states are returned for the
+/// server.
 #[tracing::instrument(
     name = "select_ordered_server_states_by_user_begin_and_end_from_db",
     skip(transaction)
@@ -955,6 +1023,10 @@ pub async fn select_ordered_server_states_by_user_begin_and_end_from_db(
     Ok(rows)
 }
 
+/// Select all not yet completed server states from the database.
+///
+/// This means all server states without an end timestamp. Note, that this should always only be one
+/// per server.
 #[tracing::instrument(
     name = "select_unfinished_server_states_from_db",
     skip(transaction)

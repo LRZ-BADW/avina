@@ -1,3 +1,5 @@
+//! Endpoints for users and projects.
+
 use actix_web::{
     Scope,
     web::{get, scope},
@@ -8,13 +10,20 @@ use project::projects_scope;
 #[allow(clippy::module_inception)]
 pub mod user;
 use user::users_scope;
-mod me;
+pub mod me;
 use me::user_me;
-mod import;
+pub mod import;
 use import::user_import;
-mod sync;
+pub mod sync;
 use sync::user_sync;
 
+/// Routes to user and project endpoints.
+///
+///   - `GET /api/user/projects` => [projects_scope]
+///   - `GET /api/user/users` => [users_scope]
+///   - `GET /api/user/me` => [user_me] endpoint
+///   - `GET /api/user/import` => [user_import] endpoint
+///   - `GET /api/user/sync` => [user_sync] endpoint
 pub fn user_scope() -> Scope {
     scope("/user")
         .service(projects_scope())

@@ -1,3 +1,7 @@
+//! Application definition and start-up.
+//!
+//! [Application] is the main struct for `avina-api` execution.
+
 use std::{net::TcpListener, sync::Mutex};
 
 use actix_cors::Cors;
@@ -27,12 +31,24 @@ use crate::{
     },
 };
 
+/// Instance of the `avina-api` application.
+///
+/// This is the central struct for initializing all auxiliary objects, and building and
+/// starting the server function. This abstraction is used both by the `avina-api` binary and the
+/// `avina-test` crate.
 pub struct Application {
+    /// Port the server is supposed to listen on.
     port: u16,
+    /// The [actix_web] server, serving the API backend.
     server: Server,
 }
 
 impl Application {
+    /// Build the application from the given settings.
+    ///
+    /// This initializes auxiliary objects, e.g., database connection, OpenStack and LDAP helper
+    /// services, and then starts and runs the web server. Depending on the configuration, it also
+    /// inserts a default admin user into the database, which is helpful for local test deployments.
     pub async fn build(configuration: Settings) -> Result<Self, anyhow::Error> {
         let connection_pool = get_connection_pool(&configuration.database);
         let address = format!(
@@ -66,6 +82,11 @@ impl Application {
         Ok(Self { port, server })
     }
 
+    /// Inserts the default admin user of `avina-api` in the database.
+    ///
+    /// It uses the configured OpenStack admin project as default admin user.
+    /// In case the corresponding project or user already exists, it simply
+    /// skips insertion with a log message.
     async fn insert_admin_user(
         connection_pool: &MySqlPool,
         configuration: &Settings,
@@ -116,26 +137,45 @@ impl Application {
         Ok(())
     }
 
+    /// Get the port the application is bound to.
     pub fn port(&self) -> u16 {
         self.port
     }
 
+    /// Run the server until it is stopped.
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
         self.server.await
     }
 }
 
+/// Wrapper type for the application base URL.
+///
+/// As this is handed to endpoints as [Data], it needs to have a distinguishable type.
 pub struct ApplicationBaseUrl(pub String);
+
+/// Wrapper type for the cloudusage URL.
+///
+/// As this is handed to endpoints as [Data], it needs to have a distinguishable type.
 #[derive(Debug)]
 pub struct CloudUsageUrl(pub Option<String>);
 
+/// Configuration abstraction for avina-ldap access.
 #[derive(Debug)]
 pub enum AvinaLdapConfig {
+    /// Access to avina-ldap is enabled, and the contained API URL and token (given by the first and
+    /// second [String]) are used. Using defaults in absence of other data is specified in the
+    /// [bool].
     Enabled(String, String, bool),
+    /// Access to avina-ldap is disabled, and using defaults instead is specified in the contained
+    /// [bool].
     Disabled(bool),
 }
 
 impl AvinaLdapConfig {
+    /// Build a new instance from the given or not given parameters.
+    ///
+    /// All parameters are optional, `default` defaults to [true], in absence of either the `url` or
+    /// `token`, access is disabled.
     fn new(
         url: Option<String>,
         token: Option<String>,
@@ -149,6 +189,12 @@ impl AvinaLdapConfig {
     }
 }
 
+/// Setup and run the [HttpServer] with the supplied state objects and all imported endpoints.
+///
+/// This function packs all relevant data and functionality together in the resulting server. This
+/// includes wrapping all state objects in [Data], setting up CORS (Cross-Origin Resource Sharing),
+/// handing in the logger, and registering all the implemented API endpoints. It returns the
+/// asynchronously running server.
 async fn run(
     listener: TcpListener,
     db_pool: MySqlPool,
@@ -203,6 +249,7 @@ async fn run(
     Ok(server)
 }
 
+/// Setup a connection pool with the configured database.
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> MySqlPool {
     MySqlPoolOptions::new().connect_lazy_with(configuration.with_db())
 }

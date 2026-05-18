@@ -1,3 +1,5 @@
+//! Types for avina's accounting module.
+
 mod server_consumption;
 mod server_cost;
 mod server_state;

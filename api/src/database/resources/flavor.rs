@@ -1,3 +1,5 @@
+//! Queries for flavors.
+
 use anyhow::Context;
 use avina_wire::resources::{
     Flavor, FlavorCreateData, FlavorDetailed, FlavorGroupMinimal, FlavorMinimal,
@@ -8,6 +10,7 @@ use crate::error::{
     MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
 };
 
+/// Select the name of the flavor with the given ID from the database, or return [None].
 #[tracing::instrument(
     name = "select_maybe_flavor_name_from_db",
     skip(transaction)
@@ -43,6 +46,10 @@ pub async fn select_maybe_flavor_name_from_db(
     })
 }
 
+/// Select the name of the flavor with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_flavor_name_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_flavor_name_from_db", skip(transaction))]
 pub async fn select_flavor_name_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -53,6 +60,7 @@ pub async fn select_flavor_name_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the flavor with the given ID from the database, or return [None].
 #[tracing::instrument(name = "select_maybe_flavor_from_db", skip(transaction))]
 pub async fn select_maybe_flavor_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -87,6 +95,10 @@ pub async fn select_maybe_flavor_from_db(
     })
 }
 
+/// Select the flavor with the given ID from the database, or a "not found" error.
+///
+/// This calls [select_maybe_flavor_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_flavor_from_db", skip(transaction))]
 pub async fn select_flavor_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -97,6 +109,9 @@ pub async fn select_flavor_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the LRZ flavor with the given ID from the database, or return [None].
+///
+/// LRZ flavors are those with a name starting with `lrz.`.
 #[tracing::instrument(
     name = "select_maybe_lrz_flavor_from_db",
     skip(transaction)
@@ -136,6 +151,10 @@ pub async fn select_maybe_lrz_flavor_from_db(
     })
 }
 
+/// Select the LRZ flavor with the given ID from the database, or a "not found" error.
+///
+/// LRZ flavors are those with a name starting with `lrz.`. This calls [select_maybe_lrz_flavor_from_db]
+/// and then turns a [None] response into a [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_lrz_flavor_from_db", skip(transaction))]
 pub async fn select_lrz_flavor_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -146,6 +165,7 @@ pub async fn select_lrz_flavor_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of flavors that belong to the group with the given ID from the database in minimal representation.
 #[tracing::instrument(
     name = "select_minimal_flavors_by_group_from_db",
     skip(transaction)
@@ -173,6 +193,7 @@ pub async fn select_minimal_flavors_by_group_from_db(
     Ok(rows)
 }
 
+/// Select the flavor with the given ID from the database in detailed representation, or return [None].
 #[tracing::instrument(
     name = "select_maybe_flavor_detail_from_db",
     skip(transaction)
@@ -232,6 +253,11 @@ pub async fn select_maybe_flavor_detail_from_db(
     }))
 }
 
+/// Select the flavor with the given ID from the database in detailed representation, or a "not
+/// found" error.
+///
+/// This calls [select_maybe_flavor_detail_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(name = "select_flavor_detail_from_db", skip(transaction))]
 pub async fn select_flavor_detail_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -242,6 +268,9 @@ pub async fn select_flavor_detail_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select the LRZ flavor with the given ID from the database in detailed representation, or return [None].
+///
+/// LRZ flavors are those with a name starting with `lrz.`.
 #[tracing::instrument(
     name = "select_maybe_lrz_flavor_detail_from_db",
     skip(transaction)
@@ -303,6 +332,12 @@ pub async fn select_maybe_lrz_flavor_detail_from_db(
     }))
 }
 
+/// Select the flavor with the given ID from the database in detailed representation, or a "not
+/// found" error.
+///
+/// LRZ flavors are those with a name starting with `lrz.`. This calls
+/// [select_maybe_lrz_flavor_detail_from_db] and then turns a [None] response into a
+/// [NotFoundOrUnexpectedApiError::NotFoundError].
 #[tracing::instrument(
     name = "select_lrz_flavor_detail_from_db",
     skip(transaction)
@@ -316,6 +351,7 @@ pub async fn select_lrz_flavor_detail_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
+/// Select a list of all flavors from the database.
 #[tracing::instrument(name = "select_all_flavors_from_db", skip(transaction))]
 pub async fn select_all_flavors_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -345,6 +381,9 @@ pub async fn select_all_flavors_from_db(
     Ok(rows)
 }
 
+/// Select a list of all LRZ flavors from the database.
+///
+/// LRZ flavors are those with a name starting with `lrz.`.
 #[tracing::instrument(name = "select_lrz_flavors_from_db", skip(transaction))]
 pub async fn select_lrz_flavors_from_db(
     transaction: &mut Transaction<'_, MySql>,
@@ -375,6 +414,7 @@ pub async fn select_lrz_flavors_from_db(
     Ok(rows)
 }
 
+/// Select a list of all flavors belonging to the group with the given ID from the database.
 #[tracing::instrument(
     name = "select_flavors_by_flavor_group_from_db",
     skip(transaction)
@@ -410,6 +450,7 @@ pub async fn select_flavors_by_flavor_group_from_db(
     Ok(rows)
 }
 
+/// Insert a new flavor based on the given [FlavorCreateData] into the database.
 #[tracing::instrument(
     name = "insert_flavor_into_db",
     skip(new_flavor, transaction)

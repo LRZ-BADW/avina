@@ -1,3 +1,5 @@
+//! Types for avina's hello module.
+
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};

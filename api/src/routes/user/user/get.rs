@@ -1,3 +1,5 @@
+//! Implementation of the user-get endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Path, ReqData},
@@ -12,6 +14,7 @@ use crate::{
     database::user::user::select_user_detail_from_db, error::OptionApiError,
 };
 
+/// Get the user with the given user ID.
 #[tracing::instrument(name = "user_get")]
 pub async fn user_get(
     user: ReqData<User>,
