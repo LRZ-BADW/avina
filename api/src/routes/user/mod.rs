@@ -8,11 +8,11 @@ use project::projects_scope;
 #[allow(clippy::module_inception)]
 pub mod user;
 use user::users_scope;
-mod me;
+pub mod me;
 use me::user_me;
-mod import;
+pub mod import;
 use import::user_import;
-mod sync;
+pub mod sync;
 use sync::user_sync;
 
 pub fn user_scope() -> Scope {
