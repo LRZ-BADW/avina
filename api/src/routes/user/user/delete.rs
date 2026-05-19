@@ -16,10 +16,10 @@ use crate::{
 
 /// Delete the user with the given user ID.
 ///
-/// This expects the user ID as URL path parameter.
+/// This expects the user ID as URL path parameter. On success an HTTP 204 NO CONTENT status code is
+/// returned.
 ///
-/// Only admins can use this endpoint, otherwise an HTTP 403 FORBIDDEN error is returned.
-/// On success an HTTP 204 NO CONTENT status code is returned.
+/// Only admins can use this endpoint, otherwise an [NormalApiError::AuthorizationError] error is returned.
 #[tracing::instrument(name = "user_delete")]
 pub async fn user_delete(
     user: ReqData<User>,
