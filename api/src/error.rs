@@ -71,18 +71,23 @@ pub async fn not_found() -> Result<HttpResponse, actix_web::Error> {
 /// Like [NormalApiError] but with an additional not-found variant.
 #[derive(thiserror::Error)]
 pub enum OptionApiError {
-    /// Validation of the user input failed. The error message is contained within.
+    /// Validation of the user input failed. This causes an HTTP 400 BAD REQUEST status code
+    /// with the contained error message.
     #[error("{0}")]
     ValidationError(String),
-    /// The requested resource was not found.
+    /// The requested resource was not found. This causes an HTTP 404 NOT FOUND status code
+    /// with the message "Resource not found".
     // NOTE: Do not change this string, because different not found
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
-    /// The user is unauthorized to perform the request. The error message is contained within.
+    /// The user is unauthorized to perform the request. This causes an HTTP 403 FORBIDDEN status
+    /// code with the contained error message.
     #[error("{0}")]
     AuthorizationError(String),
-    /// An unexpected error occurred, which is contained inside.
+    /// An unexpected error occurred. This causes an HTTP 500 INTERNAL SERVER ERROR status code
+    /// with the message "Internal server error, contact admin or check logs". The contained
+    /// error is logged.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -210,13 +215,17 @@ impl From<UnexpectedOnlyError> for MinimalApiError {
 /// for the specified action, or something unexpected happened.
 #[derive(thiserror::Error)]
 pub enum NormalApiError {
-    /// Validation of the user input failed. The error message is contained within.
+    /// Validation of the user input failed. This causes an HTTP 400 BAD REQUEST status code
+    /// with the contained error message.
     #[error("{0}")]
     ValidationError(String),
-    /// The user is unauthorized to perform the request. The error message is contained within.
+    /// The user is unauthorized to perform the request. This causes an HTTP 403 FORBIDDEN status
+    /// code with the contained error message.
     #[error("{0}")]
     AuthorizationError(String),
-    /// An unexpected error occurred, which is contained inside.
+    /// An unexpected error occurred. This causes an HTTP 500 INTERNAL SERVER ERROR status code
+    /// with the message "Internal server error, contact admin or check logs". The contained
+    /// error is logged.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -271,10 +280,13 @@ impl From<MinimalApiError> for NormalApiError {
 /// Like [NormalApiError] but without unauthorized variant.
 #[derive(thiserror::Error)]
 pub enum MinimalApiError {
-    /// Validation of the user input failed. The error message is contained within.
+    /// Validation of the user input failed. This causes an HTTP 400 BAD REQUEST status code
+    /// with the contained error message.
     #[error("{0}")]
     ValidationError(String),
-    /// An unexpected error occurred, which is contained inside.
+    /// An unexpected error occurred. This causes an HTTP 500 INTERNAL SERVER ERROR status code
+    /// with the message "Internal server error, contact admin or check logs". The contained
+    /// error is logged.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -288,11 +300,15 @@ impl std::fmt::Debug for MinimalApiError {
 /// The request can fail either when the resource does not exist, or unexpectedly.
 #[derive(thiserror::Error)]
 pub enum NotFoundOrUnexpectedApiError {
+    /// The requested resource was not found. This causes an HTTP 404 NOT FOUND status code
+    /// with the message "Resource not found".
     // NOTE: Do not change this string, because different not found
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
-    /// An unexpected error occurred, which is contained inside.
+    /// An unexpected error occurred. This causes an HTTP 500 INTERNAL SERVER ERROR status code
+    /// with the message "Internal server error, contact admin or check logs". The contained
+    /// error is logged.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
@@ -331,7 +347,8 @@ impl ResponseError for NotFoundOrUnexpectedApiError {
 /// The request can only fail due to an authorization error.
 #[derive(thiserror::Error)]
 pub enum AuthOnlyError {
-    /// The user is unauthorized to perform the request. The error message is contained within.
+    /// The user is unauthorized to perform the request. This causes an HTTP 403 FORBIDDEN status
+    /// code with the contained error message.
     #[error("{0}")]
     AuthorizationError(String),
 }
@@ -375,7 +392,8 @@ impl From<AuthOnlyError> for NormalApiError {
 /// The request can only fail when the resource does not exist.
 #[derive(thiserror::Error)]
 pub enum NotFoundOnlyError {
-    /// The requested resource was not found.
+    /// The requested resource was not found. This causes an HTTP 404 NOT FOUND status code
+    /// with the message "Resource not found".
     // NOTE: Do not change this string, because different not found messages
     // messages can lead to information leakage
     #[error("Resource not found")]
@@ -419,7 +437,9 @@ impl From<NotFoundOnlyError> for OptionApiError {
 /// The request can only fail unexpectedly.
 #[derive(thiserror::Error)]
 pub enum UnexpectedOnlyError {
-    /// An unexpected error occurred, which is contained inside.
+    /// An unexpected error occurred. This causes an HTTP 500 INTERNAL SERVER ERROR status code
+    /// with the message "Internal server error, contact admin or check logs". The contained
+    /// error is logged.
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
