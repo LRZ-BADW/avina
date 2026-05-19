@@ -35,6 +35,12 @@ use crate::{
 /// This calls the Keystone API to list all users and projects, as well as avina-ldap
 /// and imports all those missing in the database. It also creates user and project
 /// budgets if necessary.
+///
+/// On success this returns the number of imported users and projects with an HTTP 200 OK
+/// status code.
+///
+/// Only admins are allowed to call this endpoint, otherwise a [NormalApiError::AuthorizationError]
+/// is returned.
 #[tracing::instrument(name = "user_import", skip(openstack))]
 pub async fn user_import(
     user: ReqData<User>,
