@@ -6,7 +6,9 @@ use avina_wire::user::{
 };
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
-use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
+use crate::error::{
+    MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
+};
 
 /// Select the name of the user with the given ID from the database, or return [None].
 #[tracing::instrument(
@@ -465,4 +467,30 @@ pub async fn update_user_role_in_db(
         },
     )
     .await
+}
+
+/// Delete the user with the given ID from the database.
+#[tracing::instrument(name = "delete_user_from_db", skip(transaction))]
+pub async fn delete_user_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    user_id: u64,
+) -> Result<(), MinimalApiError> {
+    let query = sqlx::query!(
+        r#"
+        DELETE IGNORE FROM user_user
+        WHERE id = ?
+        "#,
+        user_id
+    );
+    let result = transaction
+        .execute(query)
+        .await
+        .context("Failed to execute delete query")?;
+    if result.rows_affected() == 0 {
+        return Err(MinimalApiError::ValidationError(
+            // TODO: test that this message is really correct
+            "Failed to delete user, either it doesn't exist or other data still depends on it.".to_string(),
+        ));
+    }
+    Ok(())
 }
