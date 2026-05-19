@@ -495,12 +495,19 @@ pub async fn delete_user_from_db(
     Ok(())
 }
 
+/// Simplified representation of data needed to create a new user.
 pub struct NewUser {
+    /// User name.
     pub name: String,
+    /// OpenStack UUID.
     pub openstack_id: String,
+    /// ID of the project the user belongs to.
     pub project_id: u32,
+    /// Role of the user as integer.
     pub role: u32,
+    /// Whether the user is an admin.
     pub is_staff: bool,
+    /// Whether the user is active or not.
     pub is_active: bool,
 }
 
@@ -508,6 +515,10 @@ pub struct NewUser {
 impl TryFrom<UserCreateData> for NewUser {
     type Error = String;
 
+    /// Transform a [UserCreateData] into a [NewUser].
+    ///
+    /// More specifically this inserts defaults for `role` (1: normal user),
+    /// `is_staff` (false), and `is_active` (true).
     // TODO: we might need a more complex function with access to the database
     //       and the transaction
     fn try_from(data: UserCreateData) -> Result<Self, Self::Error> {
@@ -523,6 +534,7 @@ impl TryFrom<UserCreateData> for NewUser {
     }
 }
 
+/// Insert a new user based on the given [NewUser] into the database.
 #[tracing::instrument(
     name = "insert_user_into_db",
     skip(new_user, transaction)
