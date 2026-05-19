@@ -26,6 +26,10 @@ use crate::{
 /// This compares the users and projects currently in the database to the
 /// information from avina-ldap, and updates the user's role or project's
 /// user class if necessary.
+///
+/// Only admins can call this endpoint, otherwise a [NormalApiError::AuthorizationError]
+/// is returned. On success an HTTP 200 OK is returned with the number of projects and
+/// users updated as data.
 #[tracing::instrument(name = "user_sync")]
 pub async fn user_sync(
     user: ReqData<User>,
