@@ -1,3 +1,5 @@
+//! Implementation of the user-modify endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Json, Path, ReqData},
@@ -12,6 +14,14 @@ use crate::{
     error::OptionApiError,
 };
 
+/// Modify the user based on the given [UserModifyData].
+///
+/// This expects the user ID as path parameter, and the data to update in the request data.
+/// On success a HTTP 200 OK with the updated user in the response data is returned.
+///
+/// Only admins can call this endpoint, otherwise an [OptionApiError::AuthorizationError] is returned.
+/// If the ID given via URL parameters does not match the ID in the request data,
+/// an [OptionApiError::ValidationError] is returned.
 #[tracing::instrument(name = "user_modify")]
 pub async fn user_modify(
     user: ReqData<User>,
