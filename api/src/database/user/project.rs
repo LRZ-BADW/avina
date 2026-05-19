@@ -4,7 +4,9 @@ use anyhow::Context;
 use avina_wire::user::{Project, ProjectMinimal, ProjectModifyData, UserClass};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
-use crate::error::{NotFoundOrUnexpectedApiError, UnexpectedOnlyError};
+use crate::error::{
+    MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
+};
 
 /// Select the project with the given ID from the database, or return [None].
 #[tracing::instrument(name = "select_maybe_project_from_db", skip(transaction))]
@@ -335,4 +337,30 @@ pub async fn update_project_user_class_in_db(
         },
     )
     .await
+}
+
+/// Delete the project with the given ID from the database.
+#[tracing::instrument(name = "delete_project_from_db", skip(transaction))]
+pub async fn delete_project_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    project_id: u64,
+) -> Result<(), MinimalApiError> {
+    let query = sqlx::query!(
+        r#"
+        DELETE IGNORE FROM user_project
+        WHERE id = ?
+        "#,
+        project_id
+    );
+    let result = transaction
+        .execute(query)
+        .await
+        .context("Failed to execute delete query")?;
+    if result.rows_affected() == 0 {
+        return Err(MinimalApiError::ValidationError(
+            // TODO: test that this message is really correct
+            "Failed to delete project, either it doesn't exist or still has users or flavor groups.".to_string(),
+        ));
+    }
+    Ok(())
 }
