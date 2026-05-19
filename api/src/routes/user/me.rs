@@ -4,6 +4,10 @@ use actix_web::{HttpResponse, web::ReqData};
 use avina_wire::user::{Project, ProjectMinimal, User, UserDetailed};
 
 /// Endpoint to return the calling user's information.
+///
+/// Any user can call this, as they only get information about
+/// themselves. On success they get a HTTP 200 OK with an instance
+/// of [UserDetailed] as data.
 #[tracing::instrument(name = "user_me")]
 pub async fn user_me(
     user: ReqData<User>,
