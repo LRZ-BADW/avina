@@ -1,3 +1,5 @@
+//! Implementation of the user-delete endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Path, ReqData},
@@ -12,6 +14,12 @@ use crate::{
     database::user::user::delete_user_from_db, error::NormalApiError,
 };
 
+/// Delete the user with the given user ID.
+///
+/// This expects the user ID as URL path parameter.
+///
+/// Only admins can use this endpoint, otherwise an HTTP 403 FORBIDDEN error is returned.
+/// On success an HTTP 204 NO CONTENT status code is returned.
 #[tracing::instrument(name = "user_delete")]
 pub async fn user_delete(
     user: ReqData<User>,
