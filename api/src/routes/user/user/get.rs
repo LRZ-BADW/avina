@@ -15,6 +15,14 @@ use crate::{
 };
 
 /// Get the user with the given user ID.
+///
+/// This expects the user ID as URL path parameter. On success an HTTP 200 OK is returned with the
+/// requested user in the response data.
+///
+/// Only master users of the respective user or admins can get other users then themselves.
+/// Otherwise an [OptionApiError::NotFoundError] error is returned. We use this instead of some
+/// authorization error to ensure this endpoint doesn't leak information about existing but
+/// invisible user IDs.
 #[tracing::instrument(name = "user_get")]
 pub async fn user_get(
     user: ReqData<User>,
