@@ -1,3 +1,5 @@
+//! Implementation of the user-create endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Json, ReqData},
@@ -15,6 +17,13 @@ use crate::{
     error::{NormalApiError, OptionApiError},
 };
 
+/// Create a new user based on the given [UserCreateData].
+///
+/// On success a HTTP 201 CREATED with the created user in the response data is returned.
+///
+/// Only admins can call this endpoint, otherwise an [OptionApiError::AuthorizationError] is returned.
+/// If the [UserCreateData] cannot be converted into a [NewUser] an [OptionApiError::ValidationError]
+/// is returned.
 #[tracing::instrument(name = "user_create")]
 pub async fn user_create(
     user: ReqData<User>,
