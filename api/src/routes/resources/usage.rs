@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use actix_web::{
-    HttpResponse, Scope, http,
-    web::{Data, ReqData, get, scope},
+    HttpResponse, http,
+    web::{Data, ReqData},
 };
 use avina_wire::user::User;
 use reqwest::Client;
@@ -11,12 +11,8 @@ use crate::{
     authentication::Token, error::AuthOnlyError, startup::CloudUsageUrl,
 };
 
-pub fn usage_scope() -> Scope {
-    scope("/usage").route("", get().to(cloud_usage))
-}
-
 #[tracing::instrument(name = "cloud_usage")]
-async fn cloud_usage(
+pub async fn cloud_usage(
     user: ReqData<User>,
     token: ReqData<Token>,
     cloud_usage_url: Data<CloudUsageUrl>,
