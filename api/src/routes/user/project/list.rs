@@ -28,7 +28,7 @@ use crate::{
 ///   - `user_class`: returns all projects of the given user class.
 ///
 /// Note, that given both filters, `all` takes precedence. If users other than admins use any of
-/// them, an [OptionApiError::AuthorizationError] is returned.
+/// them, an [NormalApiError::AuthorizationError] is returned.
 #[tracing::instrument(name = "project_list")]
 pub async fn project_list(
     user: ReqData<User>,
