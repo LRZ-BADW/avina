@@ -1,3 +1,5 @@
+//! Implementation of the flavor-create endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Json, ReqData},
@@ -18,6 +20,13 @@ use crate::{
     error::OptionApiError,
 };
 
+/// Create a new flavor based on the given [FlavorCreateData].
+///
+/// On success a HTTP 201 CREATED with the created flavor in the response data is returned.
+///
+/// Only admins can call this endpoint, otherwise an [OptionApiError::AuthorizationError] is returned.
+/// If the flavor group ID given in the [FlavorCreateData] does not exist, an
+/// [OptionApiError::NotFoundError] is returned.
 #[tracing::instrument(name = "flavor_create")]
 pub async fn flavor_create(
     user: ReqData<User>,
