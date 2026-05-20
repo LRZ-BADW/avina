@@ -1,3 +1,5 @@
+//! Implementation of the project-modify endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Json, Path, ReqData},
@@ -12,6 +14,14 @@ use crate::{
     database::user::project::update_project_in_db, error::OptionApiError,
 };
 
+/// Modify the project based on the given [ProjectModifyData].
+///
+/// This expects the project ID as path parameter, and the data to update in the request data.
+/// On success a HTTP 200 OK with the updated project in the response data is returned.
+///
+/// Only admins can call this endpoint, otherwise an [OptionApiError::AuthorizationError] is returned.
+/// If the ID given via URL parameters does not match the ID in the request data,
+/// an [OptionApiError::ValidationError] is returned.
 #[tracing::instrument(name = "project_modify")]
 pub async fn project_modify(
     user: ReqData<User>,
