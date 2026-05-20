@@ -14,6 +14,13 @@ use crate::{
     error::NormalApiError,
 };
 
+/// Create a new project based on the given [ProjectCreateData].
+///
+/// On success a HTTP 201 CREATED with the created project in the response data is returned.
+///
+/// Only admins can call this endpoint, otherwise an [NormalApiError::AuthorizationError] is returned.
+/// If the [ProjectCreateData] cannot be converted into a [NewProject] an [OptionApiError::ValidationError]
+/// is returned.
 #[tracing::instrument(name = "project_create")]
 pub async fn project_create(
     user: ReqData<User>,
