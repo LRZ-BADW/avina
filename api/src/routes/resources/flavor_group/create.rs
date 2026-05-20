@@ -12,7 +12,7 @@ use sqlx::MySqlPool;
 use crate::{
     authorization::require_admin_user,
     database::resources::flavor_group::insert_flavor_group_into_db,
-    error::OptionApiError,
+    error::NormalApiError,
 };
 
 #[tracing::instrument(name = "flavor_group_create")]
@@ -20,7 +20,7 @@ pub async fn flavor_group_create(
     user: ReqData<User>,
     db_pool: Data<MySqlPool>,
     data: Json<FlavorGroupCreateData>,
-) -> Result<HttpResponse, OptionApiError> {
+) -> Result<HttpResponse, NormalApiError> {
     require_admin_user(&user)?;
     let mut transaction = db_pool
         .begin()
