@@ -1,3 +1,5 @@
+//! Implementation of the project-get endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Path, ReqData},
@@ -19,6 +21,18 @@ use crate::{
     error::OptionApiError,
 };
 
+/// Get the project with the given project ID.
+///
+/// This expects the project ID as URL path parameter. On success an HTTP 200 OK is returned with the
+/// requested project in the response data.
+///
+/// Only admin users get other projects than their own. Otherwise an
+/// [OptionApiError::NotFoundError] error is returned. We use this instead of some authorization
+/// error to ensure this endpoint doesn't leak information about existing but invisible project
+/// IDs.
+///
+/// Also note, that admins get a [ProjectDetailed] while normal users only get the plain [Project]
+/// representation.
 #[tracing::instrument(name = "project_get")]
 pub async fn project_get(
     user: ReqData<User>,
