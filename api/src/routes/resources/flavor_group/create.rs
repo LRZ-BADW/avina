@@ -1,3 +1,5 @@
+//! Implementation of the flavor-group-create endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Json, ReqData},
@@ -15,6 +17,11 @@ use crate::{
     error::NormalApiError,
 };
 
+/// Create a new flavor group based on the given [FlavorGroupCreateData].
+///
+/// On success a HTTP 201 CREATED with the created flavor group in the response data is returned.
+///
+/// Only admins can call this endpoint, otherwise an [NormalApiError::AuthorizationError] is returned.
 #[tracing::instrument(name = "flavor_group_create")]
 pub async fn flavor_group_create(
     user: ReqData<User>,
