@@ -1,3 +1,5 @@
+//! Implementation of the project-delete endpoint.
+
 use actix_web::{
     HttpResponse,
     web::{Data, Path, ReqData},
@@ -12,6 +14,12 @@ use crate::{
     database::user::project::delete_project_from_db, error::NormalApiError,
 };
 
+/// Delete the project with the given project ID.
+///
+/// This expects the project ID as URL path parameter. On success an HTTP 204 NO CONTENT status code is
+/// returned.
+///
+/// Only admins can use this endpoint, otherwise an [NormalApiError::AuthorizationError] error is returned.
 #[tracing::instrument(name = "project_delete")]
 pub async fn project_delete(
     user: ReqData<User>,
