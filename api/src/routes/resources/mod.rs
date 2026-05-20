@@ -7,9 +7,9 @@ use actix_web::{
 
 pub mod flavor_group;
 use flavor_group::flavor_groups_scope;
-mod flavor;
+pub mod flavor;
 use flavor::flavors_scope;
-mod usage;
+pub mod usage;
 use usage::cloud_usage;
 
 /// Routes to resource endpoints:
