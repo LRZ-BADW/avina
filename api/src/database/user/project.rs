@@ -1,7 +1,9 @@
 //! Queries regarding projects (LRZ projects).
 
 use anyhow::Context;
-use avina_wire::user::{Project, ProjectMinimal, ProjectModifyData, UserClass};
+use avina_wire::user::{
+    Project, ProjectCreateData, ProjectMinimal, ProjectModifyData, UserClass,
+};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
 use crate::error::{
@@ -363,4 +365,64 @@ pub async fn delete_project_from_db(
         ));
     }
     Ok(())
+}
+
+/// Simplified representation of data needed to create a new project.
+pub struct NewProject {
+    /// Project name.
+    pub name: String,
+    /// OpenStack UUID.
+    pub openstack_id: String,
+    /// User class.
+    pub user_class: UserClass,
+}
+
+// TODO: validate that user class is in valid range (0-6)
+impl TryFrom<ProjectCreateData> for NewProject {
+    type Error = String;
+
+    /// Transform a [ProjectCreateData] into a [NewProject].
+    ///
+    /// More specifically this inserts the default for `user_class` (1).
+    fn try_from(data: ProjectCreateData) -> Result<Self, Self::Error> {
+        // TODO: really validate data, user_class range, uuid, string length
+        Ok(Self {
+            name: data.name,
+            openstack_id: data.openstack_id,
+            user_class: data.user_class.unwrap_or(UserClass::UC1),
+        })
+    }
+}
+
+/// Insert a new project based on the given [NewProject] into the database.
+#[tracing::instrument(
+    name = "insert_project_into_db",
+    skip(new_project, transaction)
+)]
+pub async fn insert_project_into_db(
+    transaction: &mut Transaction<'_, MySql>,
+    new_project: &NewProject,
+) -> Result<u64, MinimalApiError> {
+    // TODO: MariaDB 10.5 introduced INSERT ... RETURNING
+    let query = sqlx::query!(
+        r#"
+        INSERT IGNORE INTO user_project (name, openstack_id, user_class)
+        VALUES (?, ?, ?)
+        "#,
+        new_project.name,
+        new_project.openstack_id,
+        new_project.user_class as u32
+    );
+    let result = transaction
+        .execute(query)
+        .await
+        .context("Failed to execute insert query")?;
+    if result.rows_affected() == 0 {
+        return Err(MinimalApiError::ValidationError(
+            "Failed to insert new project, a conflicting entry exists"
+                .to_string(),
+        ));
+    }
+    let id = result.last_insert_id();
+    Ok(id)
 }

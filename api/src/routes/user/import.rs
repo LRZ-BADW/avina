@@ -19,14 +19,15 @@ use crate::{
             user_budget::{NewUserBudget, insert_user_budget_into_db},
         },
         user::{
-            project::select_all_projects_from_db,
+            project::{
+                NewProject, insert_project_into_db, select_all_projects_from_db,
+            },
             user::{NewUser, insert_user_into_db, select_all_users_from_db},
         },
     },
     error::NormalApiError,
     ldap::AvinaLdap,
     openstack::OpenStack,
-    routes::project::create::{NewProject, insert_project_into_db},
     startup::AvinaLdapConfig,
 };
 

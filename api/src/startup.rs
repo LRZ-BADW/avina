@@ -16,16 +16,16 @@ use tracing_actix_web::TracingLogger;
 use crate::{
     authentication::{extract_user_and_project, require_valid_token},
     configuration::{DatabaseSettings, Settings},
-    database::user::user::{NewUser, insert_user_into_db},
+    database::user::{
+        project::{NewProject, insert_project_into_db},
+        user::{NewUser, insert_user_into_db},
+    },
     error::{MinimalApiError, not_found},
     openstack::OpenStack,
     routes::{
         accounting_scope, budgeting_scope, health_check, hello_scope,
-        pricing_scope,
-        quota::flavor_quota::check::QuotaCache,
-        quota_scope, resources_scope,
-        user::project::create::{NewProject, insert_project_into_db},
-        user_scope,
+        pricing_scope, quota::flavor_quota::check::QuotaCache, quota_scope,
+        resources_scope, user_scope,
     },
 };
 
