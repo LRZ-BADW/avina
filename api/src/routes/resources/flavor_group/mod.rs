@@ -4,15 +4,15 @@ use actix_web::{
 };
 use serde::Deserialize;
 
-mod create;
+pub mod create;
 use create::flavor_group_create;
-mod list;
+pub mod list;
 use list::flavor_group_list;
-mod get;
+pub mod get;
 use get::flavor_group_get;
-mod modify;
+pub mod modify;
 use modify::flavor_group_modify;
-mod delete;
+pub mod delete;
 use delete::flavor_group_delete;
 pub mod usage;
 use usage::flavor_group_usage;
