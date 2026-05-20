@@ -1,3 +1,5 @@
+//! Implementation of the usage endpoint
+
 use std::collections::HashMap;
 
 use actix_web::{
@@ -11,6 +13,9 @@ use crate::{
     authentication::Token, error::AuthOnlyError, startup::CloudUsageUrl,
 };
 
+/// Get global usage information of the cloud.
+///
+/// This basically calls cloud-usage and returns its response.
 #[tracing::instrument(name = "cloud_usage")]
 pub async fn cloud_usage(
     user: ReqData<User>,
