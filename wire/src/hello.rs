@@ -6,9 +6,11 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "tabled")]
 use tabled::Tabled;
 
+/// Response from the hello-user and hello-admin endpoints.
 #[cfg_attr(feature = "tabled", derive(Tabled))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct Hello {
+    /// Wrapped message.
     pub message: String,
 }
 
