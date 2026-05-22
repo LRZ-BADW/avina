@@ -4,12 +4,13 @@ use actix_web::{
 };
 use anyhow::Context;
 use avina_wire::user::User;
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use sqlx::MySqlPool;
 
 use super::ProjectBudgetIdParam;
 use crate::{
     authorization::require_admin_user,
-    error::{MinimalApiError, NormalApiError},
+    database::budgeting::project_budget::delete_project_budget_from_db,
+    error::NormalApiError,
 };
 
 #[tracing::instrument(name = "project_budget_delete")]
@@ -33,32 +34,4 @@ pub async fn project_budget_delete(
         .await
         .context("Failed to commit transaction")?;
     Ok(HttpResponse::NoContent().finish())
-}
-
-#[tracing::instrument(
-    name = "delete_project_budget_from_db",
-    skip(transaction)
-)]
-async fn delete_project_budget_from_db(
-    transaction: &mut Transaction<'_, MySql>,
-    project_budget_id: u64,
-) -> Result<(), MinimalApiError> {
-    let query = sqlx::query!(
-        r#"
-        DELETE IGNORE FROM budgeting_projectbudget
-        WHERE id = ?
-        "#,
-        project_budget_id
-    );
-    let result = transaction
-        .execute(query)
-        .await
-        .context("Failed to execute delete query")?;
-    if result.rows_affected() == 0 {
-        return Err(MinimalApiError::ValidationError(
-            // TODO: test that this message is really correct
-            "Failed to delete project budget.".to_string(),
-        ));
-    }
-    Ok(())
 }

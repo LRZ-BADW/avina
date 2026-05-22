@@ -4,12 +4,13 @@ use actix_web::{
 };
 use anyhow::Context;
 use avina_wire::user::User;
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use sqlx::MySqlPool;
 
 use super::ServerStateIdParam;
 use crate::{
     authorization::require_admin_user,
-    error::{MinimalApiError, NormalApiError},
+    database::accounting::server_state::delete_server_state_from_db,
+    error::NormalApiError,
 };
 
 #[tracing::instrument(name = "server_state_delete")]
@@ -33,46 +34,4 @@ pub async fn server_state_delete(
         .await
         .context("Failed to commit transaction")?;
     Ok(HttpResponse::NoContent().finish())
-}
-
-#[tracing::instrument(name = "delete_server_state_from_db", skip(transaction))]
-async fn delete_server_state_from_db(
-    transaction: &mut Transaction<'_, MySql>,
-    server_state_id: u64,
-) -> Result<(), MinimalApiError> {
-    let query1 = sqlx::query!(
-        r#"
-        DELETE IGNORE FROM accounting_serverstate
-        WHERE state_ptr_id = ?
-        "#,
-        server_state_id
-    );
-    let result1 = transaction
-        .execute(query1)
-        .await
-        .context("Failed to execute delete query")?;
-    if result1.rows_affected() == 0 {
-        return Err(MinimalApiError::ValidationError(
-            // TODO: test that this message is really correct
-            "Failed to delete server state.".to_string(),
-        ));
-    }
-    let query2 = sqlx::query!(
-        r#"
-        DELETE IGNORE FROM accounting_state
-        WHERE id = ?
-        "#,
-        server_state_id
-    );
-    let result2 = transaction
-        .execute(query2)
-        .await
-        .context("Failed to execute delete query")?;
-    if result2.rows_affected() == 0 {
-        return Err(MinimalApiError::ValidationError(
-            // TODO: test that this message is really correct
-            "Failed to delete state.".to_string(),
-        ));
-    }
-    Ok(())
 }

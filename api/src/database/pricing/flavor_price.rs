@@ -425,3 +425,29 @@ pub async fn insert_flavor_price_into_db(
     let id = result.last_insert_id();
     Ok(id)
 }
+
+/// Delete the flavor price with the given ID from the database.
+#[tracing::instrument(name = "delete_flavor_price_from_db", skip(transaction))]
+pub async fn delete_flavor_price_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    flavor_price_id: u64,
+) -> Result<(), MinimalApiError> {
+    let query = sqlx::query!(
+        r#"
+        DELETE IGNORE FROM pricing_flavorprice
+        WHERE id = ?
+        "#,
+        flavor_price_id
+    );
+    let result = transaction
+        .execute(query)
+        .await
+        .context("Failed to execute delete query")?;
+    if result.rows_affected() == 0 {
+        return Err(MinimalApiError::ValidationError(
+            // TODO: test that this message is really correct
+            "Failed to delete flavor price.".to_string(),
+        ));
+    }
+    Ok(())
+}

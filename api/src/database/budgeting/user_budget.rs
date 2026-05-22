@@ -354,3 +354,29 @@ pub async fn sync_user_budgets_in_db(
         .context("Failed to execute update query")?;
     Ok(result.rows_affected())
 }
+
+/// Delete the user budget with the given ID from the database.
+#[tracing::instrument(name = "delete_user_budget_from_db", skip(transaction))]
+pub async fn delete_user_budget_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    user_budget_id: u64,
+) -> Result<(), MinimalApiError> {
+    let query = sqlx::query!(
+        r#"
+        DELETE IGNORE FROM budgeting_userbudget
+        WHERE id = ?
+        "#,
+        user_budget_id
+    );
+    let result = transaction
+        .execute(query)
+        .await
+        .context("Failed to execute delete query")?;
+    if result.rows_affected() == 0 {
+        return Err(MinimalApiError::ValidationError(
+            // TODO: test that this message is really correct
+            "Failed to delete user budget.".to_string(),
+        ));
+    }
+    Ok(())
+}

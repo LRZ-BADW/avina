@@ -295,3 +295,32 @@ pub async fn insert_project_budget_into_db(
     let id = result.last_insert_id();
     Ok(id)
 }
+
+/// Delete the project budget with the given ID from the database.
+#[tracing::instrument(
+    name = "delete_project_budget_from_db",
+    skip(transaction)
+)]
+pub async fn delete_project_budget_from_db(
+    transaction: &mut Transaction<'_, MySql>,
+    project_budget_id: u64,
+) -> Result<(), MinimalApiError> {
+    let query = sqlx::query!(
+        r#"
+        DELETE IGNORE FROM budgeting_projectbudget
+        WHERE id = ?
+        "#,
+        project_budget_id
+    );
+    let result = transaction
+        .execute(query)
+        .await
+        .context("Failed to execute delete query")?;
+    if result.rows_affected() == 0 {
+        return Err(MinimalApiError::ValidationError(
+            // TODO: test that this message is really correct
+            "Failed to delete project budget.".to_string(),
+        ));
+    }
+    Ok(())
+}

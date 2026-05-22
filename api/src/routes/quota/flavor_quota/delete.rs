@@ -4,12 +4,13 @@ use actix_web::{
 };
 use anyhow::Context;
 use avina_wire::user::User;
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use sqlx::MySqlPool;
 
 use super::FlavorQuotaIdParam;
 use crate::{
     authorization::require_admin_user,
-    error::{MinimalApiError, NormalApiError},
+    database::quota::flavor_quota::delete_flavor_quota_from_db,
+    error::NormalApiError,
 };
 
 #[tracing::instrument(name = "flavor_quota_delete")]
@@ -33,46 +34,4 @@ pub async fn flavor_quota_delete(
         .await
         .context("Failed to commit transaction")?;
     Ok(HttpResponse::NoContent().finish())
-}
-
-#[tracing::instrument(name = "delete_flavor_quota_from_db", skip(transaction))]
-async fn delete_flavor_quota_from_db(
-    transaction: &mut Transaction<'_, MySql>,
-    flavor_quota_id: u64,
-) -> Result<(), MinimalApiError> {
-    let query1 = sqlx::query!(
-        r#"
-        DELETE IGNORE FROM quota_flavorquota
-        WHERE quota_ptr_id = ?
-        "#,
-        flavor_quota_id
-    );
-    let result1 = transaction
-        .execute(query1)
-        .await
-        .context("Failed to execute delete query")?;
-    if result1.rows_affected() == 0 {
-        return Err(MinimalApiError::ValidationError(
-            // TODO: test that this message is really correct
-            "Failed to delete flavor quota.".to_string(),
-        ));
-    }
-    let query2 = sqlx::query!(
-        r#"
-        DELETE IGNORE FROM quota_quota
-        WHERE id = ?
-        "#,
-        flavor_quota_id
-    );
-    let result2 = transaction
-        .execute(query2)
-        .await
-        .context("Failed to execute delete query")?;
-    if result2.rows_affected() == 0 {
-        return Err(MinimalApiError::ValidationError(
-            // TODO: test that this message is really correct
-            "Failed to delete quota.".to_string(),
-        ));
-    }
-    Ok(())
 }
