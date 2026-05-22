@@ -1,10 +1,10 @@
 use actix_web::{Scope, web::scope};
 
-mod server_state;
+pub mod server_state;
 use server_state::server_states_scope;
-mod server_consumption;
+pub mod server_consumption;
 use server_consumption::server_consumption_scope;
-pub(crate) mod server_cost;
+pub mod server_cost;
 use server_cost::server_cost_scope;
 
 pub fn accounting_scope() -> Scope {
