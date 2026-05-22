@@ -19,8 +19,8 @@ use sync::user_sync;
 
 /// Routes to user and project endpoints.
 ///
-///   - `GET /api/user/projects` => [projects_scope], see [project] submodule
-///   - `GET /api/user/users` => [users_scope], see [user] submodule
+///   - `___ /api/user/projects` => [projects_scope], see [project] submodule
+///   - `___ /api/user/users` => [users_scope], see [user] submodule
 ///   - `GET /api/user/me` => [user_me] endpoint
 ///   - `GET /api/user/import` => [user_import] endpoint
 ///   - `GET /api/user/sync` => [user_sync] endpoint
