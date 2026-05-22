@@ -47,27 +47,27 @@ use reqwest::{
     header::{CONTENT_TYPE, HeaderMap, HeaderValue},
 };
 
-mod common;
+pub mod common;
 pub mod error;
 use error::ApiError;
 
-mod token;
+pub mod token;
 pub use token::Token;
 
 #[cfg(feature = "accounting")]
-mod accounting;
+pub mod accounting;
 #[cfg(feature = "budgeting")]
-mod budgeting;
+pub mod budgeting;
 #[cfg(feature = "hello")]
-mod hello;
+pub mod hello;
 #[cfg(feature = "pricing")]
-mod pricing;
+pub mod pricing;
 #[cfg(feature = "quota")]
-mod quota;
+pub mod quota;
 #[cfg(feature = "resources")]
-mod resources;
+pub mod resources;
 #[cfg(feature = "user")]
-mod user;
+pub mod user;
 
 #[cfg(feature = "accounting")]
 use accounting::ServerConsumptionApi;
