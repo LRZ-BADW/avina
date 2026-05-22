@@ -32,7 +32,7 @@
 //!                 user_domain_name.as_str(),
 //!                 project_domain_id.as_str(),
 //!             ).unwrap();
-//! let api = Api::new("https://cc.lrz.de:1338/api", token, None, None).unwrap();
+//! let api = Api::new("https://cc.lrz.de:1338/api".to_string(), token, None, None).unwrap();
 //! println!("{:?}", api.user.me());
 //! ```
 //!
