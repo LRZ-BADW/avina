@@ -14,8 +14,8 @@ use usage::cloud_usage;
 
 /// Routes to resource endpoints:
 ///
-///   - `GET /api/resources/flavorgroups` => [flavor_groups_scope], see [flavor_group] submodule
-///   - `GET /api/resources/flavors` => [flavors_scope], see [flavor] submodule
+///   - `___ /api/resources/flavorgroups` => [flavor_groups_scope], see [flavor_group] submodule
+///   - `___ /api/resources/flavors` => [flavors_scope], see [flavor] submodule
 ///   - `GET /api/resources/usage` => [cloud_usage] endpoint
 pub fn resources_scope() -> Scope {
     scope("/resources")
