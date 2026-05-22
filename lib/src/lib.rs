@@ -106,6 +106,9 @@ pub const DEFAULT_TIMEOUT: u64 = 300;
 /// Main API client.
 ///
 /// This is a collection of all the individual API module clients.
+/// While the token is held in this main struct, both the URL
+/// and the references to a shared HTTP client are held in the
+/// individual module clients.
 #[derive(Debug)]
 pub struct Api {
     /// Authentication token.
