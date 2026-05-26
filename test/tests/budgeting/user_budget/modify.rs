@@ -11,6 +11,7 @@ use avina_wire::user::{Project, UserClass};
 use chrono::{Datelike, TimeZone, Utc};
 use uuid::Uuid;
 
+// WARN: this test might fail, if it is run immediately at the beginning of a new year.
 #[tokio::test]
 async fn e2e_lib_admin_cannot_modify_user_budget() {
     // arrange
@@ -124,7 +125,7 @@ async fn e2e_lib_admin_cannot_modify_user_budget() {
     let new_flavor_price = NewFlavorPrice {
         flavor_id: flavor.id as u64,
         user_class: project_1.user_class,
-        // NOTE: this test fails at the beginning of a year without a ridiculously high price
+        // INFO: this test fails at the beginning of a year without a ridiculously high price
         unit_price: 100000_f64,
         start_time,
     };
