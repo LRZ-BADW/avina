@@ -20,7 +20,6 @@ pub fn flavor_prices_scope() -> Scope {
         .route("/", post().to(flavor_price_create))
         .route("", get().to(flavor_price_list))
         .route("/{flavor_price_id}", get().to(flavor_price_get))
-        // TODO: what about PUT?
         .route("/{flavor_price_id}/", patch().to(flavor_price_modify))
         .route("/{flavor_price_id}/", delete().to(flavor_price_delete))
 }

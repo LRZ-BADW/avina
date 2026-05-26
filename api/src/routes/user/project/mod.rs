@@ -29,7 +29,6 @@ pub fn projects_scope() -> Scope {
         .route("/", post().to(project_create))
         .route("", get().to(project_list))
         .route("/{project_id}", get().to(project_get))
-        // TODO: what about PUT?
         .route("/{project_id}/", patch().to(project_modify))
         .route("/{project_id}/", delete().to(project_delete))
 }

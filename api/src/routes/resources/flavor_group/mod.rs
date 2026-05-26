@@ -32,7 +32,6 @@ pub fn flavor_groups_scope() -> Scope {
         .route("/", post().to(flavor_group_create))
         .route("", get().to(flavor_group_list))
         .route("/{flavor_group_id}", get().to(flavor_group_get))
-        // TODO: what about PUT?
         .route("/{flavor_group_id}/", patch().to(flavor_group_modify))
         .route("/{flavor_group_id}/", delete().to(flavor_group_delete))
         .route("/usage/", get().to(flavor_group_usage))

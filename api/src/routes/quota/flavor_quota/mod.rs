@@ -22,7 +22,6 @@ pub fn flavor_quotas_scope() -> Scope {
         .route("/", post().to(flavor_quota_create))
         .route("", get().to(flavor_quota_list))
         .route("/{flavor_quota_id}", get().to(flavor_quota_get))
-        // TODO: what about PUT?
         .route("/{flavor_quota_id}/", patch().to(flavor_quota_modify))
         .route("/{flavor_quota_id}/", delete().to(flavor_quota_delete))
         .route("/check/", get().to(flavor_quota_check))

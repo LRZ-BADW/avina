@@ -24,7 +24,6 @@ pub fn user_budgets_scope() -> Scope {
         .route("/", post().to(user_budget_create))
         .route("", get().to(user_budget_list))
         .route("/{user_budget_id}", get().to(user_budget_get))
-        // TODO: what about PUT?
         .route("/{user_budget_id}/", patch().to(user_budget_modify))
         .route("/{user_budget_id}/", delete().to(user_budget_delete))
         .route("/over/", get().to(user_budget_over))

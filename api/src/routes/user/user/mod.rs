@@ -29,7 +29,6 @@ pub fn users_scope() -> Scope {
         .route("/", post().to(user_create))
         .route("", get().to(user_list))
         .route("/{user_id}", get().to(user_get))
-        // TODO: what about PUT?
         .route("/{user_id}/", patch().to(user_modify))
         .route("/{user_id}/", delete().to(user_delete))
 }
