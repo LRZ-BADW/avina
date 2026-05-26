@@ -21,7 +21,7 @@ use crate::{
     openstack::{OpenStack, ServerDetailed},
 };
 
-// NOTE: the hashmap cannot contain (None, None).
+// WARN: the hashmap cannot contain (None, None).
 fn union_hash_zip<K, V, W>(
     hm1: HashMap<K, V>,
     hm2: HashMap<K, W>,
