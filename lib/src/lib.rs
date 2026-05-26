@@ -167,7 +167,10 @@ impl Api {
     /// Optionally, the request timeout and a user ID for impersonation may be configured.
     /// The latter is only allowed for admin users.
     pub fn new(
-        // TODO: this should be a url::Url
+        // TODO: Use url::Url instead of String and &str for handling URLs.
+        // This means this and all url parameters of the various other Api
+        // structs should become url::Url, and then the various binding
+        // functions can make use of things like url::Url::join.
         url: String,
         token: Token,
         impersonate: Option<u32>,
