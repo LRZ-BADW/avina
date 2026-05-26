@@ -6,6 +6,8 @@ of the LRZ Compute Cloud, [https://cc.lrz.de](https://cc.lrz.de).
 
 ### Requirements
 You need to have `dioxus-cli` and `wasm-bindgen-cli` installed.
+For the required `dioxus-cli` version, check the `ui/Cargo.toml`
+and install the `wasm-bindgen-cli` version this requires.
 
 ### Run
 Make sure the API runs locally, see [here](../api/README.md) and then execute:
