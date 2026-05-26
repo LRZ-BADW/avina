@@ -20,7 +20,7 @@
 //!
 //! Then you can use the bindings like this:
 //!
-//! ```rust
+//! ```ignore
 //! use avina::{Token, Api};
 //!
 //! // let token = Token::from_str("abcdefg...").unwrap();
@@ -31,9 +31,9 @@
 //!                 project_name.as_str(),
 //!                 user_domain_name.as_str(),
 //!                 project_domain_id.as_str(),
-//!             ).unwrap();
+//!             ).await.unwrap();
 //! let api = Api::new("https://cc.lrz.de:1338/api".to_string(), token, None, None).unwrap();
-//! println!("{:?}", api.user.me());
+//! println!("{:?}", api.user.me().await.unwrap());
 //! ```
 //!
 //! [avina-api]: https://docs.rs/avina-api
