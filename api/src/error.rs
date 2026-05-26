@@ -77,7 +77,7 @@ pub enum OptionApiError {
     ValidationError(String),
     /// The requested resource was not found. This causes an HTTP 404 NOT FOUND status code
     /// with the message "Resource not found".
-    // NOTE: Do not change this string, because different not found
+    // WARN: Do not change this string, because different not found
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
@@ -302,7 +302,7 @@ impl std::fmt::Debug for MinimalApiError {
 pub enum NotFoundOrUnexpectedApiError {
     /// The requested resource was not found. This causes an HTTP 404 NOT FOUND status code
     /// with the message "Resource not found".
-    // NOTE: Do not change this string, because different not found
+    // WARN: Do not change this string, because different not found
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
@@ -394,7 +394,7 @@ impl From<AuthOnlyError> for NormalApiError {
 pub enum NotFoundOnlyError {
     /// The requested resource was not found. This causes an HTTP 404 NOT FOUND status code
     /// with the message "Resource not found".
-    // NOTE: Do not change this string, because different not found messages
+    // WARN: Do not change this string, because different not found messages
     // messages can lead to information leakage
     #[error("Resource not found")]
     NotFoundError,
