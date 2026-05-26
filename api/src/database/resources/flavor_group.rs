@@ -3,6 +3,7 @@
 use anyhow::Context;
 use avina_wire::resources::{
     FlavorGroup, FlavorGroupCreateData, FlavorGroupMinimal,
+    FlavorGroupModifyData,
 };
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
@@ -328,4 +329,38 @@ pub async fn delete_flavor_group_from_db(
         ));
     }
     Ok(())
+}
+
+#[tracing::instrument(
+    name = "update_flavor_group_in_db",
+    skip(data, transaction)
+)]
+pub async fn update_flavor_group_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &FlavorGroupModifyData,
+) -> Result<FlavorGroup, NotFoundOrUnexpectedApiError> {
+    let row = select_flavor_group_from_db(transaction, data.id as u64).await?;
+    let name = data.name.clone().unwrap_or(row.name);
+    let project = data.project.unwrap_or(row.project);
+    let query = sqlx::query!(
+        r#"
+        UPDATE resources_flavorgroup
+        SET name = ?, project_id = ?
+        WHERE id = ?
+        "#,
+        name,
+        project,
+        data.id,
+    );
+    transaction
+        .execute(query)
+        .await
+        .context("Failed to execute update query")?;
+    let project = FlavorGroup {
+        id: data.id,
+        name,
+        project,
+        flavors: row.flavors,
+    };
+    Ok(project)
 }

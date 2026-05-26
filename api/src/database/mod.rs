@@ -17,6 +17,7 @@
 //! "Not Found" error. As an example, see [user::user::select_maybe_user_from_db]
 //! and [user::user::select_user_from_db].
 
+// TODO: maybe this module could become a separate crate (avina-db) at some point.
 pub mod accounting;
 pub mod budgeting;
 pub mod pricing;

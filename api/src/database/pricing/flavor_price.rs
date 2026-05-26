@@ -4,14 +4,17 @@ use std::collections::HashMap;
 
 use anyhow::Context;
 use avina_wire::{
-    pricing::{FlavorPrice, FlavorPriceCreateData},
+    pricing::{FlavorPrice, FlavorPriceCreateData, FlavorPriceModifyData},
     user::UserClass,
 };
 use chrono::{DateTime, Utc};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
-use crate::error::{
-    MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
+use crate::{
+    database::resources::flavor::select_flavor_name_from_db,
+    error::{
+        MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
+    },
 };
 
 /// Representation of a flavor price specifically for communication with the database.
@@ -450,4 +453,47 @@ pub async fn delete_flavor_price_from_db(
         ));
     }
     Ok(())
+}
+
+/// Update the flavor price with the given [FlavorPriceModifyData] in the database.
+#[tracing::instrument(
+    name = "update_flavor_price_in_db",
+    skip(data, transaction)
+)]
+pub async fn update_flavor_price_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &FlavorPriceModifyData,
+) -> Result<FlavorPrice, NotFoundOrUnexpectedApiError> {
+    let row = select_flavor_price_from_db(transaction, data.id as u64).await?;
+    let user_class = data.user_class.unwrap_or(row.user_class);
+    let unit_price = data.unit_price.unwrap_or(row.unit_price);
+    let start_time = data.start_time.unwrap_or(row.start_time);
+    let flavor = data.flavor.unwrap_or(row.flavor);
+    let flavor_name =
+        select_flavor_name_from_db(transaction, flavor as u64).await?;
+    let query = sqlx::query!(
+        r#"
+        UPDATE pricing_flavorprice
+        SET user_class = ?, unit_price = ?, start_time = ?, flavor_id = ?
+        WHERE id = ?
+        "#,
+        user_class as u32,
+        unit_price,
+        start_time.to_utc(),
+        flavor,
+        data.id,
+    );
+    transaction
+        .execute(query)
+        .await
+        .context("Failed to execute update query")?;
+    let price = FlavorPrice {
+        id: data.id,
+        user_class,
+        unit_price,
+        start_time,
+        flavor,
+        flavor_name,
+    };
+    Ok(price)
 }

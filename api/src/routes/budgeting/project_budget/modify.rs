@@ -3,20 +3,19 @@ use actix_web::{
     web::{Data, Json, Path, ReqData},
 };
 use anyhow::{Context, anyhow};
-use avina_wire::{
-    budgeting::{ProjectBudget, ProjectBudgetModifyData},
-    user::User,
-};
+use avina_wire::{budgeting::ProjectBudgetModifyData, user::User};
 use chrono::{Datelike, Utc};
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use sqlx::MySqlPool;
 
 use super::ProjectBudgetIdParam;
 use crate::{
     authorization::{
         require_admin_user, require_master_user_or_return_not_found,
     },
-    database::budgeting::project_budget::select_project_budget_from_db,
-    error::{NotFoundOrUnexpectedApiError, OptionApiError},
+    database::budgeting::project_budget::{
+        select_project_budget_from_db, update_project_budget_in_db,
+    },
+    error::OptionApiError,
     routes::{
         accounting::server_cost::get::ServerCostForProject,
         server_cost::get::calculate_server_cost_for_project,
@@ -85,38 +84,4 @@ pub async fn project_budget_modify(
     Ok(HttpResponse::Ok()
         .content_type("application/json")
         .json(project_budget))
-}
-
-#[tracing::instrument(
-    name = "update_project_budget_in_db",
-    skip(data, transaction)
-)]
-pub async fn update_project_budget_in_db(
-    transaction: &mut Transaction<'_, MySql>,
-    data: &ProjectBudgetModifyData,
-) -> Result<ProjectBudget, NotFoundOrUnexpectedApiError> {
-    let row =
-        select_project_budget_from_db(transaction, data.id as u64).await?;
-    let amount = data.amount.unwrap_or(row.amount);
-    let query = sqlx::query!(
-        r#"
-        UPDATE budgeting_projectbudget
-        SET amount = ?
-        WHERE id = ?
-        "#,
-        amount,
-        data.id,
-    );
-    transaction
-        .execute(query)
-        .await
-        .context("Failed to execute update query")?;
-    let project_budget = ProjectBudget {
-        id: data.id,
-        amount,
-        project: row.project,
-        project_name: row.project_name,
-        year: row.year,
-    };
-    Ok(project_budget)
 }

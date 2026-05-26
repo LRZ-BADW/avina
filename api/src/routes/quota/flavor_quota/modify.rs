@@ -3,21 +3,14 @@ use actix_web::{
     web::{Data, Json, Path, ReqData},
 };
 use anyhow::Context;
-use avina_wire::{
-    quota::{FlavorQuota, FlavorQuotaModifyData},
-    user::User,
-};
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use avina_wire::{quota::FlavorQuotaModifyData, user::User};
+use sqlx::MySqlPool;
 
 use super::FlavorQuotaIdParam;
 use crate::{
     authorization::require_admin_user,
-    database::{
-        quota::flavor_quota::select_flavor_quota_from_db,
-        resources::flavor_group::select_flavor_group_name_from_db,
-        user::user::select_user_name_from_db,
-    },
-    error::{NotFoundOrUnexpectedApiError, OptionApiError},
+    database::quota::flavor_quota::update_flavor_quota_in_db,
+    error::OptionApiError,
 };
 
 #[tracing::instrument(name = "flavor_quota_modify")]
@@ -47,60 +40,4 @@ pub async fn flavor_quota_modify(
     Ok(HttpResponse::Ok()
         .content_type("application/json")
         .json(flavor_quota))
-}
-
-#[tracing::instrument(
-    name = "update_flavor_quota_in_db",
-    skip(data, transaction)
-)]
-pub async fn update_flavor_quota_in_db(
-    transaction: &mut Transaction<'_, MySql>,
-    data: &FlavorQuotaModifyData,
-) -> Result<FlavorQuota, NotFoundOrUnexpectedApiError> {
-    let row = select_flavor_quota_from_db(transaction, data.id as u64).await?;
-    let user = data.user.unwrap_or(row.user);
-    let username = select_user_name_from_db(transaction, user as u64).await?;
-    let quota = data.quota.unwrap_or(row.quota);
-    let flavor_group = data.flavor_group.unwrap_or(row.flavor_group);
-    let flavor_group_name =
-        select_flavor_group_name_from_db(transaction, flavor_group as u64)
-            .await?;
-    let query1 = sqlx::query!(
-        r#"
-        UPDATE quota_quota
-        SET
-            user_id = ?,
-            quota = ?
-        WHERE id = ?
-        "#,
-        user,
-        quota,
-        data.id,
-    );
-    transaction
-        .execute(query1)
-        .await
-        .context("Failed to execute first update query")?;
-    let query2 = sqlx::query!(
-        r#"
-        UPDATE quota_flavorquota
-        SET flavor_group_id = ?
-        WHERE quota_ptr_id = ?
-        "#,
-        flavor_group,
-        data.id,
-    );
-    transaction
-        .execute(query2)
-        .await
-        .context("Failed to execute second update query")?;
-    let flavor_quota = FlavorQuota {
-        id: data.id,
-        user,
-        username,
-        quota,
-        flavor_group,
-        flavor_group_name,
-    };
-    Ok(flavor_quota)
 }

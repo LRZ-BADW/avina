@@ -3,20 +3,14 @@ use actix_web::{
     web::{Data, Json, Path, ReqData},
 };
 use anyhow::Context;
-use avina_wire::{
-    pricing::{FlavorPrice, FlavorPriceModifyData},
-    user::User,
-};
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use avina_wire::{pricing::FlavorPriceModifyData, user::User};
+use sqlx::MySqlPool;
 
 use super::FlavorPriceIdParam;
 use crate::{
     authorization::require_admin_user,
-    database::{
-        pricing::flavor_price::select_flavor_price_from_db,
-        resources::flavor::select_flavor_name_from_db,
-    },
-    error::{NotFoundOrUnexpectedApiError, OptionApiError},
+    database::pricing::flavor_price::update_flavor_price_in_db,
+    error::OptionApiError,
 };
 
 #[tracing::instrument(name = "flavor_price_modify")]
@@ -46,46 +40,4 @@ pub async fn flavor_price_modify(
     Ok(HttpResponse::Ok()
         .content_type("application/json")
         .json(flavor_price))
-}
-
-#[tracing::instrument(
-    name = "update_flavor_price_in_db",
-    skip(data, transaction)
-)]
-pub async fn update_flavor_price_in_db(
-    transaction: &mut Transaction<'_, MySql>,
-    data: &FlavorPriceModifyData,
-) -> Result<FlavorPrice, NotFoundOrUnexpectedApiError> {
-    let row = select_flavor_price_from_db(transaction, data.id as u64).await?;
-    let user_class = data.user_class.unwrap_or(row.user_class);
-    let unit_price = data.unit_price.unwrap_or(row.unit_price);
-    let start_time = data.start_time.unwrap_or(row.start_time);
-    let flavor = data.flavor.unwrap_or(row.flavor);
-    let flavor_name =
-        select_flavor_name_from_db(transaction, flavor as u64).await?;
-    let query = sqlx::query!(
-        r#"
-        UPDATE pricing_flavorprice
-        SET user_class = ?, unit_price = ?, start_time = ?, flavor_id = ?
-        WHERE id = ?
-        "#,
-        user_class as u32,
-        unit_price,
-        start_time.to_utc(),
-        flavor,
-        data.id,
-    );
-    transaction
-        .execute(query)
-        .await
-        .context("Failed to execute update query")?;
-    let price = FlavorPrice {
-        id: data.id,
-        user_class,
-        unit_price,
-        start_time,
-        flavor,
-        flavor_name,
-    };
-    Ok(price)
 }

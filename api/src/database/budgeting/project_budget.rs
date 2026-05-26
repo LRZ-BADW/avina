@@ -1,7 +1,9 @@
 //! Queries for project budgets.
 
 use anyhow::Context;
-use avina_wire::budgeting::{ProjectBudget, ProjectBudgetCreateData};
+use avina_wire::budgeting::{
+    ProjectBudget, ProjectBudgetCreateData, ProjectBudgetModifyData,
+};
 use chrono::{Datelike, Utc};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
@@ -323,4 +325,39 @@ pub async fn delete_project_budget_from_db(
         ));
     }
     Ok(())
+}
+
+/// Update the project budget with the given [ProjectBudgetModifyData] in the database.
+#[tracing::instrument(
+    name = "update_project_budget_in_db",
+    skip(data, transaction)
+)]
+pub async fn update_project_budget_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &ProjectBudgetModifyData,
+) -> Result<ProjectBudget, NotFoundOrUnexpectedApiError> {
+    let row =
+        select_project_budget_from_db(transaction, data.id as u64).await?;
+    let amount = data.amount.unwrap_or(row.amount);
+    let query = sqlx::query!(
+        r#"
+        UPDATE budgeting_projectbudget
+        SET amount = ?
+        WHERE id = ?
+        "#,
+        amount,
+        data.id,
+    );
+    transaction
+        .execute(query)
+        .await
+        .context("Failed to execute update query")?;
+    let project_budget = ProjectBudget {
+        id: data.id,
+        amount,
+        project: row.project,
+        project_name: row.project_name,
+        year: row.year,
+    };
+    Ok(project_budget)
 }

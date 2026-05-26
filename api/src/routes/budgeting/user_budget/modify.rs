@@ -3,12 +3,9 @@ use actix_web::{
     web::{Data, Json, Path, ReqData},
 };
 use anyhow::{Context, anyhow};
-use avina_wire::{
-    budgeting::{UserBudget, UserBudgetModifyData},
-    user::User,
-};
+use avina_wire::{budgeting::UserBudgetModifyData, user::User};
 use chrono::{Datelike, Utc};
-use sqlx::{Executor, MySql, MySqlPool, Transaction};
+use sqlx::MySqlPool;
 
 use super::UserBudgetIdParam;
 use crate::{
@@ -18,11 +15,13 @@ use crate::{
     database::{
         budgeting::{
             project_budget::select_maybe_project_budget_by_project_and_year_from_db,
-            user_budget::select_user_budget_from_db,
+            user_budget::{
+                select_user_budget_from_db, update_user_budget_in_db,
+            },
         },
         user::user::select_user_from_db,
     },
-    error::{NotFoundOrUnexpectedApiError, OptionApiError},
+    error::OptionApiError,
     routes::{
         accounting::server_cost::get::ServerCostForProject,
         server_cost::get::calculate_server_cost_for_project,
@@ -116,37 +115,4 @@ pub async fn user_budget_modify(
     Ok(HttpResponse::Ok()
         .content_type("application/json")
         .json(user_budget))
-}
-
-#[tracing::instrument(
-    name = "update_user_budget_in_db",
-    skip(data, transaction)
-)]
-pub async fn update_user_budget_in_db(
-    transaction: &mut Transaction<'_, MySql>,
-    data: &UserBudgetModifyData,
-) -> Result<UserBudget, NotFoundOrUnexpectedApiError> {
-    let row = select_user_budget_from_db(transaction, data.id as u64).await?;
-    let amount = data.amount.unwrap_or(row.amount);
-    let query = sqlx::query!(
-        r#"
-        UPDATE budgeting_userbudget
-        SET amount = ?
-        WHERE id = ?
-        "#,
-        amount,
-        data.id,
-    );
-    transaction
-        .execute(query)
-        .await
-        .context("Failed to execute update query")?;
-    let user_budget = UserBudget {
-        id: data.id,
-        amount,
-        user: row.user,
-        username: row.username,
-        year: row.year,
-    };
-    Ok(user_budget)
 }

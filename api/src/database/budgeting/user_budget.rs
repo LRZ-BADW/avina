@@ -1,7 +1,9 @@
 //! Queries for project budgets.
 
 use anyhow::Context;
-use avina_wire::budgeting::{UserBudget, UserBudgetCreateData};
+use avina_wire::budgeting::{
+    UserBudget, UserBudgetCreateData, UserBudgetModifyData,
+};
 use chrono::{Datelike, Utc};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
@@ -379,4 +381,38 @@ pub async fn delete_user_budget_from_db(
         ));
     }
     Ok(())
+}
+
+/// Update the user budget with the given [UserBudgetModifyData] in the database.
+#[tracing::instrument(
+    name = "update_user_budget_in_db",
+    skip(data, transaction)
+)]
+pub async fn update_user_budget_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &UserBudgetModifyData,
+) -> Result<UserBudget, NotFoundOrUnexpectedApiError> {
+    let row = select_user_budget_from_db(transaction, data.id as u64).await?;
+    let amount = data.amount.unwrap_or(row.amount);
+    let query = sqlx::query!(
+        r#"
+        UPDATE budgeting_userbudget
+        SET amount = ?
+        WHERE id = ?
+        "#,
+        amount,
+        data.id,
+    );
+    transaction
+        .execute(query)
+        .await
+        .context("Failed to execute update query")?;
+    let user_budget = UserBudget {
+        id: data.id,
+        amount,
+        user: row.user,
+        username: row.username,
+        year: row.year,
+    };
+    Ok(user_budget)
 }

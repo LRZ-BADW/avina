@@ -1,11 +1,19 @@
 //! Queries for flavor quotas.
 
 use anyhow::Context;
-use avina_wire::quota::{FlavorQuota, FlavorQuotaCreateData};
+use avina_wire::quota::{
+    FlavorQuota, FlavorQuotaCreateData, FlavorQuotaModifyData,
+};
 use sqlx::{Executor, FromRow, MySql, Transaction};
 
-use crate::error::{
-    MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
+use crate::{
+    database::{
+        resources::flavor_group::select_flavor_group_name_from_db,
+        user::user::select_user_name_from_db,
+    },
+    error::{
+        MinimalApiError, NotFoundOrUnexpectedApiError, UnexpectedOnlyError,
+    },
 };
 
 /// Select a flavor quota with the given ID from the database, or [None].
@@ -352,4 +360,61 @@ pub async fn delete_flavor_quota_from_db(
         ));
     }
     Ok(())
+}
+
+/// Update the flavor quota with the given [FlavorQuotaModifyData] in the database.
+#[tracing::instrument(
+    name = "update_flavor_quota_in_db",
+    skip(data, transaction)
+)]
+pub async fn update_flavor_quota_in_db(
+    transaction: &mut Transaction<'_, MySql>,
+    data: &FlavorQuotaModifyData,
+) -> Result<FlavorQuota, NotFoundOrUnexpectedApiError> {
+    let row = select_flavor_quota_from_db(transaction, data.id as u64).await?;
+    let user = data.user.unwrap_or(row.user);
+    let username = select_user_name_from_db(transaction, user as u64).await?;
+    let quota = data.quota.unwrap_or(row.quota);
+    let flavor_group = data.flavor_group.unwrap_or(row.flavor_group);
+    let flavor_group_name =
+        select_flavor_group_name_from_db(transaction, flavor_group as u64)
+            .await?;
+    let query1 = sqlx::query!(
+        r#"
+        UPDATE quota_quota
+        SET
+            user_id = ?,
+            quota = ?
+        WHERE id = ?
+        "#,
+        user,
+        quota,
+        data.id,
+    );
+    transaction
+        .execute(query1)
+        .await
+        .context("Failed to execute first update query")?;
+    let query2 = sqlx::query!(
+        r#"
+        UPDATE quota_flavorquota
+        SET flavor_group_id = ?
+        WHERE quota_ptr_id = ?
+        "#,
+        flavor_group,
+        data.id,
+    );
+    transaction
+        .execute(query2)
+        .await
+        .context("Failed to execute second update query")?;
+    let flavor_quota = FlavorQuota {
+        id: data.id,
+        user,
+        username,
+        quota,
+        flavor_group,
+        flavor_group_name,
+    };
+    Ok(flavor_quota)
 }
