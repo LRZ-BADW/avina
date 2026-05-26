@@ -41,7 +41,6 @@ impl ProjectListRequest {
     pub async fn send(&self) -> Result<Vec<Project>, ApiError> {
         let params = serde_urlencoded::to_string(&self.params)
             .context("Failed to encode URL parameters.")?;
-        // TODO: maybe use url join
         let url = if params.is_empty() {
             self.url.clone()
         } else {
@@ -162,7 +161,6 @@ impl ProjectApi {
     }
 
     pub async fn get(&self, id: u32) -> Result<ProjectRetrieved, ApiError> {
-        // TODO: use Url.join
         let url = format!("{}/{}", self.url, id);
         request(
             &self.client,
@@ -179,7 +177,6 @@ impl ProjectApi {
         name: String,
         openstack_id: String,
     ) -> ProjectCreateRequest {
-        // TODO: use Url.join
         let url = format!("{}/", self.url);
         ProjectCreateRequest::new(
             url.as_ref(),
@@ -190,13 +187,11 @@ impl ProjectApi {
     }
 
     pub fn modify(&self, id: u32) -> ProjectModifyRequest {
-        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         ProjectModifyRequest::new(url.as_ref(), &self.client, id)
     }
 
     pub async fn delete(&self, id: u32) -> Result<(), ApiError> {
-        // TODO: use Url.join
         let url = format!("{}/{}/", self.url, id);
         request_bare(
             &self.client,
