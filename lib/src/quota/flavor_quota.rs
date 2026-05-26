@@ -22,7 +22,6 @@ pub struct FlavorQuotaApi {
 pub struct FlavorQuotaListRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorQuotaListParams,
 }
 
@@ -31,12 +30,7 @@ impl FlavorQuotaListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: FlavorQuotaListParams {
-                all: None,
-                group: None,
-                user: None,
-            },
+            params: Default::default(),
         }
     }
 
@@ -158,7 +152,6 @@ impl FlavorQuotaModifyRequest {
 pub struct FlavorQuotaCheckRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorQuotaCheckParams,
 }
 
@@ -167,12 +160,10 @@ impl FlavorQuotaCheckRequest {
         Self {
             url: format!("{url}/check/"),
             client: Rc::clone(client),
-
             params: FlavorQuotaCheckParams {
                 user: Some(user),
-                openstackproject: None,
                 flavor,
-                count: None,
+                ..Default::default()
             },
         }
     }

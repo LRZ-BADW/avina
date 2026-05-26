@@ -24,7 +24,6 @@ pub struct ServerStateApi {
 pub struct ServerStateListRequest {
     url: String,
     client: Rc<Client>,
-
     params: ServerStateListParams,
 }
 
@@ -33,13 +32,7 @@ impl ServerStateListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: ServerStateListParams {
-                server: None,
-                user: None,
-                project: None,
-                all: None,
-            },
+            params: Default::default(),
         }
     }
 

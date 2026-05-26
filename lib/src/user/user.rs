@@ -22,7 +22,6 @@ pub struct UserApi {
 pub struct UserListRequest {
     url: String,
     client: Rc<Client>,
-
     params: UserListParams,
 }
 
@@ -31,11 +30,7 @@ impl UserListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: UserListParams {
-                all: None,
-                project: None,
-            },
+            params: Default::default(),
         }
     }
 

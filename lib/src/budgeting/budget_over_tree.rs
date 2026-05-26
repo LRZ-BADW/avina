@@ -20,7 +20,6 @@ pub struct BudgetOverTreeApi {
 pub struct BudgetOverTreeRequest {
     url: String,
     client: Rc<Client>,
-
     params: BudgetOverTreeParams,
 }
 
@@ -29,13 +28,7 @@ impl BudgetOverTreeRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: BudgetOverTreeParams {
-                all: None,
-                project: None,
-                user: None,
-                end: None,
-            },
+            params: Default::default(),
         }
     }
 

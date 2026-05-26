@@ -18,7 +18,6 @@ use crate::{
 pub struct ServerConsumptionRequest {
     url: String,
     client: Rc<Client>,
-
     params: ServerConsumptionParams,
 }
 
@@ -27,16 +26,7 @@ impl ServerConsumptionRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: ServerConsumptionParams {
-                begin: None,
-                end: None,
-                server: None,
-                user: None,
-                project: None,
-                all: None,
-                detail: None,
-            },
+            params: Default::default(),
         }
     }
 

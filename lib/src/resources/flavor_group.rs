@@ -24,7 +24,6 @@ pub struct FlavorGroupApi {
 pub struct FlavorGroupListRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorGroupListParams,
 }
 
@@ -33,8 +32,7 @@ impl FlavorGroupListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: FlavorGroupListParams { all: None },
+            params: Default::default(),
         }
     }
 
@@ -132,7 +130,6 @@ impl FlavorGroupModifyRequest {
 pub struct FlavorGroupUsageRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorGroupUsageParams,
 }
 
@@ -141,14 +138,7 @@ impl FlavorGroupUsageRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            // TODO: shouldn't we be able to use ::default() in these cases
-            params: FlavorGroupUsageParams {
-                user: None,
-                project: None,
-                all: None,
-                aggregate: None,
-            },
+            params: Default::default(),
         }
     }
 

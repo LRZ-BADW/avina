@@ -18,7 +18,6 @@ use crate::{
 pub struct ServerCostRequest {
     url: String,
     client: Rc<Client>,
-
     params: ServerCostParams,
 }
 
@@ -27,17 +26,7 @@ impl ServerCostRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            // TODO: we should be able to use Default the *Params inits
-            params: ServerCostParams {
-                begin: None,
-                end: None,
-                server: None,
-                user: None,
-                project: None,
-                all: None,
-                detail: None,
-            },
+            params: Default::default(),
         }
     }
 

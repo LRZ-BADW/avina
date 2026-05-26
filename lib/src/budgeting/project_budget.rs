@@ -34,12 +34,7 @@ impl ProjectBudgetListRequest {
             url: url.to_string(),
             client: Rc::clone(client),
 
-            params: ProjectBudgetListParams {
-                user: None,
-                project: None,
-                all: None,
-                year: None,
-            },
+            params: Default::default(),
         }
     }
 
@@ -162,7 +157,6 @@ impl ProjectBudgetModifyRequest {
 pub struct ProjectBudgetOverRequest {
     url: String,
     client: Rc<Client>,
-
     params: ProjectBudgetOverParams,
 }
 
@@ -171,14 +165,7 @@ impl ProjectBudgetOverRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: ProjectBudgetOverParams {
-                end: None,
-                budget: None,
-                project: None,
-                all: None,
-                detail: None,
-            },
+            params: Default::default(),
         }
     }
 

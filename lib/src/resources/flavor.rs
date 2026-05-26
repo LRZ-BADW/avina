@@ -23,7 +23,6 @@ pub struct FlavorApi {
 pub struct FlavorListRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorListParams,
 }
 
@@ -32,11 +31,7 @@ impl FlavorListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: FlavorListParams {
-                all: None,
-                group: None,
-            },
+            params: Default::default(),
         }
     }
 
@@ -168,7 +163,6 @@ impl FlavorModifyRequest {
 pub struct FlavorUsageRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorUsageParams,
 }
 
@@ -177,13 +171,7 @@ impl FlavorUsageRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: FlavorUsageParams {
-                user: None,
-                project: None,
-                all: None,
-                aggregate: None,
-            },
+            params: Default::default(),
         }
     }
 

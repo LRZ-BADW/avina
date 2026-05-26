@@ -26,7 +26,6 @@ pub struct FlavorPriceApi {
 pub struct FlavorPriceListRequest {
     url: String,
     client: Rc<Client>,
-
     params: FlavorPriceListParams,
 }
 
@@ -35,11 +34,7 @@ impl FlavorPriceListRequest {
         Self {
             url: url.to_string(),
             client: Rc::clone(client),
-
-            params: FlavorPriceListParams {
-                user_class: None,
-                current: None,
-            },
+            params: Default::default(),
         }
     }
 
