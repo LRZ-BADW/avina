@@ -329,7 +329,7 @@ pub async fn select_user_from_db(
         .ok_or(NotFoundOrUnexpectedApiError::NotFoundError)
 }
 
-/// Select the mininal representation of the users of the project of the given ID from the database, or [None].
+/// Select the minimal representation of the users of the project of the given ID from the database, or [None].
 #[tracing::instrument(
     name = "select_minimal_users_by_project_id_from_db",
     skip(transaction)
