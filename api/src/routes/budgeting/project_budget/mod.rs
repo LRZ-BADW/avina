@@ -28,10 +28,7 @@ pub fn project_budgets_scope() -> Scope {
         .route("/over/", get().to(project_budget_over))
 }
 
-// TODO: wouldn't a general IdParam be better?
 #[derive(Deserialize, Debug)]
 struct ProjectBudgetIdParam {
-    // TODO: why is this necessary, when this is clearly read in query_as
-    #[allow(unused)]
     project_budget_id: u32,
 }

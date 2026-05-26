@@ -28,10 +28,7 @@ pub fn flavor_quotas_scope() -> Scope {
         .route("/check/", get().to(flavor_quota_check))
 }
 
-// TODO: wouldn't a general IdParam be better?
 #[derive(Deserialize, Debug)]
 struct FlavorQuotaIdParam {
-    // TODO: why is this necessary, when this is clearly read in query_as
-    #[allow(unused)]
     flavor_quota_id: u32,
 }

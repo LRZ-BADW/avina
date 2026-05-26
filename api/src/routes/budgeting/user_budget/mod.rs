@@ -31,10 +31,7 @@ pub fn user_budgets_scope() -> Scope {
         .route("/sync/", get().to(user_budget_sync))
 }
 
-// TODO: wouldn't a general IdParam be better?
 #[derive(Deserialize, Debug)]
 struct UserBudgetIdParam {
-    // TODO: why is this necessary, when this is clearly read in query_as
-    #[allow(unused)]
     user_budget_id: u32,
 }

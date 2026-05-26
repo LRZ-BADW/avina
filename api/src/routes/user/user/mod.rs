@@ -37,11 +37,8 @@ pub fn users_scope() -> Scope {
 /// Wrapper type for the user ID parameter to user endpoints.
 ///
 /// As this is handed to endpoints as [actix_web::web::Path], it should to have a distinguishable type.
-// TODO: wouldn't a general IdParam be better?
 #[derive(Deserialize, Debug)]
 pub struct UserIdParam {
     /// The wrapped user ID.
-    // TODO: why is this necessary, when this is clearly read in query_as
-    #[allow(unused)]
     user_id: u32,
 }
