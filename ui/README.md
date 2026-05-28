@@ -15,16 +15,17 @@ scripts/run_ui.sh
 ```
 
 This spawns the web UI on `http://localhost:8080`.
+
 **WARNING**: This is not fully functional like this, though, continue
-[here](../wrapper/README.md).
+[here to learn how to run a wrapper](../wrapper/README.md).
 
 #### Production API
 
 In case you want to run the UI against the production API, for example to test
-the cloud usage page, use:
+the cloud usage page, use the [wrapper](../wrapper/README.md) with `--prod` like this:
 
 ```bash
-scripts/run_ui_prod.sh
+scripts/run_ui_wrapper.sh --prod
 ```
 
 **WARNING**: This is generally fine for read-only pages, but be careful with
