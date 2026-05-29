@@ -65,7 +65,7 @@ jobs:
       - name: Install mold
         run: sudo apt update && sudo apt install mold -y
       - name: Install Dioxus CLI
-        run: cargo install dioxus-cli --version="${DX_VERSION}"
+        run: cargo install dioxus-cli --version="${DX_VERSION}" --locked
       - name: Build UI crate with Dioxus
         run: dx build --package avina-ui
 
