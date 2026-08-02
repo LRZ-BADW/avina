@@ -77,5 +77,5 @@ features = ["json", "rustls", "cookies"]
 [dev-dependencies]
 once_cell = "1"
 wiremock = "0.6"
-rand = "0.9"
+rand = "0.10"
 avina-test = { path = "../test" }
