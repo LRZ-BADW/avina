@@ -18,7 +18,7 @@ ignored = ["getrandom"]
 
 [dependencies]
 # INFO: This version is pinned to avoid issues with newer patch version.
-dioxus = { version = "=0.7.5", features = ["fullstack"] }
+dioxus = { version = "=0.7.10", features = ["fullstack"] }
 avina = { version = "2.2", path = "../lib" }
 avina-wire = { version = "2.2", path = "../wire" }
 # INFO: This version is currently needed for WASM compilation
